@@ -26,6 +26,12 @@ class MainWindow : public QMainWindow {
 	  private slots:
 		void defaultAction(); // To remove
 
+		void showLibrary();
+		void showPlaylists();
+		void showFavorite();
+		void showAuthors();
+		void showFiles();
+
 		void closeEvent(QCloseEvent *event) override;
 		void readWindowGeometrySettings();
 

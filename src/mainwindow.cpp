@@ -18,6 +18,7 @@ MainWindow::MainWindow()
 
 		setupSideBar();
 		setupPlaybackControll();
+		showLibrary();
 
 		m_mainGridLayout->setSpacing(0);
 
@@ -69,6 +70,21 @@ void MainWindow::readWindowGeometrySettings() {
 		}
 
 		qsettings.endGroup();
+}
+
+void MainWindow::showLibrary() {
+}
+
+void MainWindow::showPlaylists() {
+}
+
+void MainWindow::showFavorite() {
+}
+
+void MainWindow::showFiles() {
+}
+
+void MainWindow::showAuthors() {
 }
 
 void MainWindow::setupPlaybackControll() {
@@ -144,26 +160,31 @@ void MainWindow::setupSideBar() {
 		const QIcon LIBRARY_ICON = QIcon::fromTheme("focus-legacy-systray-symbolic");
 		QAction *showLibratyAct = new QAction(LIBRARY_ICON, tr("&Library"), this);
 		showLibratyAct->setStatusTip(tr("Library"));
+		connect(showLibratyAct, &QAction::triggered, this, &MainWindow::showLibrary);
 		sideToolBar->addAction(showLibratyAct);
 
 		const QIcon PLAYLIST_ICON = QIcon::fromTheme("playlist-symbolic");
 		QAction *showPlaylistsAct = new QAction(PLAYLIST_ICON, tr("&Playlists"), this);
 		showPlaylistsAct->setStatusTip(tr("Playlists"));
+		connect(showPlaylistsAct, &QAction::triggered, this, &MainWindow::showPlaylists);
 		sideToolBar->addAction(showPlaylistsAct);
 
 		const QIcon FAVORITE_ICON = QIcon::fromTheme("emblem-favorite-symbolic");
 		QAction *showFavoriteAct = new QAction(FAVORITE_ICON, tr("&Favorite"), this);
 		showFavoriteAct->setStatusTip(tr("Favorite"));
+		connect(showFavoriteAct, &QAction::triggered, this, &MainWindow::showFavorite);
 		sideToolBar->addAction(showFavoriteAct);
 
 		const QIcon AUTHORS_ICON = QIcon::fromTheme("music-artist-symbolic");
 		QAction *showAuthorsAct = new QAction(AUTHORS_ICON, tr("&Authors"), this);
 		showAuthorsAct->setStatusTip(tr("Authors"));
+		connect(showAuthorsAct, &QAction::triggered, this, &MainWindow::showAuthors);
 		sideToolBar->addAction(showAuthorsAct);
 
 		const QIcon FILES_ICON = QIcon::fromTheme("folder-symbolic");
 		QAction *showFilesAct = new QAction(FILES_ICON, tr("&Files"), this);
 		showFilesAct->setStatusTip(tr("Files"));
+		connect(showFilesAct, &QAction::triggered, this, &MainWindow::showFiles);
 		sideToolBar->addAction(showFilesAct);
 
 		sideToolBar->setOrientation(Qt::Vertical);
