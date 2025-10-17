@@ -1,0 +1,59 @@
+#ifndef MAINWINDOW_HPP
+#define MAINWINDOW_HPP
+
+// Qt
+#include <QAction>
+#include <QDir>
+#include <QDockWidget>
+#include <QFileDialog>
+#include <QGridLayout>
+#include <QHeaderView>
+#include <QLabel>
+#include <QMainWindow>
+#include <QMenuBar>
+#include <QSettings>
+#include <QSlider>
+#include <QToolBar>
+#include <QTreeView>
+#include <QVBoxLayout>
+
+class MainWindow : public QMainWindow {
+		Q_OBJECT
+
+	  public:
+		MainWindow();
+
+	  private slots:
+		void defaultAction(); // To remove
+
+		void closeEvent(QCloseEvent *event) override;
+		void readWindowGeometrySettings();
+
+	  private:
+		void setupSideBar();
+		void setupPlaybackControll();
+
+		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"};
+
+		QSlider *m_playbackSlider;
+		QSlider *m_volumeSlider;
+
+		QLabel *m_timeLabel;
+		QLabel *m_volumeLabel;
+		QLabel *m_coverLabel;
+
+		QWidget *m_centralWidget;
+		QWidget *m_sideBarWidget;
+		QWidget *m_playbackControllWidget;
+
+		QTreeView *m_middleTreeView;
+		QTreeView *m_playerMainTreeView;
+
+		QVBoxLayout *m_sideBarLayout;
+		QGridLayout *m_mainGridLayout;
+		QGridLayout *m_playbackControllLayout;
+
+		QPixmap m_coverImage;
+};
+
+#endif /* MAINWINDOW_HPP */

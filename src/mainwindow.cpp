@@ -1,0 +1,175 @@
+#include "mainwindow.hpp"
+// Qt
+#include <QDirListing>
+#include <QScreen>
+
+MainWindow::MainWindow()
+	: m_coverLabel(new QLabel())
+	, m_centralWidget(new QWidget(this))
+	, m_sideBarWidget(new QWidget())
+	, m_playbackControllWidget(new QWidget())
+	, m_middleTreeView(new QTreeView())
+	, m_playerMainTreeView(new QTreeView())
+	, m_sideBarLayout(new QVBoxLayout(m_sideBarWidget))
+	, m_mainGridLayout(new QGridLayout(this))
+	, m_playbackControllLayout(new QGridLayout(m_playbackControllWidget)) {
+
+		readWindowGeometrySettings();
+
+		setupSideBar();
+		setupPlaybackControll();
+
+		m_mainGridLayout->setSpacing(0);
+
+		m_middleTreeView->header()->setDefaultAlignment(Qt::AlignCenter);
+		m_playerMainTreeView->header()->setDefaultAlignment(Qt::AlignCenter);
+
+		m_coverLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+		m_coverLabel->setPixmap(m_coverImage);
+
+		m_mainGridLayout->addWidget(m_sideBarWidget, 0, 0, 13, 1);
+		m_mainGridLayout->addWidget(m_middleTreeView, 0, 1, 9, 5);
+		m_mainGridLayout->addWidget(m_coverLabel, 9, 1, 4, 5);
+		m_mainGridLayout->addWidget(m_playerMainTreeView, 0, 6, 13, 27);
+
+		m_centralWidget->setLayout(m_mainGridLayout);
+		setCentralWidget(m_centralWidget);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+		QSettings qsettings{};
+
+		qsettings.beginGroup("Geometry");
+
+		qsettings.setValue("geometry", saveGeometry());
+		qsettings.setValue("savestate", saveState());
+		qsettings.setValue("maximized", isMaximized());
+		if (!isMaximized()) {
+				qsettings.setValue("pos", pos());
+				qsettings.setValue("size", size());
+		}
+
+		qsettings.endGroup();
+
+		QMainWindow::closeEvent(event);
+}
+
+void MainWindow::readWindowGeometrySettings() {
+		QSettings qsettings;
+
+		qsettings.beginGroup("Geometry");
+
+		restoreGeometry(qsettings.value("geometry", saveGeometry()).toByteArray());
+		restoreState(qsettings.value("savestate", saveState()).toByteArray());
+		move(qsettings.value("pos", pos()).toPoint());
+		resize(qsettings.value("size", size()).toSize());
+
+		if (qsettings.value("maximized", isMaximized()).toBool()) {
+				showMaximized();
+		}
+
+		qsettings.endGroup();
+}
+
+void MainWindow::setupPlaybackControll() {
+		QToolBar *playbackControllToolBar = addToolBar(tr("Playback Controll"));
+
+		m_playbackControllLayout->setSpacing(0);
+
+		const QIcon LOOP_ICON = QIcon::fromTheme("media-playlist-repeat-rtl-symbolic");
+		QAction *loopPlaybackAct = new QAction(LOOP_ICON, tr("&Loop"), this);
+		loopPlaybackAct->setStatusTip(tr("Loop Playback"));
+		loopPlaybackAct->setCheckable(true);
+		playbackControllToolBar->addAction(loopPlaybackAct);
+
+		const QIcon SHUFFLE_ICON = QIcon::fromTheme("media-playlist-shuffle-symbolic");
+		QAction *shuffleAct = new QAction(SHUFFLE_ICON, tr("&Shuffle"), this);
+		shuffleAct->setStatusTip(tr("Shuffle"));
+		shuffleAct->setCheckable(true);
+		playbackControllToolBar->addAction(shuffleAct);
+
+		const QIcon PREVIOUS_SONG_ICON = QIcon::fromTheme("media-skip-backward-symbolic");
+		QAction *previousSongAct = new QAction(PREVIOUS_SONG_ICON, tr("&Previous"), this);
+		previousSongAct->setStatusTip(tr("Previous Song"));
+		playbackControllToolBar->addAction(previousSongAct);
+
+		const QIcon START_ICON = QIcon::fromTheme("media-playback-start-symbolic");
+		const QIcon PAUSE_ICON = QIcon::fromTheme("media-playback-pause-symbolic");
+		QAction *startpauseAct = new QAction(START_ICON, tr("&Start"), this);
+		startpauseAct->setStatusTip(tr("Start"));
+		playbackControllToolBar->addAction(startpauseAct);
+
+		const QIcon NEXT_SONG_ICON = QIcon::fromTheme("media-skip-forward-symbolic");
+		QAction *nextSongAct = new QAction(NEXT_SONG_ICON, tr("&Next"), this);
+		nextSongAct->setStatusTip(tr("Next Song"));
+		playbackControllToolBar->addAction(nextSongAct);
+
+		m_playbackSlider = new QSlider();
+		m_playbackSlider->setOrientation(Qt::Horizontal);
+		playbackControllToolBar->addWidget(m_playbackSlider);
+
+		m_timeLabel = new QLabel(tr(" 00:00/00:00 "));
+		playbackControllToolBar->addWidget(m_timeLabel);
+
+		const QIcon MUTED_ICON = QIcon::fromTheme("audio-volume-muted-symbolic");
+		const QIcon HIGH_VOLUME_ICON = QIcon::fromTheme("audio-volume-high-symbolic");
+		const QIcon MED_VOLUME_ICON = QIcon::fromTheme("audio-volume-medium-symbolic");
+		const QIcon LOW_VOLUME_ICON = QIcon::fromTheme("audio-volume-low-symbolic");
+		QAction *audioControllAct = new QAction(HIGH_VOLUME_ICON, tr("&Volume"), this);
+		nextSongAct->setStatusTip(tr("Volume"));
+		playbackControllToolBar->addAction(audioControllAct);
+
+		m_volumeSlider = new QSlider();
+		m_volumeSlider->setOrientation(Qt::Horizontal);
+		m_volumeSlider->setMaximumWidth(175);
+		playbackControllToolBar->addWidget(m_volumeSlider);
+
+		m_volumeLabel = new QLabel(tr(" 100 "));
+		playbackControllToolBar->addWidget(m_volumeLabel);
+
+		const QIcon FAVORITE_ICON = QIcon::fromTheme("emblem-favorite-symbolic");
+		QAction *addFavoriteAct = new QAction(FAVORITE_ICON, tr("&Favorite"), this);
+		addFavoriteAct->setStatusTip(tr("Add Favorite"));
+		addFavoriteAct->setCheckable(true);
+		playbackControllToolBar->addAction(addFavoriteAct);
+
+		playbackControllToolBar->setOrientation(Qt::Horizontal);
+}
+
+void MainWindow::setupSideBar() {
+		QToolBar *sideToolBar = addToolBar(tr("Side Tool Bar"));
+
+		m_sideBarLayout->setSpacing(0);
+
+		const QIcon LIBRARY_ICON = QIcon::fromTheme("focus-legacy-systray-symbolic");
+		QAction *showLibratyAct = new QAction(LIBRARY_ICON, tr("&Library"), this);
+		showLibratyAct->setStatusTip(tr("Library"));
+		sideToolBar->addAction(showLibratyAct);
+
+		const QIcon PLAYLIST_ICON = QIcon::fromTheme("playlist-symbolic");
+		QAction *showPlaylistsAct = new QAction(PLAYLIST_ICON, tr("&Playlists"), this);
+		showPlaylistsAct->setStatusTip(tr("Playlists"));
+		sideToolBar->addAction(showPlaylistsAct);
+
+		const QIcon FAVORITE_ICON = QIcon::fromTheme("emblem-favorite-symbolic");
+		QAction *showFavoriteAct = new QAction(FAVORITE_ICON, tr("&Favorite"), this);
+		showFavoriteAct->setStatusTip(tr("Favorite"));
+		sideToolBar->addAction(showFavoriteAct);
+
+		const QIcon AUTHORS_ICON = QIcon::fromTheme("music-artist-symbolic");
+		QAction *showAuthorsAct = new QAction(AUTHORS_ICON, tr("&Authors"), this);
+		showAuthorsAct->setStatusTip(tr("Authors"));
+		sideToolBar->addAction(showAuthorsAct);
+
+		const QIcon FILES_ICON = QIcon::fromTheme("folder-symbolic");
+		QAction *showFilesAct = new QAction(FILES_ICON, tr("&Files"), this);
+		showFilesAct->setStatusTip(tr("Files"));
+		sideToolBar->addAction(showFilesAct);
+
+		sideToolBar->setOrientation(Qt::Vertical);
+		m_sideBarLayout->addWidget(sideToolBar);
+}
+
+void MainWindow::defaultAction() {
+		qDebug() << "Click!";
+}
