@@ -97,7 +97,6 @@ void TreeModel::setupModelData(const std::vector<Track> &tracks, TreeItem *paren
 				columnData << line.year;
 				columnData << line.bitrate;
 				columnData << line.fileSize;
-				columnData << line.cover;
 				columnData << line.path;
 
 				if (position > state.constLast().indentation) {

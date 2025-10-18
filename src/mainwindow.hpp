@@ -2,8 +2,6 @@
 #define MAINWINDOW_HPP
 
 #include "track.hpp"
-#include "treeitem.hpp"
-#include "treemodel.hpp"
 // Qt
 #include <QAction>
 #include <QDir>
@@ -42,6 +40,8 @@ class MainWindow : public QMainWindow {
 		void setupSideBar();
 		void setupPlaybackControll();
 		void setupPlayerModel();
+		void scanLibrarty();
+		QPixmap getCoverArt(const QString &path, const QString &extension);
 
 		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"};
 
@@ -61,6 +61,7 @@ class MainWindow : public QMainWindow {
 
 		QVBoxLayout *m_sideBarLayout;
 		QGridLayout *m_mainGridLayout;
+		QVBoxLayout *m_middleListLayout;
 		QGridLayout *m_playbackControllLayout;
 
 		QPixmap m_coverImage;

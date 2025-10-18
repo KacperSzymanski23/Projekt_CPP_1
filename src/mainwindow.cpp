@@ -1,7 +1,15 @@
 #include "mainwindow.hpp"
+#include "treemodel.hpp"
 // Qt
 #include <QDirListing>
 #include <QScreen>
+// TagLib
+#include <taglib/attachedpictureframe.h>
+#include <taglib/fileref.h>
+#include <taglib/flacfile.h>
+#include <taglib/id3v2tag.h>
+#include <taglib/mp4file.h>
+#include <taglib/mpegfile.h>
 
 MainWindow::MainWindow()
 	: m_coverLabel(new QLabel())
@@ -15,6 +23,8 @@ MainWindow::MainWindow()
 	, m_playbackControllLayout(new QGridLayout(m_playbackControllWidget)) {
 
 		readWindowGeometrySettings();
+
+		scanLibrarty();
 
 		setupSideBar();
 		setupPlaybackControll();
@@ -40,7 +50,7 @@ MainWindow::MainWindow()
 
 void MainWindow::setupPlayerModel() {
 
-		const QVariantList COLUMNS_NAME{"Number", "Title", "Album", "Author", "Duration", "Year", "Bitrate", "File Size"};
+		const QVariantList COLUMNS_NAME{"Number", "Title", "Album", "Author", "Duration", "Year", "Bitrate", "File Size", "Path"};
 
 		TreeModel *playerModel = new TreeModel(m_tracks, COLUMNS_NAME);
 
@@ -209,4 +219,116 @@ void MainWindow::setupSideBar() {
 
 void MainWindow::defaultAction() {
 		qDebug() << "Click!";
+}
+
+void MainWindow::scanLibrarty() {
+		m_tracks.clear();
+
+		QDir testLibrary{""};
+
+		Track track{};
+
+		const int32_t MIB = 1024 * 1024;
+		const auto FLAGS = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::FilesOnly;
+
+		for (const auto &file : QDirListing(testLibrary.path(), AUDIO_FILE_FILTER, FLAGS)) {
+				TagLib::FileRef fileRef{file.filePath().toUtf8().data()};
+
+				uint32_t number{fileRef.tag()->track()};
+				TagLib::String title{fileRef.tag()->title().to8Bit(true)};
+				TagLib::String album{fileRef.tag()->album().to8Bit(true)};
+				TagLib::String artist{fileRef.tag()->artist().to8Bit(true)};
+				int32_t durationInSeconds{fileRef.audioProperties()->lengthInSeconds()};
+				uint32_t year{fileRef.tag()->year()};
+				int32_t bitrate{fileRef.audioProperties()->bitrate()};
+				QPixmap coverArt{getCoverArt(file.filePath(), file.suffix())};
+				QTime duration{0, durationInSeconds / 60, durationInSeconds % 60};
+				m_coverImage = coverArt;
+
+				track.number = number;
+				track.title = title.toCString();
+				track.album = album.toCString();
+				track.artist = artist.toCString();
+				track.duration = duration.toString("mm:ss");
+				track.year = year;
+				track.bitrate = QString::number(bitrate) + " kbps";
+				track.fileSize = QString::number(file.size() / MIB) + " MiB";
+				track.cover = coverArt;
+				track.path = file.filePath();
+
+				m_tracks.push_back(track);
+		}
+}
+
+QPixmap MainWindow::getCoverArt(const QString &path, const QString &extension) {
+		QPixmap img{};
+
+		if (extension == "mp3") {
+				TagLib::MPEG::File file(path.toStdString().c_str());
+				TagLib::ID3v2::Tag *tag = file.ID3v2Tag(true);
+
+				if (tag == nullptr) {
+						return {":/Placeholders/Placeholder.svg"};
+				}
+
+				TagLib::ID3v2::FrameList frames = tag->frameList("APIC");
+
+				if (frames.isEmpty()) {
+						return {":/Placeholders/Placeholder.svg"};
+				}
+
+				auto *apic = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame *>(frames.front());
+
+				QByteArray data((const char *)apic->picture().data(), apic->picture().size());
+				img.loadFromData(reinterpret_cast<const uchar *>(data.constData()), data.size());
+
+				return img;
+		}
+		if (extension == "mp4" || extension == "m4a") {
+				TagLib::MP4::File file(path.toStdString().c_str());
+				TagLib::MP4::Tag *tag = file.tag();
+
+				if (tag == nullptr) {
+						return {":/Placeholders/Placeholder.svg"};
+				}
+
+				TagLib::MP4::ItemMap itemsListMap = tag->itemMap();
+				TagLib::MP4::Item coverItem = itemsListMap["covr"];
+
+				TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
+				if (coverArtList.isEmpty()) {
+						return {":/Placeholders/Placeholder.svg"};
+				}
+				const TagLib::MP4::CoverArt &coverArt = coverArtList.front();
+
+				QByteArray data((const char *)coverArt.data().data(), coverArt.data().size());
+
+				img.loadFromData(reinterpret_cast<const uchar *>(data.constData()), data.size());
+
+				return img;
+		}
+		if (extension == "flac") {
+				TagLib::FLAC::File file(path.toStdString().c_str());
+				TagLib::ID3v2::Tag *tag = file.ID3v2Tag(true);
+
+				if (tag == nullptr) {
+						return {":/Placeholders/Placeholder.svg"};
+				}
+
+				TagLib::ID3v2::FrameList frames = tag->frameList("APIC");
+
+				if (frames.isEmpty()) {
+						return {":/Placeholders/Placeholder.svg"};
+				}
+
+				auto *apic = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame *>(frames.front());
+
+				QByteArray data((const char *)apic->picture().data(), apic->picture().size());
+
+				img.loadFromData(reinterpret_cast<const uchar *>(data.constData()), data.size());
+
+				return img;
+		}
+
+		return {":/Placeholders/Placeholder.svg"};
 }
