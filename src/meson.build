@@ -1,10 +1,16 @@
 src = files(
   'main.cpp',
   'mainwindow.cpp',
+  'track.cpp',
+  'treeitem.cpp',
+  'treemodel.cpp',
 )
 
 moc_headers = files(
   'mainwindow.hpp',
+  'track.hpp',
+  'treeitem.hpp',
+  'treemodel.hpp',
 )
 
 qt_moc = qt6.compile_moc(headers: moc_headers, dependencies: qt_deps)

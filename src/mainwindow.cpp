@@ -18,6 +18,7 @@ MainWindow::MainWindow()
 
 		setupSideBar();
 		setupPlaybackControll();
+		setupPlayerModel();
 		showLibrary();
 
 		m_mainGridLayout->setSpacing(0);
@@ -35,6 +36,21 @@ MainWindow::MainWindow()
 
 		m_centralWidget->setLayout(m_mainGridLayout);
 		setCentralWidget(m_centralWidget);
+}
+
+void MainWindow::setupPlayerModel() {
+
+		const QVariantList COLUMNS_NAME{"Number", "Title", "Album", "Author", "Duration", "Year", "Bitrate", "File Size"};
+
+		TreeModel *playerModel = new TreeModel(m_tracks, COLUMNS_NAME);
+
+		m_playerMainTreeView->setModel(playerModel);
+
+		for (int32_t c = 0; c < playerModel->columnCount(); ++c) {
+				m_playerMainTreeView->resizeColumnToContents(c);
+		}
+
+		m_playerMainTreeView->show();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
