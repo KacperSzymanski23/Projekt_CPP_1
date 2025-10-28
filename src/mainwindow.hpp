@@ -1,9 +1,12 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#include "playercontrols.hpp"
 #include "track.hpp"
+#include "treemodel.hpp"
 // Qt
 #include <QAction>
+#include <QAudioOutput>
 #include <QDir>
 #include <QDockWidget>
 #include <QFileDialog>
@@ -11,6 +14,7 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QMainWindow>
+#include <QMediaPlayer>
 #include <QMenuBar>
 #include <QSettings>
 #include <QSlider>
@@ -36,25 +40,24 @@ class MainWindow : public QMainWindow {
 		void closeEvent(QCloseEvent *event) override;
 		void readWindowGeometrySettings();
 
+		void rowClicked(const QModelIndex &current);
+
 	  private:
 		void setupSideBar();
 		void setupPlaybackControll();
 		void setupPlayerModel();
 		void scanLibrarty();
+
 		QPixmap getCoverArt(const QString &path, const QString &extension);
 
 		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"};
 
-		QSlider *m_playbackSlider;
-		QSlider *m_volumeSlider;
-
-		QLabel *m_timeLabel;
-		QLabel *m_volumeLabel;
-		QLabel *m_coverLabel;
-
 		QWidget *m_centralWidget;
 		QWidget *m_sideBarWidget;
-		QWidget *m_playbackControllWidget;
+
+		PlayerControls *m_playbackControllWidget;
+
+		QLabel *m_coverLabel;
 
 		QTreeView *m_middleTreeView;
 		QTreeView *m_playerMainTreeView;
@@ -62,7 +65,10 @@ class MainWindow : public QMainWindow {
 		QVBoxLayout *m_sideBarLayout;
 		QGridLayout *m_mainGridLayout;
 		QVBoxLayout *m_middleListLayout;
-		QGridLayout *m_playbackControllLayout;
+
+		TreeModel *m_playerModel;
+		QMediaPlayer *m_audioPlayer;
+		QAudioOutput *m_audioOutput;
 
 		QPixmap m_coverImage;
 

@@ -18,6 +18,7 @@ class TreeModel : public QAbstractItemModel {
 		~TreeModel() override;
 
 		QVariant data(const QModelIndex &index, int32_t role) const override;
+		QVariant dataAtColumn(const QModelIndex &index, int32_t role, int32_t column) const;
 		Qt::ItemFlags flags(const QModelIndex &index) const override;
 		QVariant headerData(int32_t section, Qt::Orientation orientation, int32_t role = Qt::DisplayRole) const override;
 		QModelIndex index(int32_t row, int32_t column, const QModelIndex &parent = {}) const override;

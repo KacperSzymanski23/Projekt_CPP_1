@@ -1,6 +1,7 @@
 src = files(
   'main.cpp',
   'mainwindow.cpp',
+  'playercontrols.cpp',
   'track.cpp',
   'treeitem.cpp',
   'treemodel.cpp',
@@ -8,7 +9,7 @@ src = files(
 
 moc_headers = files(
   'mainwindow.hpp',
-  'track.hpp',
+  'playercontrols.hpp',
   'treeitem.hpp',
   'treemodel.hpp',
 )

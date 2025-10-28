@@ -28,6 +28,15 @@ QVariant TreeModel::data(const QModelIndex &index, int32_t role) const {
 		return item->data(index.column());
 }
 
+QVariant TreeModel::dataAtColumn(const QModelIndex &index, int32_t role, int32_t column) const {
+		if (!index.isValid() || role != Qt::DisplayRole) {
+				return {};
+		}
+
+		const auto *item = static_cast<const TreeItem *>(index.internalPointer());
+		return item->data(column);
+}
+
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
 		return index.isValid() ? QAbstractItemModel::flags(index) : Qt::ItemFlags(Qt::NoItemFlags);
 }
@@ -98,6 +107,7 @@ void TreeModel::setupModelData(const std::vector<Track> &tracks, TreeItem *paren
 				columnData << line.bitrate;
 				columnData << line.fileSize;
 				columnData << line.path;
+				columnData << line.cover;
 
 				if (position > state.constLast().indentation) {
 						auto *lastParent = state.constLast().parent;
