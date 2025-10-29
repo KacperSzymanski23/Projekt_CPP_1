@@ -4,4 +4,4 @@ url = https://github.com/KacperSzymanski23/utfcpp-meson.git
 revision = master
 
 [provide]
-taglib = utf8cpp_dep
+utf8cpp = utf8cpp_dep

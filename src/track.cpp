@@ -3,15 +3,15 @@
 #include <utility>
 
 Track::Track(
-	uint32_t number, QString title, QString album, QString artist, QString duration, uint32_t year, QString bitrate, QString fileSize,
-	QPixmap cover, QString path
+	const uint32_t NUMBER, QString title, QString album, QString artist, QString duration, const uint32_t YEAR, QString bitrate,
+	QString fileSize, QPixmap cover, QString path
 )
-	: number(number)
+	: number(NUMBER)
 	, title(std::move(title))
 	, album(std::move(album))
 	, artist(std::move(artist))
-	, duration(duration)
-	, year(year)
+	, duration(std::move(duration))
+	, year(YEAR)
 	, bitrate(std::move(bitrate))
 	, fileSize(std::move(fileSize))
 	, cover(std::move(cover))

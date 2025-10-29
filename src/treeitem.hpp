@@ -2,7 +2,6 @@
 #define TREEITEM_HPP
 
 // Qt
-#include <QList>
 #include <QVariant>
 
 class TreeItem {
@@ -11,12 +10,12 @@ class TreeItem {
 
 		void appendChild(std::unique_ptr<TreeItem> &&child);
 
-		TreeItem *child(int32_t row);
-		int32_t childCount() const;
-		int32_t columnCount() const;
-		QVariant data(int32_t column) const;
-		int32_t row() const;
-		TreeItem *parentItem();
+		[[nodiscard]] TreeItem *child(int32_t row) const;
+		[[nodiscard]] int32_t childCount() const;
+		[[nodiscard]] int32_t columnCount() const;
+		[[nodiscard]] QVariant data(int32_t column) const;
+		[[nodiscard]] int32_t row() const;
+		[[nodiscard]] TreeItem *parentItem() const;
 
 	  private:
 		std::vector<std::unique_ptr<TreeItem>> m_childItems;

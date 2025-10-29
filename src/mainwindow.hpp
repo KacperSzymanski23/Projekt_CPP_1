@@ -8,16 +8,13 @@
 #include <QAction>
 #include <QAudioOutput>
 #include <QDir>
-#include <QDockWidget>
 #include <QFileDialog>
 #include <QGridLayout>
 #include <QHeaderView>
 #include <QLabel>
 #include <QMainWindow>
 #include <QMediaPlayer>
-#include <QMenuBar>
 #include <QSettings>
-#include <QSlider>
 #include <QToolBar>
 #include <QTreeView>
 #include <QVBoxLayout>
@@ -28,36 +25,23 @@ class MainWindow : public QMainWindow {
 	  public:
 		MainWindow();
 
-	  private slots:
-		void defaultAction(); // To remove
-
-		void showLibrary();
-		void showPlaylists();
-		void showFavorite();
-		void showAuthors();
-		void showFiles();
-
-		void closeEvent(QCloseEvent *event) override;
-		void readWindowGeometrySettings();
-
-		void rowClicked(const QModelIndex &current);
-
 	  private:
 		void setupSideBar();
-		void setupPlaybackControll();
 		void setupPlayerModel();
-		void scanLibrarty();
+		void scanLibrary();
 
-		QPixmap getCoverArt(const QString &path, const QString &extension);
+		static QPixmap getCoverArt(const QString &path, const QString &extension);
 
 		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"};
 
 		QWidget *m_centralWidget;
 		QWidget *m_sideBarWidget;
 
-		PlayerControls *m_playbackControllWidget;
+		PlayerControls *m_playbackControlsWidget;
 
 		QLabel *m_coverLabel;
+
+		QToolBar *m_sideToolBar;
 
 		QTreeView *m_middleTreeView;
 		QTreeView *m_playerMainTreeView;
@@ -73,6 +57,18 @@ class MainWindow : public QMainWindow {
 		QPixmap m_coverImage;
 
 		std::vector<Track> m_tracks;
+
+	  private slots:
+		void showLibrary();
+		void showPlaylists();
+		void showFavorite();
+		void showAuthors();
+		void showAlbums();
+
+		void closeEvent(QCloseEvent *event) override;
+		void readWindowGeometrySettings();
+
+		void rowClicked(const QModelIndex &current);
 };
 
 #endif /* MAINWINDOW_HPP */

@@ -4,7 +4,6 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QSlider>
-#include <QToolBar>
 #include <QToolButton>
 #include <QWidget>
 
@@ -15,11 +14,11 @@ class PlayerControls : public QWidget {
 		explicit PlayerControls(QWidget *parent = nullptr);
 		~PlayerControls() override;
 
-		float getVolume() const;
-		bool isMuted() const;
+		[[nodiscard]] float getVolume() const;
+		[[nodiscard]] bool isMuted() const;
 
 	  private:
-		void updateProgressLabel(int32_t progress);
+		void updateProgressLabel(int32_t progress) const;
 
 		QSlider *m_progressSlider;
 		QSlider *m_volumeSlider;
@@ -34,10 +33,10 @@ class PlayerControls : public QWidget {
 		QToolButton *m_audioButton;
 		QToolButton *m_favoriteButton;
 
-		QHBoxLayout *m_playbackControllLayout;
+		QHBoxLayout *m_playbackControlsLayout;
 
-		int32_t m_progress;
-		int32_t m_duration;
+		int32_t m_progress{};
+		int32_t m_duration{};
 
 		bool m_playerMuted = false;
 		bool m_playerShuffled = false;
@@ -46,13 +45,13 @@ class PlayerControls : public QWidget {
 		bool m_playerState = true;
 
 	  public slots:
-		void setVolume(float volume);
+		void setVolume(float volume) const;
 		void setMuted(bool muted);
 		void setShuffle(bool shuffle);
 		void setLoop(bool loop);
-		void setFavorite(bool loop);
-		void setTrackDuration(const int32_t DURATION);
-		void setTrackProgress(int32_t duration);
+		void setFavorite(bool favorite);
+		void setTrackDuration(int32_t duration);
+		void setTrackProgress(int32_t progress) const;
 
 	  private slots:
 		void playPauseClicked();

@@ -7,7 +7,7 @@
 class Track {
 	  public:
 		explicit Track(
-			uint32_t number = {}, QString title = {}, QString album = {}, QString artist = {}, QString duration = {}, uint32_t year = {},
+			const uint32_t NUMBER = {}, QString title = {}, QString album = {}, QString artist = {}, QString duration = {}, const uint32_t YEAR = {},
 			QString bitrate = {}, QString fileSize = {}, QPixmap cover = {}, QString path = {}
 		);
 		~Track();

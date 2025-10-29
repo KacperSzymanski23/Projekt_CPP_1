@@ -28,7 +28,7 @@ QVariant TreeModel::data(const QModelIndex &index, int32_t role) const {
 		return item->data(index.column());
 }
 
-QVariant TreeModel::dataAtColumn(const QModelIndex &index, int32_t role, int32_t column) const {
+QVariant TreeModel::dataAtColumn(const QModelIndex &index, int32_t role, int32_t column) {
 		if (!index.isValid() || role != Qt::DisplayRole) {
 				return {};
 		}
@@ -50,7 +50,7 @@ QModelIndex TreeModel::index(int32_t row, int32_t column, const QModelIndex &par
 				return {};
 		}
 
-		TreeItem *parentItem = parent.isValid() ? static_cast<TreeItem *>(parent.internalPointer()) : m_rootItem.get();
+		TreeItem const *parentItem = parent.isValid() ? static_cast<TreeItem *>(parent.internalPointer()) : m_rootItem.get();
 
 		if (auto *childItem = parentItem->child(row)) {
 				return createIndex(row, column, childItem);
@@ -64,7 +64,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const {
 		}
 
 		auto *childItem = static_cast<TreeItem *>(index.internalPointer());
-		TreeItem *parentItem = childItem->parentItem();
+		TreeItem const *parentItem = childItem->parentItem();
 
 		return parentItem != m_rootItem.get() ? createIndex(parentItem->row(), 0, parentItem) : QModelIndex{};
 }
@@ -94,7 +94,7 @@ void TreeModel::setupModelData(const std::vector<Track> &tracks, TreeItem *paren
 		};
 
 		for (const auto &line : tracks) {
-				qsizetype position = 0;
+				constexpr qsizetype POSITION_ZERO = 0;
 
 				QVariantList columnData;
 
@@ -109,13 +109,13 @@ void TreeModel::setupModelData(const std::vector<Track> &tracks, TreeItem *paren
 				columnData << line.path;
 				columnData << line.cover;
 
-				if (position > state.constLast().indentation) {
+				if (state.constLast().indentation < POSITION_ZERO) {
 						auto *lastParent = state.constLast().parent;
 						if (lastParent->childCount() > 0) {
-								state.append({lastParent->child(lastParent->childCount() - 1), position});
+								state.append({.parent = lastParent->child(lastParent->childCount() - 1), .indentation = POSITION_ZERO});
 						}
 				} else {
-						while (position < state.constLast().indentation && !state.isEmpty()) {
+						while (state.constLast().indentation > POSITION_ZERO && !state.isEmpty()) {
 								state.removeLast();
 						}
 				}

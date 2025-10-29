@@ -10,7 +10,6 @@ src = files(
 moc_headers = files(
   'mainwindow.hpp',
   'playercontrols.hpp',
-  'treeitem.hpp',
   'treemodel.hpp',
 )
 

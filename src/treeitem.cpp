@@ -9,8 +9,12 @@ void TreeItem::appendChild(std::unique_ptr<TreeItem> &&child) {
 		m_childItems.push_back(std::move(child));
 }
 
-TreeItem *TreeItem::child(int32_t row) {
-		return row >= 0 && row < childCount() ? m_childItems.at(row).get() : nullptr;
+TreeItem *TreeItem::child(int32_t row) const {
+		if (row >= 0 && row < childCount()) {
+				return m_childItems.at(row).get();
+		}
+
+		return nullptr;
 }
 
 int32_t TreeItem::childCount() const {
@@ -25,7 +29,7 @@ QVariant TreeItem::data(int32_t column) const {
 		return m_itemData.value(column);
 }
 
-TreeItem *TreeItem::parentItem() {
+TreeItem *TreeItem::parentItem() const {
 		return m_parentItem;
 }
 
@@ -39,7 +43,7 @@ int32_t TreeItem::row() const {
 		);
 
 		if (IT != m_parentItem->m_childItems.cend()) {
-				return std::distance(m_parentItem->m_childItems.cbegin(), IT);
+				return static_cast<int32_t>(std::distance(m_parentItem->m_childItems.cbegin(), IT));
 		}
 		Q_ASSERT(false);
 		return -1;
