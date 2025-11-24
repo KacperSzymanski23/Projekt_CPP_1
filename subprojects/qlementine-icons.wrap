@@ -1,0 +1,7 @@
+[wrap-git]
+directory = qlementine-icons
+url = https://github.com/KacperSzymanski23/qlementine-icons-meson.git
+revision = master
+
+[provide]
+qlementine-icons = qlementine_icons_dep

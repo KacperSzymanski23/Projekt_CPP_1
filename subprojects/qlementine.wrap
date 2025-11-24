@@ -1,0 +1,7 @@
+[wrap-git]
+directory = qlementine
+url = https://github.com/KacperSzymanski23/qlementine-meson.git
+revision = dev
+
+[provide]
+qlementine = qlementine_dep

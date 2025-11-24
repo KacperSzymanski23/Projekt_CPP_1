@@ -52,7 +52,7 @@ MainWindow::MainWindow()
 		setupPlayerModel();
 		showLibrary();
 
-		m_mainGridLayout->setSpacing(0);
+		m_mainGridLayout->setSpacing(5);
 
 		m_middleTreeView->header()->setDefaultAlignment(Qt::AlignCenter);
 		m_playerMainTreeView->header()->setDefaultAlignment(Qt::AlignCenter);
@@ -252,7 +252,7 @@ QPixmap MainWindow::getCoverArt(const QString &path, const QString &extension) {
 void MainWindow::scanLibrary() {
 		m_tracks.clear();
 
-		QDir testLibrary{""};
+		QDir testLibrary{"../../../Muzyka"};
 
 		Track track{};
 

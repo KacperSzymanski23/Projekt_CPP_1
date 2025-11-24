@@ -13,12 +13,13 @@ moc_headers = files(
   'treemodel.hpp',
 )
 
-qt_moc = qt6.compile_moc(headers: moc_headers, dependencies: qt_deps)
+qt_moc = qt6.compile_moc(headers: moc_headers, dependencies: qt_dep)
 
 app_exe = executable(
   meson.project_name(),
   sources: [src, qt_moc, resources],
-  dependencies: [qt_deps, taglib_dep],
+  dependencies: [qt_dep, taglib_dep, qlementine_dep, qlementine_icons_dep],
+  include_directories : include_dir,
 )
 
 test('general-test', app_exe, workdir: meson.project_build_root() + '/src/')
