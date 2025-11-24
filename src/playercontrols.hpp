@@ -42,7 +42,7 @@ class PlayerControls : public QWidget {
 		bool m_playerShuffled = false;
 		bool m_playerLooped = false;
 		bool m_playerFavorite = false;
-		bool m_playerState = true;
+		bool m_playerState = false;
 
 	  public slots:
 		void setVolume(float volume) const;

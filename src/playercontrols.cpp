@@ -20,7 +20,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 
 		constexpr QSize ICON_SIZE = QSize(24, 24);
 
-		const QIcon LOOP_ICON = QIcon::fromTheme("media-playlist-repeat-rtl-symbolic");
+		const QIcon LOOP_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/loop.svg");
 
 		m_loopButton->setIcon(LOOP_ICON);
 		m_loopButton->setIconSize(ICON_SIZE);
@@ -28,7 +28,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_loopButton->setCheckable(true);
 		m_playbackControlsLayout->addWidget(m_loopButton);
 
-		const QIcon SHUFFLE_ICON = QIcon::fromTheme("media-playlist-shuffle-symbolic");
+		const QIcon SHUFFLE_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/shuffle.svg");
 
 		m_shuffleButton->setIcon(SHUFFLE_ICON);
 		m_shuffleButton->setIconSize(ICON_SIZE);
@@ -36,7 +36,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_shuffleButton->setCheckable(true);
 		m_playbackControlsLayout->addWidget(m_shuffleButton);
 
-		const QIcon PREVIOUS_SONG_ICON = QIcon::fromTheme("media-skip-backward-symbolic");
+		const QIcon PREVIOUS_SONG_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/seek-backward.svg");
 
 		m_previousButton->setIcon(PREVIOUS_SONG_ICON);
 		m_previousButton->setIconSize(ICON_SIZE);
@@ -44,7 +44,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_playbackControlsLayout->addWidget(m_previousButton);
 		connect(m_previousButton, &QToolButton::clicked, this, &PlayerControls::previous);
 
-		const QIcon START_ICON = QIcon::fromTheme("media-playback-start-symbolic");
+		const QIcon START_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/play.svg");
 
 		m_playPauseButton->setIcon(START_ICON);
 		m_playPauseButton->setIconSize(ICON_SIZE);
@@ -52,7 +52,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_playbackControlsLayout->addWidget(m_playPauseButton);
 		connect(m_playPauseButton, &QToolButton::clicked, this, &PlayerControls::playPauseClicked);
 
-		const QIcon NEXT_SONG_ICON = QIcon::fromTheme("media-skip-forward-symbolic");
+		const QIcon NEXT_SONG_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/seek-forward.svg");
 
 		m_nextButton->setIcon(NEXT_SONG_ICON);
 		m_nextButton->setIconSize(ICON_SIZE);
@@ -67,7 +67,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_progressLabel = new QLabel(tr(" 00:00/00:00 "));
 		m_playbackControlsLayout->addWidget(m_progressLabel);
 
-		const QIcon HIGH_VOLUME_ICON = QIcon::fromTheme("audio-volume-high-symbolic");
+		const QIcon HIGH_VOLUME_ICON = QIcon::fromTheme(":/qlementine/icons/16/audio/speaker-2.svg");
 
 		m_audioButton->setIcon(HIGH_VOLUME_ICON);
 		m_audioButton->setIconSize(ICON_SIZE);
@@ -82,13 +82,15 @@ PlayerControls::PlayerControls(QWidget *parent)
 
 		connect(m_volumeSlider, &QSlider::valueChanged, this, &PlayerControls::volumeSliderValueChanged);
 
-		const QIcon FAVORITE_ICON = QIcon::fromTheme("emblem-favorite-symbolic");
+		const QIcon FAVORITE_ICON = QIcon::fromTheme(":/qlementine/icons/16/shape/heart.svg");
 
 		m_favoriteButton->setIcon(FAVORITE_ICON);
 		m_favoriteButton->setIconSize(ICON_SIZE);
 		m_favoriteButton->setToolTip(tr("Add Favorite"));
 		m_favoriteButton->setCheckable(true);
 		m_playbackControlsLayout->addWidget(m_favoriteButton);
+
+		connect(m_favoriteButton, &QToolButton::clicked, this, &PlayerControls::favoriteClicked);
 
 		this->setLayout(m_playbackControlsLayout);
 }
@@ -118,7 +120,18 @@ void PlayerControls::updateProgressLabel(int32_t progress) const {
 }
 
 void PlayerControls::playPauseClicked() {
+	m_playerState = !m_playerState;
+
+	const QIcon START_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/play.svg");
+	const QIcon PAUSE_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/pause.svg");
+
+	if (m_playerState) {
 		emit play();
+		m_playPauseButton->setIcon(PAUSE_ICON);
+	}else {
+		emit pause();
+		m_playPauseButton->setIcon(START_ICON);
+	}
 }
 
 void PlayerControls::muteClicked() {
@@ -141,6 +154,7 @@ void PlayerControls::loopClicked() {
 
 void PlayerControls::favoriteClicked() {
 		emit changeFavoriteState(!m_playerFavorite);
+		setFavorite(!m_playerFavorite);
 }
 
 void PlayerControls::progressSliderMoved() {
@@ -157,8 +171,8 @@ void PlayerControls::setMuted(bool muted) {
 		if (muted != m_playerMuted) {
 				m_playerMuted = muted;
 
-				const QIcon HIGH_VOLUME_ICON = QIcon::fromTheme("audio-volume-high-symbolic");
-				const QIcon MUTE_ICON = QIcon::fromTheme("audio-volume-mute");
+				const QIcon HIGH_VOLUME_ICON = QIcon::fromTheme(":/qlementine/icons/16/audio/speaker-2.svg");
+				const QIcon MUTE_ICON = QIcon::fromTheme(":/qlementine/icons/16/audio/speaker-mute.svg");
 
 				if (muted) {
 						m_audioButton->setIcon(MUTE_ICON);
@@ -172,13 +186,8 @@ void PlayerControls::setShuffle(bool shuffle) {
 		if (shuffle != m_playerShuffled) {
 				m_playerShuffled = shuffle;
 
-				const QIcon PLAYLIST_SHUFFLE_ICON = QIcon::fromTheme("audio-playlist-shuffle");
-				const QIcon PLAYLIST_NO_SHUFFLE_ICON = QIcon::fromTheme("media-playlist-repeat-symbolic");
-				if (shuffle) {
-						m_shuffleButton->setIcon(PLAYLIST_SHUFFLE_ICON);
-				} else {
-						m_shuffleButton->setIcon(PLAYLIST_NO_SHUFFLE_ICON);
-				}
+				const QIcon PLAYLIST_SHUFFLE_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/shuffle.svg");
+				m_shuffleButton->setIcon(PLAYLIST_SHUFFLE_ICON);
 		}
 }
 
@@ -186,13 +195,8 @@ void PlayerControls::setLoop(bool loop) {
 		if (loop != m_playerLooped) {
 				m_playerLooped = loop;
 
-				const QIcon PLAYLIST_LOOP_ICON = QIcon::fromTheme("media-playlist-repeat-symbolic");
-				const QIcon PLAYLIST_NO_LOOP_ICON = QIcon::fromTheme("media-playlist-repeat-single-symbolic");
-				if (loop) {
-						m_loopButton->setIcon(PLAYLIST_LOOP_ICON);
-				} else {
-						m_loopButton->setIcon(PLAYLIST_NO_LOOP_ICON);
-				}
+				const QIcon PLAYLIST_LOOP_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/loop.svg");
+				m_loopButton->setIcon(PLAYLIST_LOOP_ICON);
 		}
 }
 
@@ -200,8 +204,8 @@ void PlayerControls::setFavorite(bool favorite) {
 		if (favorite != m_playerFavorite) {
 				m_playerFavorite = favorite;
 
-				const QIcon FAVORITE_ICON = QIcon::fromTheme("emblem-favorite-symbolic");
-				const QIcon NO_FAVORITE_ICON = QIcon::fromTheme("emblem-favorite-symbolic-symbolic");
+				const QIcon FAVORITE_ICON = QIcon::fromTheme(":/qlementine/icons/16/shape/heart-filled.svg");
+				const QIcon NO_FAVORITE_ICON = QIcon::fromTheme(":/qlementine/icons/16/shape/heart.svg");
 				if (favorite) {
 						m_favoriteButton->setIcon(FAVORITE_ICON);
 				} else {
