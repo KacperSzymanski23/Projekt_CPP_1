@@ -12,6 +12,8 @@ class Track {
 		);
 		~Track();
 
+
+		// Metadane z pliku audio
 		uint32_t number;
 		QString title;
 		QString album;
@@ -21,7 +23,8 @@ class Track {
 		QString bitrate;
 		QString fileSize;
 		QPixmap cover;
-		QString path;
+
+		QString path; // Ścierzka do pliku audio
 };
 
 #endif /* TRACK_HPP */

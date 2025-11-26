@@ -14,37 +14,43 @@ class PlayerControls : public QWidget {
 		explicit PlayerControls(QWidget *parent = nullptr);
 		~PlayerControls() override;
 
-		[[nodiscard]] float getVolume() const;
-		[[nodiscard]] bool isMuted() const;
+		[[nodiscard]] float getVolume() const; // Pobiera obecny poziom głośności
+		[[nodiscard]] bool isMuted() const; // Zwraca wartość stanu wydziszenia odtwarzacza
 
 	  private:
-		void updateProgressLabel(int32_t progress) const;
+		void updateProgressLabel(int32_t progress) const; // Aktualizuje postęp odtwarzania w m_progressLabel
 
-		QSlider *m_progressSlider;
-		QSlider *m_volumeSlider;
+		QSlider *m_progressSlider; // Slider pozwalający na sterowanie postępem odtwarzania
+		QSlider *m_volumeSlider; // Slider pozwalający na sterowanie poziomem głośności
 
-		QLabel *m_progressLabel;
+		QLabel *m_progressLabel; // Etykieta wyświetlająca postęp odtwarzania
 
+		// Przyciski pozwalające na sterowani odtwarzaniem
 		QToolButton *m_loopButton;
 		QToolButton *m_shuffleButton;
 		QToolButton *m_previousButton;
 		QToolButton *m_playPauseButton;
 		QToolButton *m_nextButton;
 		QToolButton *m_audioButton;
-		QToolButton *m_favoriteButton;
 
-		QHBoxLayout *m_playbackControlsLayout;
+		QToolButton *m_favoriteButton; // Przycisk zapisujący piosenke do playlisty favorite
 
-		int32_t m_progress{};
-		int32_t m_duration{};
+		QHBoxLayout *m_playbackControlsLayout; // Układ elemntów GUI dla kontolek odtwarzania
 
+		int32_t m_progress{}; // Obecny postę odtwarzania
+		int32_t m_duration{}; // Długość obecnie odtwarzanej piosenki
+
+		// Flagi stanów dla sterowania odtwarzaniem
 		bool m_playerMuted = false;
 		bool m_playerShuffled = false;
 		bool m_playerLooped = false;
+		bool m_playerState = false; // true = odpauzowany, false = zapauzowany
+
+		// Flaga zawierająca informaję czy ta piosenka jest w playliscie favorite
 		bool m_playerFavorite = false;
-		bool m_playerState = false;
 
 	  public slots:
+		// Sloty do aktualizacji stanu odtwarzacza
 		void setVolume(float volume) const;
 		void setMuted(bool muted);
 		void setShuffle(bool shuffle);
@@ -54,15 +60,19 @@ class PlayerControls : public QWidget {
 		void setTrackProgress(int32_t progress) const;
 
 	  private slots:
+		// Sloty obsługujące kliknięcia przycisków
 		void playPauseClicked();
 		void muteClicked();
 		void shuffleClicked();
 		void loopClicked();
 		void favoriteClicked();
+
+		// Sloty obsługujące zmienę wartości paska postępu oraz paska głośności
 		void volumeSliderValueChanged();
 		void progressSliderMoved();
 
 	  signals:
+		// Sygnały emitowane przy zmianie stanu odtwarzacza
 		void play();
 		void pause();
 		void next();

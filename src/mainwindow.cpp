@@ -38,6 +38,7 @@ MainWindow::MainWindow()
 
 		connect(m_audioPlayer, &QMediaPlayer::durationChanged, m_playbackControlsWidget, &PlayerControls::setTrackDuration);
 		connect(m_audioPlayer, &QMediaPlayer::positionChanged, m_playbackControlsWidget, &PlayerControls::setTrackProgress);
+
 		connect(m_playbackControlsWidget, &PlayerControls::changeProgress, m_audioPlayer, &QMediaPlayer::setPosition);
 
 		connect(m_playbackControlsWidget, &PlayerControls::changeVolume, m_audioOutput, &QAudioOutput::setVolume);
@@ -93,7 +94,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 		qsettings.setValue("geometry", saveGeometry());
 		qsettings.setValue("savestate", saveState());
-		qsettings.setValue("maximized", isMaximized());
 		if (!isMaximized()) {
 				qsettings.setValue("pos", pos());
 				qsettings.setValue("size", size());

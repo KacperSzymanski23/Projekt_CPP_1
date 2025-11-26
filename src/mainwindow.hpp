@@ -26,49 +26,49 @@ class MainWindow : public QMainWindow {
 		MainWindow();
 
 	  private:
-		void setupSideBar();
+		void setupSideBar(); // Tworzy pasek narzędzi po lewej stonie
 		void setupPlayerModel();
-		void scanLibrary();
+		void scanLibrary(); // Skanuje wskananą ścieżkę w poszukiwaniu plików audio
 
-		static QPixmap getCoverArt(const QString &path, const QString &extension);
+		static QPixmap getCoverArt(const QString &path, const QString &extension); // Ekstraktuje okładkę albumu z pliku
 
-		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"};
+		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"}; // Wspierane typy plików
 
-		QWidget *m_centralWidget;
-		QWidget *m_sideBarWidget;
+		QWidget *m_centralWidget; // Centraly widget okna
+		QWidget *m_sideBarWidget; // Widget dla bocznego paska narzędzi
 
-		PlayerControls *m_playbackControlsWidget;
+		PlayerControls *m_playbackControlsWidget; // Widget umożliwiający sterowanei odtwarzaniem
 
-		QLabel *m_coverLabel;
+		QLabel *m_coverLabel; // Etykieta wyświetlająca okładkę dla każdej ścieżki
 
-		QToolBar *m_sideToolBar;
+		QToolBar *m_sideToolBar; // Pasek narzędzi
 
-		QTreeView *m_middleTreeView;
-		QTreeView *m_playerMainTreeView;
+		QTreeView *m_middleTreeView; // QTreeView zawierający wybrane przez użytkownika elementy np. albumy, autorów itd.
+		QTreeView *m_playerMainTreeView; // QTreeView zawierające wszystkie ścieżki dźwiękowe w albumnie lub wszystkie albumy autorstwa danego autora
 
-		QVBoxLayout *m_sideBarLayout;
-		QGridLayout *m_mainGridLayout;
+		QVBoxLayout *m_sideBarLayout; // Układ elementów GUI dla paska bocznego
+		QGridLayout *m_mainGridLayout; // Układ elementów GUI dla widgetu m_centralWidget
 		QVBoxLayout *m_middleListLayout;
 
-		TreeModel *m_playerModel;
-		QMediaPlayer *m_audioPlayer;
-		QAudioOutput *m_audioOutput;
+		TreeModel *m_playerModel; // Model dla m_playerMainTreeView odpowiadający za liczbę i nazwy oraz zarządzanie kolumn i informacjami w QTreeView
+		QMediaPlayer *m_audioPlayer; // Objekt klasy umożliwiającej odtwarzanie i kontrolowanie odtwarzania plików zawierających audio
+		QAudioOutput *m_audioOutput; // Objekt klasy reprezentującej kanały wyjśća audio dla m_audioPlayer
 
-		QPixmap m_coverImage;
+		QPixmap m_coverImage; // Okładka dla obecnie wybranej ścieżki dźwiękowej
 
-		std::vector<Track> m_tracks;
+		std::vector<Track> m_tracks; // std::vector zawierający metadane i ścieżki plików audio
 
 	  private slots:
-		void showLibrary();
-		void showPlaylists();
-		void showFavorite();
-		void showAuthors();
-		void showAlbums();
+		void showLibrary(); // Wyświetla wszystkie ścieżki dźwiękowe w m_middleTreeView
+		void showPlaylists(); // Wyświetla wszystkie playlisty w m_middleTreeView
+		void showFavorite(); // Wyświetla wszystkie ścieżki dźwiękowe z playlisty fovorite w m_middleTreeView
+		void showAuthors(); // yświetla wszystkich autorów albumów w m_middleTreeView
+		void showAlbums(); // Wyświetla wszystkie albumy w m_middleTreeView
 
-		void closeEvent(QCloseEvent *event) override;
-		void readWindowGeometrySettings();
+		void closeEvent(QCloseEvent *event) override; // Funkcja slot obsługująca zamykanie okna
+		void readWindowGeometrySettings(); // Funkcja slot zapisująca stan okna
 
-		void rowClicked(const QModelIndex &current);
+		void rowClicked(const QModelIndex &current); // Pobiera dane z piosenki z kliniętego przez użytkownika wiersza
 };
 
 #endif /* MAINWINDOW_HPP */
