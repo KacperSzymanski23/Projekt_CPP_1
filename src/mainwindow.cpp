@@ -16,11 +16,11 @@
 
 MainWindow::MainWindow()
 	: m_centralWidget(new QWidget(this))
-	, m_sideBarWidget(new QWidget())
-	, m_playbackControlsWidget(new PlayerControls())
-	, m_coverLabel(new QLabel())
-	, m_middleTreeView(new QTreeView())
-	, m_playerMainTreeView(new QTreeView())
+	, m_sideBarWidget(new QWidget(this))
+	, m_playbackControlsWidget(new PlayerControls(this))
+	, m_coverLabel(new QLabel(this))
+	, m_middleTreeView(new QTreeView(this))
+	, m_playerMainTreeView(new QTreeView(this))
 	, m_sideBarLayout(new QVBoxLayout(m_sideBarWidget))
 	, m_mainGridLayout(new QGridLayout(this))
 	, m_audioPlayer(new QMediaPlayer(this))
@@ -76,7 +76,7 @@ void MainWindow::setupPlayerModel() {
 
 		const QVariantList COLUMNS_NAME{"Number", "Title", "Album", "Author", "Duration", "Year", "Bitrate", "File Size", "Path"};
 
-		m_playerModel = new TreeModel(m_tracks, COLUMNS_NAME);
+		m_playerModel = new TreeModel(m_tracks, COLUMNS_NAME, this);
 
 		m_playerMainTreeView->setModel(m_playerModel);
 
@@ -252,7 +252,7 @@ QPixmap MainWindow::getCoverArt(const QString &path, const QString &extension) {
 void MainWindow::scanLibrary() {
 		m_tracks.clear();
 
-		QDir testLibrary{"../../../Muzyka"};
+		QDir testLibrary{"/home/kacper/Music"};
 
 		Track track{};
 

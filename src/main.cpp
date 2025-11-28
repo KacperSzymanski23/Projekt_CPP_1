@@ -14,7 +14,7 @@ int32_t main(int32_t argc, char *argv[]) {
 		MainWindow mainWin;
 
 		// Objekt motywu programu
-		auto* style = new oclero::qlementine::QlementineStyle(&app);
+		auto *style = new oclero::qlementine::QlementineStyle(&app);
 
 		style->setAnimationsEnabled(true);
 		style->setAutoIconColor(oclero::qlementine::AutoIconColor::TextColor);
@@ -28,7 +28,7 @@ int32_t main(int32_t argc, char *argv[]) {
 		QIcon::setThemeName("qlementine");
 
 		// Objekt menadżera motywów, który pozwala wczytć nasz własny styl z pliku json
-		auto* themeManager = new oclero::qlementine::ThemeManager(style);
+		auto *themeManager = new oclero::qlementine::ThemeManager(style);
 		themeManager->loadDirectory(":/themes");
 
 		// Domyślny motyw programu będzi ustaiony na Jasny

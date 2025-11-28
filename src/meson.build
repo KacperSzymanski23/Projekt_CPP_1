@@ -19,7 +19,12 @@ app_exe = executable(
   meson.project_name(),
   sources: [src, qt_moc, resources],
   dependencies: [qt_dep, taglib_dep, qlementine_dep, qlementine_icons_dep],
-  include_directories : include_dir,
+  include_directories: include_dir,
 )
 
-test('general-test', app_exe, workdir: meson.project_build_root() + '/src/')
+test(
+  'general-test',
+  app_exe,
+  workdir: meson.project_build_root() + '/src/',
+  timeout: 0,
+)

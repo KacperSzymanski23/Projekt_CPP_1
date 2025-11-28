@@ -39,10 +39,9 @@ int32_t TreeItem::row() const {
 		}
 
 		// Szuka wskaźnika do obecnego TreeItem'u
-		const auto IT = std::find_if(
-			m_parentItem->m_childItems.cbegin(), m_parentItem->m_childItems.cend(),
-			[this](const std::unique_ptr<TreeItem> &treeItem) { return treeItem.get() == this; }
-		);
+		const auto IT = std::find_if(m_parentItem->m_childItems.cbegin(), m_parentItem->m_childItems.cend(), [this](const std::unique_ptr<TreeItem> &treeItem) {
+				return treeItem.get() == this;
+		});
 
 		// Określa i zwraca położenie tego TreeItemu w wektorze m_childItems
 		if (IT != m_parentItem->m_childItems.cend()) {

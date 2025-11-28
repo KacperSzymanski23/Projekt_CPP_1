@@ -15,13 +15,13 @@ class PlayerControls : public QWidget {
 		~PlayerControls() override;
 
 		[[nodiscard]] float getVolume() const; // Pobiera obecny poziom głośności
-		[[nodiscard]] bool isMuted() const; // Zwraca wartość stanu wydziszenia odtwarzacza
+		[[nodiscard]] bool isMuted() const;    // Zwraca wartość stanu wydziszenia odtwarzacza
 
 	  private:
 		void updateProgressLabel(int32_t progress) const; // Aktualizuje postęp odtwarzania w m_progressLabel
 
 		QSlider *m_progressSlider; // Slider pozwalający na sterowanie postępem odtwarzania
-		QSlider *m_volumeSlider; // Slider pozwalający na sterowanie poziomem głośności
+		QSlider *m_volumeSlider;   // Slider pozwalający na sterowanie poziomem głośności
 
 		QLabel *m_progressLabel; // Etykieta wyświetlająca postęp odtwarzania
 

@@ -7,11 +7,10 @@
 class Track {
 	  public:
 		explicit Track(
-			const uint32_t NUMBER = {}, QString title = {}, QString album = {}, QString artist = {}, QString duration = {}, const uint32_t YEAR = {},
-			QString bitrate = {}, QString fileSize = {}, QPixmap cover = {}, QString path = {}
+			const uint32_t NUMBER = {}, QString title = {}, QString album = {}, QString artist = {}, QString duration = {},
+			const uint32_t YEAR = {}, QString bitrate = {}, QString fileSize = {}, QPixmap cover = {}, QString path = {}
 		);
 		~Track();
-
 
 		// Metadane z pliku audio
 		uint32_t number;

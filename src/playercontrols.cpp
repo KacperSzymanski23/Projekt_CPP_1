@@ -6,8 +6,8 @@
 
 PlayerControls::PlayerControls(QWidget *parent)
 	: QWidget(parent)
-	, m_progressSlider(new QSlider())
-	, m_volumeSlider(new QSlider())
+	, m_progressSlider(new QSlider(this))
+	, m_volumeSlider(new QSlider(this))
 	, m_loopButton(new QToolButton(this))
 	, m_shuffleButton(new QToolButton(this))
 	, m_previousButton(new QToolButton(this))
@@ -65,7 +65,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_playbackControlsLayout->addWidget(m_progressSlider);
 		connect(m_progressSlider, &QSlider::sliderMoved, this, &PlayerControls::progressSliderMoved);
 
-		m_progressLabel = new QLabel(tr(" 00:00/00:00 "));
+		m_progressLabel = new QLabel(tr(" 00:00/00:00 "), this);
 		m_playbackControlsLayout->addWidget(m_progressLabel);
 
 		const QIcon HIGH_VOLUME_ICON = QIcon::fromTheme(":/qlementine/icons/16/audio/speaker-2.svg");
@@ -121,18 +121,18 @@ void PlayerControls::updateProgressLabel(int32_t progress) const {
 }
 
 void PlayerControls::playPauseClicked() {
-	m_playerState = !m_playerState;
+		m_playerState = !m_playerState;
 
-	const QIcon START_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/play.svg");
-	const QIcon PAUSE_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/pause.svg");
+		const QIcon START_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/play.svg");
+		const QIcon PAUSE_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/pause.svg");
 
-	if (m_playerState) {
-		emit play();
-		m_playPauseButton->setIcon(PAUSE_ICON);
-	}else {
-		emit pause();
-		m_playPauseButton->setIcon(START_ICON);
-	}
+		if (m_playerState) {
+				emit play();
+				m_playPauseButton->setIcon(PAUSE_ICON);
+		} else {
+				emit pause();
+				m_playPauseButton->setIcon(START_ICON);
+		}
 }
 
 void PlayerControls::muteClicked() {
