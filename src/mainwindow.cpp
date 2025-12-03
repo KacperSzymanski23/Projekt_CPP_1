@@ -48,6 +48,10 @@ MainWindow::MainWindow()
 		connect(m_audioOutput, &QAudioOutput::volumeChanged, m_playbackControlsWidget, &PlayerControls::setVolume);
 		connect(m_audioOutput, &QAudioOutput::mutedChanged, m_playbackControlsWidget, &PlayerControls::setMuted);
 
+		connect(m_audioPlayer, &QMediaPlayer::playbackStateChanged, m_playbackControlsWidget, [this](QMediaPlayer::PlaybackState arg) {
+				m_playbackControlsWidget->setPlayerState(arg);
+		});
+
 		scanLibrary();
 
 		setupSideBar();
@@ -61,6 +65,7 @@ MainWindow::MainWindow()
 
 		m_coverLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 		m_coverLabel->setPixmap(m_coverImage);
+		m_coverLabel->setScaledContents(true);
 
 		m_mainGridLayout->addWidget(m_playbackControlsWidget, 0, 0, 1, 33);
 		m_mainGridLayout->addWidget(m_sideBarWidget, 1, 0, 13, 1);
@@ -184,6 +189,7 @@ void MainWindow::scanLibrary() {
 
 		constexpr int32_t MIB = 1024 * 1024;
 		constexpr auto FLAGS = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::FilesOnly;
+		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"}; // Wspierane typy plików
 
 		for (const auto &file : QDirListing(library.path(), AUDIO_FILE_FILTER, FLAGS)) {
 				TagLib::FileRef fileRef{file.filePath().toUtf8().data()};

@@ -55,6 +55,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_progressSlider->setOrientation(Qt::Horizontal);
 		m_playbackControlsLayout->addWidget(m_progressSlider);
 		connect(m_progressSlider, &QSlider::sliderMoved, this, &PlayerControls::progressSliderMoved);
+		connect(m_progressSlider, &QSlider::sliderPressed, this, &PlayerControls::progressSliderMoved);
 
 		m_progressLabel = new QLabel(tr(" 00:00 / 00:00 "), this);
 		m_playbackControlsLayout->addWidget(m_progressLabel);
@@ -91,6 +92,24 @@ bool PlayerControls::isMuted() const {
 		return m_playerMuted;
 }
 
+void PlayerControls::setPlayerState(QMediaPlayer::PlaybackState state) {
+		if (state != m_playerState) {
+				m_playerState = state;
+
+				switch (state) {
+						case QMediaPlayer::StoppedState:
+								m_playPauseButton->setIcon(Icons::PLAY);
+								break;
+						case QMediaPlayer::PlayingState:
+								m_playPauseButton->setIcon(Icons::PAUSE);
+								break;
+						case QMediaPlayer::PausedState:
+								m_playPauseButton->setIcon(Icons::PLAY);
+								break;
+				}
+		}
+}
+
 void PlayerControls::updateProgressLabel(int32_t progress) const {
 		const QTime PROGRESS_TIME((progress / 3600) % 60, (progress / 60) % 60, progress % 60);
 		const QTime DURATION_TIME((m_duration / 3600) % 60, (m_duration / 60) % 60, m_duration % 60);
@@ -105,15 +124,37 @@ void PlayerControls::updateProgressLabel(int32_t progress) const {
 		m_progressLabel->setText(PROGRESS_LABEL_TEXT);
 }
 
-void PlayerControls::playPauseClicked() {
-		m_playerState = !m_playerState;
-
-		if (m_playerState) {
-				emit play();
-				m_playPauseButton->setIcon(Icons::PAUSE);
+void PlayerControls::updateVolumeIcon(int32_t volume) const {
+		if (volume > 75) {
+				m_audioButton->setIcon(Icons::HIGH_VOLUME);
+		} else if (volume > 25) {
+				m_audioButton->setIcon(Icons::MEDIUM_VOLUME);
+		} else if (volume > 0) {
+				m_audioButton->setIcon(Icons::LOW_VOLUME);
 		} else {
-				emit pause();
-				m_playPauseButton->setIcon(Icons::PLAY);
+				m_audioButton->setIcon(Icons::MUTE);
+		}
+}
+
+void PlayerControls::playPauseClicked() {
+		if (m_playerState == QMediaPlayer::PlayingState) {
+				m_playerState = QMediaPlayer::PausedState;
+		} else {
+				m_playerState = QMediaPlayer::PlayingState;
+		}
+
+		switch (m_playerState) {
+				case QMediaPlayer::PlayingState:
+						emit play();
+						m_playPauseButton->setIcon(Icons::PAUSE);
+
+						break;
+				case QMediaPlayer::PausedState:
+				case QMediaPlayer::StoppedState:
+						emit pause();
+						m_playPauseButton->setIcon(Icons::PLAY);
+
+						break;
 		}
 }
 
@@ -147,6 +188,8 @@ void PlayerControls::progressSliderMoved() {
 void PlayerControls::setVolume(float volume) const {
 		const int VOLUME = static_cast<int>(volume * 100);
 
+		updateVolumeIcon(VOLUME);
+
 		m_volumeSlider->setValue(VOLUME);
 }
 
@@ -157,7 +200,7 @@ void PlayerControls::setMuted(bool muted) {
 				if (muted) {
 						m_audioButton->setIcon(Icons::MUTE);
 				} else {
-						m_audioButton->setIcon(Icons::HIGH_VOLUME);
+						updateVolumeIcon(m_volumeSlider->value());
 				}
 		}
 }

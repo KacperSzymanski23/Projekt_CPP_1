@@ -32,8 +32,6 @@ class MainWindow : public QMainWindow {
 
 		static QPixmap getCoverArt(const QString &path, const QString &extension); // Ekstraktuje okładkę albumu z pliku
 
-		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"}; // Wspierane typy plików
-
 		QWidget *m_centralWidget; // Centraly widget okna
 		QWidget *m_sideBarWidget; // Widget dla bocznego paska narzędzi
 

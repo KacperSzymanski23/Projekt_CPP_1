@@ -3,6 +3,7 @@
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMediaPlayer>
 #include <QSlider>
 #include <QToolButton>
 #include <QWidget>
@@ -16,8 +17,11 @@ class PlayerControls : public QWidget {
 		[[nodiscard]] float getVolume() const; // Pobiera obecny poziom głośności
 		[[nodiscard]] bool isMuted() const;    // Zwraca wartość stanu wydziszenia odtwarzacza
 
+		void setPlayerState(QMediaPlayer::PlaybackState state); // Ustawia stan odtwarzania
+
 	  private:
 		void updateProgressLabel(int32_t progress) const; // Aktualizuje postęp odtwarzania w m_progressLabel
+		void updateVolumeIcon(int32_t volume) const;      // Aktualizuje ikonę głośności w m_audioButton
 
 		QSlider *m_progressSlider; // Slider pozwalający na sterowanie postępem odtwarzania
 		QSlider *m_volumeSlider;   // Slider pozwalający na sterowanie poziomem głośności
@@ -36,6 +40,8 @@ class PlayerControls : public QWidget {
 
 		QHBoxLayout *m_playbackControlsLayout; // Układ elemntów GUI dla kontolek odtwarzania
 
+		QMediaPlayer::PlaybackState m_playerState = QMediaPlayer::StoppedState; // Stan odtwarzania
+
 		int32_t m_progress{}; // Obecny postę odtwarzania
 		int32_t m_duration{}; // Długość obecnie odtwarzanej piosenki
 
@@ -43,7 +49,6 @@ class PlayerControls : public QWidget {
 		bool m_playerMuted = false;
 		bool m_playerShuffled = false;
 		bool m_playerLooped = false;
-		bool m_playerState = false; // true = odpauzowany, false = zapauzowany
 
 		// Flaga zawierająca informaję czy ta piosenka jest w playliscie favorite
 		bool m_playerFavorite = false;
