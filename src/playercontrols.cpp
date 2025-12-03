@@ -1,4 +1,5 @@
 #include "playercontrols.hpp"
+#include "icons.hpp"
 // Qt
 #include <QTime>
 // STD
@@ -21,41 +22,31 @@ PlayerControls::PlayerControls(QWidget *parent)
 
 		constexpr QSize ICON_SIZE = QSize(24, 24);
 
-		const QIcon LOOP_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/loop.svg");
-
-		m_loopButton->setIcon(LOOP_ICON);
+		m_loopButton->setIcon(Icons::LOOP);
 		m_loopButton->setIconSize(ICON_SIZE);
 		m_loopButton->setToolTip(tr("Loop Playback"));
 		m_loopButton->setCheckable(true);
 		m_playbackControlsLayout->addWidget(m_loopButton);
 
-		const QIcon SHUFFLE_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/shuffle.svg");
-
-		m_shuffleButton->setIcon(SHUFFLE_ICON);
+		m_shuffleButton->setIcon(Icons::SHUFFLE);
 		m_shuffleButton->setIconSize(ICON_SIZE);
 		m_shuffleButton->setToolTip(tr("Shuffle"));
 		m_shuffleButton->setCheckable(true);
 		m_playbackControlsLayout->addWidget(m_shuffleButton);
 
-		const QIcon PREVIOUS_SONG_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/seek-backward.svg");
-
-		m_previousButton->setIcon(PREVIOUS_SONG_ICON);
+		m_previousButton->setIcon(Icons::PREVIOUS);
 		m_previousButton->setIconSize(ICON_SIZE);
 		m_previousButton->setToolTip(tr("Previous Song"));
 		m_playbackControlsLayout->addWidget(m_previousButton);
 		connect(m_previousButton, &QToolButton::clicked, this, &PlayerControls::previous);
 
-		const QIcon START_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/play.svg");
-
-		m_playPauseButton->setIcon(START_ICON);
+		m_playPauseButton->setIcon(Icons::PLAY);
 		m_playPauseButton->setIconSize(ICON_SIZE);
 		m_playPauseButton->setToolTip(tr("Start"));
 		m_playbackControlsLayout->addWidget(m_playPauseButton);
 		connect(m_playPauseButton, &QToolButton::clicked, this, &PlayerControls::playPauseClicked);
 
-		const QIcon NEXT_SONG_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/seek-forward.svg");
-
-		m_nextButton->setIcon(NEXT_SONG_ICON);
+		m_nextButton->setIcon(Icons::NEXT);
 		m_nextButton->setIconSize(ICON_SIZE);
 		m_nextButton->setToolTip(tr("Next Song"));
 		m_playbackControlsLayout->addWidget(m_nextButton);
@@ -68,9 +59,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_progressLabel = new QLabel(tr(" 00:00 / 00:00 "), this);
 		m_playbackControlsLayout->addWidget(m_progressLabel);
 
-		const QIcon HIGH_VOLUME_ICON = QIcon::fromTheme(":/qlementine/icons/16/audio/speaker-2.svg");
-
-		m_audioButton->setIcon(HIGH_VOLUME_ICON);
+		m_audioButton->setIcon(Icons::HIGH_VOLUME);
 		m_audioButton->setIconSize(ICON_SIZE);
 		m_audioButton->setToolTip(tr("Volume"));
 		m_playbackControlsLayout->addWidget(m_audioButton);
@@ -83,9 +72,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 
 		connect(m_volumeSlider, &QSlider::valueChanged, this, &PlayerControls::volumeSliderValueChanged);
 
-		const QIcon FAVORITE_ICON = QIcon::fromTheme(":/qlementine/icons/16/shape/heart.svg");
-
-		m_favoriteButton->setIcon(FAVORITE_ICON);
+		m_favoriteButton->setIcon(Icons::FAVORITE);
 		m_favoriteButton->setIconSize(ICON_SIZE);
 		m_favoriteButton->setToolTip(tr("Add Favorite"));
 		m_favoriteButton->setCheckable(true);
@@ -121,15 +108,12 @@ void PlayerControls::updateProgressLabel(int32_t progress) const {
 void PlayerControls::playPauseClicked() {
 		m_playerState = !m_playerState;
 
-		const QIcon START_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/play.svg");
-		const QIcon PAUSE_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/pause.svg");
-
 		if (m_playerState) {
 				emit play();
-				m_playPauseButton->setIcon(PAUSE_ICON);
+				m_playPauseButton->setIcon(Icons::PAUSE);
 		} else {
 				emit pause();
-				m_playPauseButton->setIcon(START_ICON);
+				m_playPauseButton->setIcon(Icons::PLAY);
 		}
 }
 
@@ -170,13 +154,10 @@ void PlayerControls::setMuted(bool muted) {
 		if (muted != m_playerMuted) {
 				m_playerMuted = muted;
 
-				const QIcon HIGH_VOLUME_ICON = QIcon::fromTheme(":/qlementine/icons/16/audio/speaker-2.svg");
-				const QIcon MUTE_ICON = QIcon::fromTheme(":/qlementine/icons/16/audio/speaker-mute.svg");
-
 				if (muted) {
-						m_audioButton->setIcon(MUTE_ICON);
+						m_audioButton->setIcon(Icons::MUTE);
 				} else {
-						m_audioButton->setIcon(HIGH_VOLUME_ICON);
+						m_audioButton->setIcon(Icons::HIGH_VOLUME);
 				}
 		}
 }
@@ -184,18 +165,12 @@ void PlayerControls::setMuted(bool muted) {
 void PlayerControls::setShuffle(bool shuffle) {
 		if (shuffle != m_playerShuffled) {
 				m_playerShuffled = shuffle;
-
-				const QIcon PLAYLIST_SHUFFLE_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/shuffle.svg");
-				m_shuffleButton->setIcon(PLAYLIST_SHUFFLE_ICON);
 		}
 }
 
 void PlayerControls::setLoop(bool loop) {
 		if (loop != m_playerLooped) {
 				m_playerLooped = loop;
-
-				const QIcon PLAYLIST_LOOP_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/loop.svg");
-				m_loopButton->setIcon(PLAYLIST_LOOP_ICON);
 		}
 }
 
@@ -203,12 +178,10 @@ void PlayerControls::setFavorite(bool favorite) {
 		if (favorite != m_playerFavorite) {
 				m_playerFavorite = favorite;
 
-				const QIcon FAVORITE_ICON = QIcon::fromTheme(":/qlementine/icons/16/shape/heart-filled.svg");
-				const QIcon NO_FAVORITE_ICON = QIcon::fromTheme(":/qlementine/icons/16/shape/heart.svg");
 				if (favorite) {
-						m_favoriteButton->setIcon(FAVORITE_ICON);
+						m_favoriteButton->setIcon(Icons::FAVORITE);
 				} else {
-						m_favoriteButton->setIcon(NO_FAVORITE_ICON);
+						m_favoriteButton->setIcon(Icons::NO_FAVORITE);
 				}
 		}
 }

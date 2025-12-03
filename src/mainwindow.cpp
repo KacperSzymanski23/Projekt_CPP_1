@@ -1,4 +1,5 @@
 #include "mainwindow.hpp"
+#include "icons.hpp"
 // Qt
 #include <QDirListing>
 #include <QMediaMetaData>
@@ -141,32 +142,27 @@ void MainWindow::setupSideBar() {
 
 		m_sideBarLayout->setSpacing(0);
 
-		const QIcon LIBRARY_ICON = QIcon::fromTheme(":/qlementine/icons/24/hardware/tape.svg");
-		QAction *showLibraryAct = new QAction(LIBRARY_ICON, tr("&Library"), this);
+		QAction *showLibraryAct = new QAction(Icons::LIBRARY, tr("&Library"), this);
 		showLibraryAct->setStatusTip(tr("Library"));
 		connect(showLibraryAct, &QAction::triggered, this, &MainWindow::showLibrary);
 		m_sideToolBar->addAction(showLibraryAct);
 
-		const QIcon PLAYLIST_ICON = QIcon::fromTheme(":/qlementine/icons/16/media/playlist.svg");
-		QAction *showPlaylistsAct = new QAction(PLAYLIST_ICON, tr("&Playlists"), this);
+		QAction *showPlaylistsAct = new QAction(Icons::PLAYLIST, tr("&Playlists"), this);
 		showPlaylistsAct->setStatusTip(tr("Playlists"));
 		connect(showPlaylistsAct, &QAction::triggered, this, &MainWindow::showPlaylists);
 		m_sideToolBar->addAction(showPlaylistsAct);
 
-		const QIcon FAVORITE_ICON = QIcon::fromTheme(":/qlementine/icons/16/shape/heart-filled.svg");
-		QAction *showFavoriteAct = new QAction(FAVORITE_ICON, tr("&Favorite"), this);
+		QAction *showFavoriteAct = new QAction(Icons::FAVORITE, tr("&Favorite"), this);
 		showFavoriteAct->setStatusTip(tr("Favorite"));
 		connect(showFavoriteAct, &QAction::triggered, this, &MainWindow::showFavorite);
 		m_sideToolBar->addAction(showFavoriteAct);
 
-		const QIcon AUTHORS_ICON = QIcon::fromTheme(":/qlementine/icons/16/misc/user.svg");
-		QAction *showAuthorsAct = new QAction(AUTHORS_ICON, tr("&Authors"), this);
+		QAction *showAuthorsAct = new QAction(Icons::AUTHORS, tr("&Authors"), this);
 		showAuthorsAct->setStatusTip(tr("Authors"));
 		connect(showAuthorsAct, &QAction::triggered, this, &MainWindow::showAuthors);
 		m_sideToolBar->addAction(showAuthorsAct);
 
-		const QIcon ALBUMS_ICON = QIcon::fromTheme(":/qlementine/icons/16/instrument/accordion.svg");
-		QAction *showAlbumsAct = new QAction(ALBUMS_ICON, tr("&Albums"), this);
+		QAction *showAlbumsAct = new QAction(Icons::ALBUMS, tr("&Albums"), this);
 		showAlbumsAct->setStatusTip(tr("Albums"));
 		connect(showAlbumsAct, &QAction::triggered, this, &MainWindow::showAlbums);
 		m_sideToolBar->addAction(showAlbumsAct);
