@@ -26,9 +26,9 @@ class MainWindow : public QMainWindow {
 		MainWindow();
 
 	  private:
-		void setupSideBar(); // Tworzy pasek narzędzi po lewej stonie
-		void setupPlayerModel();
-		void scanLibrary(); // Skanuje wskananą ścieżkę w poszukiwaniu plików audio
+		void setupSideBar();     // Tworzy pasek narzędzi po lewej stonie
+		void setupPlayerModel(); // Tworzy model elemetów dla m_playerMainTreeView
+		void scanLibrary();      // Skanuje wskananą ścieżkę w poszukiwaniu plików audio
 
 		static QPixmap getCoverArt(const QString &path, const QString &extension); // Ekstraktuje okładkę albumu z pliku
 
@@ -64,7 +64,7 @@ class MainWindow : public QMainWindow {
 		void showLibrary();   // Wyświetla wszystkie ścieżki dźwiękowe w m_middleTreeView
 		void showPlaylists(); // Wyświetla wszystkie playlisty w m_middleTreeView
 		void showFavorite();  // Wyświetla wszystkie ścieżki dźwiękowe z playlisty fovorite w m_middleTreeView
-		void showAuthors();   // yświetla wszystkich autorów albumów w m_middleTreeView
+		void showAuthors();   // Wyświetla wszystkich autorów albumów w m_middleTreeView
 		void showAlbums();    // Wyświetla wszystkie albumy w m_middleTreeView
 
 		void closeEvent(QCloseEvent *event) override; // Funkcja slot obsługująca zamykanie okna

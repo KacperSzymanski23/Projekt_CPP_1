@@ -12,7 +12,6 @@ class PlayerControls : public QWidget {
 
 	  public:
 		explicit PlayerControls(QWidget *parent = nullptr);
-		~PlayerControls() override;
 
 		[[nodiscard]] float getVolume() const; // Pobiera obecny poziom głośności
 		[[nodiscard]] bool isMuted() const;    // Zwraca wartość stanu wydziszenia odtwarzacza

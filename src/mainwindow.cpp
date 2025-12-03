@@ -105,7 +105,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::readWindowGeometrySettings() {
-		QSettings qsettings;
+		QSettings qsettings{};
 
 		qsettings.beginGroup("Geometry");
 
@@ -173,6 +173,50 @@ void MainWindow::setupSideBar() {
 
 		m_sideToolBar->setOrientation(Qt::Vertical);
 		m_sideBarLayout->addWidget(m_sideToolBar);
+}
+
+void MainWindow::scanLibrary() {
+		m_tracks.clear();
+
+		QDir library{QFileDialog::getExistingDirectory(this, "Wybierz lokalizację biblioteki muzycznej", QDir::homePath())};
+
+		if (!library.exists()) {
+				return;
+		}
+
+		Track track{};
+
+		constexpr int32_t MIB = 1024 * 1024;
+		constexpr auto FLAGS = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::FilesOnly;
+
+		for (const auto &file : QDirListing(library.path(), AUDIO_FILE_FILTER, FLAGS)) {
+				TagLib::FileRef fileRef{file.filePath().toUtf8().data()};
+
+				if (fileRef.tag() != nullptr) {
+						const uint32_t NUMBER{fileRef.tag()->track()};
+						const TagLib::String TITLE{fileRef.tag()->title().to8Bit(true)};
+						const TagLib::String ALBUM{fileRef.tag()->album().to8Bit(true)};
+						const TagLib::String ARTIST{fileRef.tag()->artist().to8Bit(true)};
+						const int32_t DURATION_IN_SECONDS{fileRef.audioProperties()->lengthInSeconds()};
+						const uint32_t YEAR{fileRef.tag()->year()};
+						const int32_t BITRATE{fileRef.audioProperties()->bitrate()};
+						const QPixmap COVER_ART{getCoverArt(file.filePath(), file.suffix())};
+						const QTime DURATION{0, DURATION_IN_SECONDS / 60, DURATION_IN_SECONDS % 60};
+
+						track.number = NUMBER;
+						track.title = TITLE.toCString();
+						track.album = ALBUM.toCString();
+						track.artist = ARTIST.toCString();
+						track.duration = DURATION.toString("mm:ss");
+						track.year = YEAR;
+						track.bitrate = QString::number(BITRATE) + " kbps";
+						track.fileSize = QString::number(file.size() / MIB) + " MiB";
+						track.cover = COVER_ART;
+						track.path = file.filePath();
+
+						m_tracks.emplace_back(track);
+				}
+		}
 }
 
 QPixmap MainWindow::getCoverArt(const QString &path, const QString &extension) {
@@ -248,46 +292,6 @@ QPixmap MainWindow::getCoverArt(const QString &path, const QString &extension) {
 		}
 
 		return {":/Placeholders/Placeholder.svg"};
-}
-void MainWindow::scanLibrary() {
-		m_tracks.clear();
-
-		QDir testLibrary{"/home/kacper/Music"};
-
-		Track track{};
-
-		constexpr int32_t MIB = 1024 * 1024;
-		constexpr auto FLAGS = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::FilesOnly;
-
-		for (const auto &file : QDirListing(testLibrary.path(), AUDIO_FILE_FILTER, FLAGS)) {
-				TagLib::FileRef fileRef{file.filePath().toUtf8().data()};
-
-				if (fileRef.tag() != nullptr) {
-						const uint32_t NUMBER{fileRef.tag()->track()};
-						TagLib::String title{fileRef.tag()->title().to8Bit(true)};
-						TagLib::String album{fileRef.tag()->album().to8Bit(true)};
-						TagLib::String artist{fileRef.tag()->artist().to8Bit(true)};
-						const int32_t DURATION_IN_SECONDS{fileRef.audioProperties()->lengthInSeconds()};
-						const uint32_t YEAR{fileRef.tag()->year()};
-						const int32_t BITRATE{fileRef.audioProperties()->bitrate()};
-						const QPixmap COVER_ART{getCoverArt(file.filePath(), file.suffix())};
-						const QTime DURATION{0, DURATION_IN_SECONDS / 60, DURATION_IN_SECONDS % 60};
-						m_coverImage = COVER_ART;
-
-						track.number = NUMBER;
-						track.title = title.toCString();
-						track.album = album.toCString();
-						track.artist = artist.toCString();
-						track.duration = DURATION.toString("mm:ss");
-						track.year = YEAR;
-						track.bitrate = QString::number(BITRATE) + " kbps";
-						track.fileSize = QString::number(file.size() / MIB) + " MiB";
-						track.cover = COVER_ART;
-						track.path = file.filePath();
-
-						m_tracks.push_back(track);
-				}
-		}
 }
 
 void MainWindow::rowClicked(const QModelIndex &current) {

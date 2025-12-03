@@ -17,5 +17,3 @@ Track::Track(
 	, cover(std::move(cover))
 	, path(std::move(path)) {
 }
-
-Track::~Track() = default;

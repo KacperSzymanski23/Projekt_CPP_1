@@ -65,7 +65,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_playbackControlsLayout->addWidget(m_progressSlider);
 		connect(m_progressSlider, &QSlider::sliderMoved, this, &PlayerControls::progressSliderMoved);
 
-		m_progressLabel = new QLabel(tr(" 00:00/00:00 "), this);
+		m_progressLabel = new QLabel(tr(" 00:00 / 00:00 "), this);
 		m_playbackControlsLayout->addWidget(m_progressLabel);
 
 		const QIcon HIGH_VOLUME_ICON = QIcon::fromTheme(":/qlementine/icons/16/audio/speaker-2.svg");
@@ -96,8 +96,6 @@ PlayerControls::PlayerControls(QWidget *parent)
 		this->setLayout(m_playbackControlsLayout);
 }
 
-PlayerControls::~PlayerControls() = default;
-
 float PlayerControls::getVolume() const {
 		return static_cast<float>(m_volumeSlider->value()) / 100.0F;
 }
@@ -110,9 +108,9 @@ void PlayerControls::updateProgressLabel(int32_t progress) const {
 		const QTime PROGRESS_TIME((progress / 3600) % 60, (progress / 60) % 60, progress % 60);
 		const QTime DURATION_TIME((m_duration / 3600) % 60, (m_duration / 60) % 60, m_duration % 60);
 
-		QString timeFormat{"mm:ss"};
+		QString timeFormat{" mm:ss "};
 		if (m_duration > 3600) {
-				timeFormat = "hh:mm:ss";
+				timeFormat = " hh:mm:ss ";
 		}
 
 		const QString PROGRESS_LABEL_TEXT = PROGRESS_TIME.toString(timeFormat) + "/" + DURATION_TIME.toString(timeFormat);
