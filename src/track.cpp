@@ -4,7 +4,7 @@
 
 Track::Track(
 	const uint32_t NUMBER, QString title, QString album, QString artist, QString duration, const uint32_t YEAR, QString bitrate, QString fileSize,
-	QPixmap cover, QString path
+	QString coverArtPath, QString path
 )
 	: number(NUMBER)
 	, title(std::move(title))
@@ -14,6 +14,6 @@ Track::Track(
 	, year(YEAR)
 	, bitrate(std::move(bitrate))
 	, fileSize(std::move(fileSize))
-	, cover(std::move(cover))
+	, coverArtPath(std::move(coverArtPath))
 	, path(std::move(path)) {
 }

@@ -30,7 +30,7 @@ class MainWindow : public QMainWindow {
 		void setupPlayerModel(); // Tworzy model elemetów dla m_playerMainTreeView
 		void scanLibrary();      // Skanuje wskananą ścieżkę w poszukiwaniu plików audio
 
-		static QPixmap getCoverArt(const QString &path, const QString &extension); // Ekstraktuje okładkę albumu z pliku
+		static QString findCoverArt(const QFileInfo &fileInfo); // Szuka okładki albumu w folderze
 
 		QWidget *m_centralWidget; // Centraly widget okna
 		QWidget *m_sideBarWidget; // Widget dla bocznego paska narzędzi

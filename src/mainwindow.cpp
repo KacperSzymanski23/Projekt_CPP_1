@@ -5,15 +5,7 @@
 #include <QMediaMetaData>
 #include <QScreen>
 // TagLib
-#include <taglib/attachedpictureframe.h>
 #include <taglib/fileref.h>
-#include <taglib/flacfile.h>
-#include <taglib/id3v2tag.h>
-#include <taglib/mp4coverart.h>
-#include <taglib/mp4file.h>
-#include <taglib/mp4item.h>
-#include <taglib/mp4tag.h>
-#include <taglib/mpegfile.h>
 
 MainWindow::MainWindow()
 	: m_centralWidget(new QWidget(this))
@@ -187,12 +179,13 @@ void MainWindow::scanLibrary() {
 
 		Track track{};
 
-		constexpr int32_t MIB = 1024 * 1024;
+		constexpr float MIB = 1024.0F * 1024.0F;
 		constexpr auto FLAGS = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::FilesOnly;
 		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"}; // Wspierane typy plików
 
 		for (const auto &file : QDirListing(library.path(), AUDIO_FILE_FILTER, FLAGS)) {
 				TagLib::FileRef fileRef{file.filePath().toUtf8().data()};
+				QFileInfo fileInfo(file.filePath());
 
 				if (fileRef.tag() != nullptr) {
 						const uint32_t NUMBER{fileRef.tag()->track()};
@@ -202,8 +195,9 @@ void MainWindow::scanLibrary() {
 						const int32_t DURATION_IN_SECONDS{fileRef.audioProperties()->lengthInSeconds()};
 						const uint32_t YEAR{fileRef.tag()->year()};
 						const int32_t BITRATE{fileRef.audioProperties()->bitrate()};
-						const QPixmap COVER_ART{getCoverArt(file.filePath(), file.suffix())};
+						const QString COVER_ART_PATH{findCoverArt(fileInfo)};
 						const QTime DURATION{0, DURATION_IN_SECONDS / 60, DURATION_IN_SECONDS % 60};
+						const float FILE_SIZE = static_cast<float>(file.size()) / MIB;
 
 						track.number = NUMBER;
 						track.title = TITLE.toCString();
@@ -212,8 +206,8 @@ void MainWindow::scanLibrary() {
 						track.duration = DURATION.toString("mm:ss");
 						track.year = YEAR;
 						track.bitrate = QString::number(BITRATE) + " kbps";
-						track.fileSize = QString::number(file.size() / MIB) + " MiB";
-						track.cover = COVER_ART;
+						track.fileSize = QString::number(FILE_SIZE, 'f', 1) + " MiB";
+						track.coverArtPath = COVER_ART_PATH;
 						track.path = file.filePath();
 
 						m_tracks.emplace_back(track);
@@ -221,87 +215,26 @@ void MainWindow::scanLibrary() {
 		}
 }
 
-QPixmap MainWindow::getCoverArt(const QString &path, const QString &extension) {
-		QPixmap img{};
-
-		TagLib::FileName fileName{path.toUtf8().data()};
-
-		if (extension == "mp3") {
-				TagLib::MPEG::File file{fileName};
-				TagLib::ID3v2::Tag *tag = file.ID3v2Tag(true);
-
-				if (tag == nullptr) {
-						return {":/Placeholders/Placeholder.svg"};
-				}
-
-				TagLib::ID3v2::FrameList frames = tag->frameList("APIC");
-
-				if (frames.isEmpty()) {
-						return {":/Placeholders/Placeholder.svg"};
-				}
-
-				auto *apic = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame *>(frames.front());
-
-				QByteArray data(reinterpret_cast<const char *>(apic->picture().data()), apic->picture().size());
-				img.loadFromData(reinterpret_cast<const uchar *>(data.constData()), data.size());
-
-				return img;
-		}
-		if (extension == "mp4" || extension == "m4a") {
-				TagLib::MP4::File file{fileName};
-				TagLib::MP4::Tag *tag = file.tag();
-
-				if (tag == nullptr) {
-						return {":/Placeholders/Placeholder.svg"};
-				}
-
-				TagLib::MP4::ItemMap itemsListMap = tag->itemMap();
-				TagLib::MP4::Item coverItem = itemsListMap["covr"];
-
-				TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
-				if (coverArtList.isEmpty()) {
-						return {":/Placeholders/Placeholder.svg"};
-				}
-				const TagLib::MP4::CoverArt &coverArt = coverArtList.front();
-
-				QByteArray data(reinterpret_cast<const char *>(coverArt.data().data()), coverArt.data().size());
-
-				img.loadFromData(reinterpret_cast<const uchar *>(data.constData()), data.size());
-
-				return img;
-		}
-		if (extension == "flac") {
-				TagLib::FLAC::File file{fileName};
-				TagLib::ID3v2::Tag *tag = file.ID3v2Tag(true);
-
-				if (tag == nullptr) {
-						return {":/Placeholders/Placeholder.svg"};
-				}
-
-				TagLib::ID3v2::FrameList frames = tag->frameList("APIC");
-
-				if (frames.isEmpty()) {
-						return {":/Placeholders/Placeholder.svg"};
-				}
-
-				auto *apic = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame *>(frames.front());
-
-				QByteArray data(reinterpret_cast<const char *>(apic->picture().data()), apic->picture().size());
-
-				img.loadFromData(reinterpret_cast<const uchar *>(data.constData()), data.size());
-
-				return img;
-		}
-
-		return {":/Placeholders/Placeholder.svg"};
-}
-
 void MainWindow::rowClicked(const QModelIndex &current) {
 		QVariant data = TreeModel::dataAtColumn(current, Qt::DisplayRole, 9);
 
-		m_coverImage = data.value<QPixmap>();
+		m_coverImage = data.value<QString>();
 		m_coverLabel->setPixmap(m_coverImage);
 
 		data = TreeModel::dataAtColumn(current, Qt::DisplayRole, 8);
 		m_audioPlayer->setSource(QUrl::fromLocalFile(data.value<QString>()));
+}
+
+QString MainWindow::findCoverArt(const QFileInfo &fileInfo) {
+		constexpr auto FLAGS = QDirListing::IteratorFlag::Default;
+
+		const QStringList IMAGE_FILE_FILTER = {"*.jpg", "*.jpeg", "*.png", "*.webp"}; // Wspierane typy plików dla grafiki okładki
+
+		for (const auto &file : QDirListing(fileInfo.absolutePath(), IMAGE_FILE_FILTER, FLAGS)) {
+				if (file.baseName() == "cover") {
+						return file.absoluteFilePath();
+				}
+		}
+
+		return nullptr;
 }

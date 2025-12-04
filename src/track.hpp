@@ -8,7 +8,7 @@ class Track {
 	  public:
 		explicit Track(
 			const uint32_t NUMBER = {}, QString title = {}, QString album = {}, QString artist = {}, QString duration = {}, const uint32_t YEAR = {},
-			QString bitrate = {}, QString fileSize = {}, QPixmap cover = {}, QString path = {}
+			QString bitrate = {}, QString fileSize = {}, QString coverArtPath = {}, QString path = {}
 		);
 
 		// Metadane z pliku audio
@@ -20,7 +20,7 @@ class Track {
 		uint32_t year;
 		QString bitrate;
 		QString fileSize;
-		QPixmap cover;
+		QString coverArtPath;
 
 		QString path; // Ścierzka do pliku audio
 };

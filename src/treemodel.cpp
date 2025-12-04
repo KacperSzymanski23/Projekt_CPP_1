@@ -128,7 +128,7 @@ void TreeModel::setupModelData(const std::vector<Track> &tracks, TreeItem *paren
 				columnData << line.bitrate;
 				columnData << line.fileSize;
 				columnData << line.path;
-				columnData << line.cover;
+				columnData << line.coverArtPath;
 
 				if (state.constLast().indentation < POSITION_ZERO) {
 						TreeItem *lastParent = state.constLast().parent;
