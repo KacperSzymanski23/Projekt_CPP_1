@@ -2,8 +2,11 @@
 #define MAINWINDOW_HPP
 
 #include "playercontrols.hpp"
+#include "settings.hpp"
+#include "settingsdialog.hpp"
 #include "track.hpp"
 #include "treemodel.hpp"
+
 // Qt
 #include <QAction>
 #include <QAudioOutput>
@@ -16,6 +19,7 @@
 #include <QMediaPlayer>
 #include <QSettings>
 #include <QToolBar>
+#include <QToolButton>
 #include <QTreeView>
 #include <QVBoxLayout>
 
@@ -35,7 +39,12 @@ class MainWindow : public QMainWindow {
 		QWidget *m_centralWidget; // Centraly widget okna
 		QWidget *m_sideBarWidget; // Widget dla bocznego paska narzędzi
 
+		QToolButton *m_settingsButton; // Przycisk otwierający okno ustawień
+
 		PlayerControls *m_playbackControlsWidget; // Widget umożliwiający sterowanei odtwarzaniem
+
+		SettingsDialog *m_settingsDialog; // Okno ustawień
+		Settings m_settings;              // Ustawienia
 
 		QLabel *m_coverLabel; // Etykieta wyświetlająca okładkę dla każdej ścieżki
 
