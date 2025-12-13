@@ -10,7 +10,10 @@
 MainWindow::MainWindow()
 	: m_centralWidget(new QWidget(this))
 	, m_sideBarWidget(new QWidget(this))
+	, m_settingsButton(new QToolButton(this))
 	, m_playbackControlsWidget(new PlayerControls(this))
+	, m_settingsDialog(new SettingsDialog(this))
+	, m_settings(Settings("config.cfg"))
 	, m_coverLabel(new QLabel(this))
 	, m_middleTreeView(new QTreeView(this))
 	, m_playerMainTreeView(new QTreeView(this))
@@ -44,6 +47,16 @@ MainWindow::MainWindow()
 				m_playbackControlsWidget->setPlayerState(arg);
 		});
 
+		m_settingsButton->setIcon(Icons::SETTINGS);
+		m_settingsButton->setIconSize(QSize(20, 20));
+		m_settingsButton->setStatusTip(tr("Settings"));
+
+		connect(m_settingsButton, &QToolButton::clicked, m_settingsDialog, [this]() {
+				m_settingsDialog->show();
+				m_settingsDialog->raise();
+				m_settingsDialog->activateWindow();
+		});
+
 		scanLibrary();
 
 		setupSideBar();
@@ -59,7 +72,8 @@ MainWindow::MainWindow()
 		m_coverLabel->setPixmap(m_coverImage);
 		m_coverLabel->setScaledContents(true);
 
-		m_mainGridLayout->addWidget(m_playbackControlsWidget, 0, 0, 1, 33);
+		m_mainGridLayout->addWidget(m_settingsButton, 0, 0, 1, 1);
+		m_mainGridLayout->addWidget(m_playbackControlsWidget, 0, 1, 1, 32);
 		m_mainGridLayout->addWidget(m_sideBarWidget, 1, 0, 13, 1);
 		m_mainGridLayout->addWidget(m_middleTreeView, 1, 1, 9, 5);
 		m_mainGridLayout->addWidget(m_coverLabel, 10, 1, 4, 5);
@@ -171,13 +185,11 @@ void MainWindow::setupSideBar() {
 void MainWindow::scanLibrary() {
 		m_tracks.clear();
 
-		QDir library{QFileDialog::getExistingDirectory(this, "Wybierz lokalizację biblioteki muzycznej", QDir::homePath())};
+		QDir library{QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"))};
 
 		if (!library.exists()) {
 				return;
 		}
-
-		Track track{};
 
 		constexpr float MIB = 1024.0F * 1024.0F;
 		constexpr auto FLAGS = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::FilesOnly;
@@ -186,6 +198,7 @@ void MainWindow::scanLibrary() {
 		for (const auto &file : QDirListing(library.path(), AUDIO_FILE_FILTER, FLAGS)) {
 				TagLib::FileRef fileRef{file.filePath().toUtf8().data()};
 				QFileInfo fileInfo(file.filePath());
+				Track track{};
 
 				extractMetadata(fileInfo.absoluteFilePath());
 		}
