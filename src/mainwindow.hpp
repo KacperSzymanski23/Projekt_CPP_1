@@ -69,6 +69,7 @@ class MainWindow : public QMainWindow {
 		void readWindowGeometrySettings();            // Funkcja slot zapisująca stan okna
 
 		void rowClicked(const QModelIndex &current); // Pobiera dane z piosenki z kliniętego przez użytkownika wiersza
+		void extractMetadata(const QString &filePath); // Funkcja pomocnicza do ekstrakcji danych
 };
 
 #endif /* MAINWINDOW_HPP */
