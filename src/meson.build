@@ -7,6 +7,7 @@ src = files(
   'track.cpp',
   'treeitem.cpp',
   'treemodel.cpp',
+  'sidebar.cpp'
 )
 
 moc_headers = files(
@@ -14,6 +15,7 @@ moc_headers = files(
   'playercontrols.hpp',
   'settingsdialog.hpp',
   'treemodel.hpp',
+  'sidebar.h'
 )
 
 qt_moc = qt6.compile_moc(headers: moc_headers, dependencies: qt_dep)
