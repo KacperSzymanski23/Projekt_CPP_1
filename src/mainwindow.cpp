@@ -9,15 +9,15 @@
 
 MainWindow::MainWindow()
 	: m_centralWidget(new QWidget(this))
-	, SideBar(new QWidget(this))
-	, m_settingsButton(new QToolButton(this))
+	, m_sideBarWidget(new SideBar(this))
+//	, m_settingsButton(new QToolButton(this))
 	, m_playbackControlsWidget(new PlayerControls(this))
-	, m_settingsDialog(new SettingsDialog(this))
+//	, m_settingsDialog(new SettingsDialog(this))
 	, m_settings(Settings("config.cfg"))
 	, m_coverLabel(new QLabel(this))
 	, m_middleTreeView(new QTreeView(this))
 	, m_playerMainTreeView(new QTreeView(this))
-	, m_sideBarLayout(new QVBoxLayout(SideBar))
+
 	, m_mainGridLayout(new QGridLayout(this))
 	, m_audioPlayer(new QMediaPlayer(this))
 	, m_audioOutput(new QAudioOutput(this)) {
@@ -47,19 +47,8 @@ MainWindow::MainWindow()
 				m_playbackControlsWidget->setPlayerState(arg);
 		});
 
-		m_settingsButton->setIcon(Icons::SETTINGS);
-		m_settingsButton->setIconSize(QSize(20, 20));
-		m_settingsButton->setStatusTip(tr("Settings"));
-
-		connect(m_settingsButton, &QToolButton::clicked, m_settingsDialog, [this]() {
-				m_settingsDialog->show();
-				m_settingsDialog->raise();
-				m_settingsDialog->activateWindow();
-		});
-
 		scanLibrary();
 
-		setupSideBar();
 		setupPlayerModel();
 		showLibrary();
 
@@ -72,9 +61,9 @@ MainWindow::MainWindow()
 		m_coverLabel->setPixmap(m_coverImage);
 		m_coverLabel->setScaledContents(true);
 
-		m_mainGridLayout->addWidget(m_settingsButton, 0, 0, 1, 1);
+//		m_mainGridLayout->addWidget(m_settingsButton, 0, 0, 1, 1);
 		m_mainGridLayout->addWidget(m_playbackControlsWidget, 0, 1, 1, 32);
-		m_mainGridLayout->addWidget(SideBar, 1, 0, 13, 1);
+		m_mainGridLayout->addWidget(m_sideBarWidget, 1, 0, 13, 1);
 		m_mainGridLayout->addWidget(m_middleTreeView, 1, 1, 9, 5);
 		m_mainGridLayout->addWidget(m_coverLabel, 10, 1, 4, 5);
 		m_mainGridLayout->addWidget(m_playerMainTreeView, 1, 6, 13, 27);
@@ -148,39 +137,6 @@ void MainWindow::showAlbums() {
 void MainWindow::showAuthors() {
 }
 
-void MainWindow::setupSideBar() {
-		m_sideToolBar = addToolBar(tr("Side Tool Bar"));
-
-		m_sideBarLayout->setSpacing(0);
-
-		QAction *showLibraryAct = new QAction(Icons::LIBRARY, tr("&Library"), this);
-		showLibraryAct->setStatusTip(tr("Library"));
-		connect(showLibraryAct, &QAction::triggered, this, &MainWindow::showLibrary);
-		m_sideToolBar->addAction(showLibraryAct);
-
-		QAction *showPlaylistsAct = new QAction(Icons::PLAYLIST, tr("&Playlists"), this);
-		showPlaylistsAct->setStatusTip(tr("Playlists"));
-		connect(showPlaylistsAct, &QAction::triggered, this, &MainWindow::showPlaylists);
-		m_sideToolBar->addAction(showPlaylistsAct);
-
-		QAction *showFavoriteAct = new QAction(Icons::FAVORITE, tr("&Favorite"), this);
-		showFavoriteAct->setStatusTip(tr("Favorite"));
-		connect(showFavoriteAct, &QAction::triggered, this, &MainWindow::showFavorite);
-		m_sideToolBar->addAction(showFavoriteAct);
-
-		QAction *showAuthorsAct = new QAction(Icons::AUTHORS, tr("&Authors"), this);
-		showAuthorsAct->setStatusTip(tr("Authors"));
-		connect(showAuthorsAct, &QAction::triggered, this, &MainWindow::showAuthors);
-		m_sideToolBar->addAction(showAuthorsAct);
-
-		QAction *showAlbumsAct = new QAction(Icons::ALBUMS, tr("&Albums"), this);
-		showAlbumsAct->setStatusTip(tr("Albums"));
-		connect(showAlbumsAct, &QAction::triggered, this, &MainWindow::showAlbums);
-		m_sideToolBar->addAction(showAlbumsAct);
-
-		m_sideToolBar->setOrientation(Qt::Vertical);
-		m_sideBarLayout->addWidget(m_sideToolBar);
-}
 
 void MainWindow::scanLibrary() {
 		m_tracks.clear();

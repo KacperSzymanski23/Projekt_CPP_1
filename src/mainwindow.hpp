@@ -6,6 +6,7 @@
 #include "settingsdialog.hpp"
 #include "track.hpp"
 #include "treemodel.hpp"
+#include "sidebar.h"
 
 // Qt
 #include <QAction>
@@ -30,20 +31,18 @@ class MainWindow : public QMainWindow {
 		MainWindow();
 
 	  private:
-		void setupSideBar();     // Tworzy pasek narzędzi po lewej stonie
 		void setupPlayerModel(); // Tworzy model elemetów dla m_playerMainTreeView
 		void scanLibrary();      // Skanuje wskananą ścieżkę w poszukiwaniu plików audio
 
 		static QString findCoverArt(const QFileInfo &fileInfo); // Szuka okładki albumu w folderze
 
 		QWidget *m_centralWidget; // Centraly widget okna
-		QWidget *SideBar; // Widget dla bocznego paska narzędzi
+		SideBar *m_sideBarWidget; // Widget dla bocznego paska narzędzi
 
-		QToolButton *m_settingsButton; // Przycisk otwierający okno ustawień
+
 
 		PlayerControls *m_playbackControlsWidget; // Widget umożliwiający sterowanei odtwarzaniem
 
-		SettingsDialog *m_settingsDialog; // Okno ustawień
 		Settings m_settings;              // Ustawienia
 
 		QLabel *m_coverLabel; // Etykieta wyświetlająca okładkę dla każdej ścieżki
