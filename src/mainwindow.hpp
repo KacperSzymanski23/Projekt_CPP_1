@@ -37,7 +37,7 @@ class MainWindow : public QMainWindow {
 		static QString findCoverArt(const QFileInfo &fileInfo); // Szuka okładki albumu w folderze
 
 		QWidget *m_centralWidget; // Centraly widget okna
-		QWidget *m_sideBarWidget; // Widget dla bocznego paska narzędzi
+		QWidget *SideBar; // Widget dla bocznego paska narzędzi
 
 		QToolButton *m_settingsButton; // Przycisk otwierający okno ustawień
 

@@ -9,7 +9,7 @@
 
 MainWindow::MainWindow()
 	: m_centralWidget(new QWidget(this))
-	, m_sideBarWidget(new QWidget(this))
+	, SideBar(new QWidget(this))
 	, m_settingsButton(new QToolButton(this))
 	, m_playbackControlsWidget(new PlayerControls(this))
 	, m_settingsDialog(new SettingsDialog(this))
@@ -17,7 +17,7 @@ MainWindow::MainWindow()
 	, m_coverLabel(new QLabel(this))
 	, m_middleTreeView(new QTreeView(this))
 	, m_playerMainTreeView(new QTreeView(this))
-	, m_sideBarLayout(new QVBoxLayout(m_sideBarWidget))
+	, m_sideBarLayout(new QVBoxLayout(SideBar))
 	, m_mainGridLayout(new QGridLayout(this))
 	, m_audioPlayer(new QMediaPlayer(this))
 	, m_audioOutput(new QAudioOutput(this)) {
@@ -74,7 +74,7 @@ MainWindow::MainWindow()
 
 		m_mainGridLayout->addWidget(m_settingsButton, 0, 0, 1, 1);
 		m_mainGridLayout->addWidget(m_playbackControlsWidget, 0, 1, 1, 32);
-		m_mainGridLayout->addWidget(m_sideBarWidget, 1, 0, 13, 1);
+		m_mainGridLayout->addWidget(SideBar, 1, 0, 13, 1);
 		m_mainGridLayout->addWidget(m_middleTreeView, 1, 1, 9, 5);
 		m_mainGridLayout->addWidget(m_coverLabel, 10, 1, 4, 5);
 		m_mainGridLayout->addWidget(m_playerMainTreeView, 1, 6, 13, 27);
