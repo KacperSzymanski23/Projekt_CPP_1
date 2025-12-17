@@ -32,6 +32,9 @@ class SettingsDialog : public QDialog {
 
 	  private slots:
 		void applySettings();
+
+	signals:
+	void settingsChanged();
 };
 
 #endif /* SETTINGSDIALOG_HPP */

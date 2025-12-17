@@ -62,4 +62,6 @@ void SettingsDialog::applySettings() {
 		m_settings.saveSettings();
 
 		m_applyButton->setDisabled(true);
+
+		emit settingsChanged();
 }
