@@ -23,6 +23,10 @@
 #include <QToolButton>
 #include <QTreeView>
 #include <QVBoxLayout>
+#include <QStandardItemModel>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QMenu>
 
 class MainWindow : public QMainWindow {
 		Q_OBJECT
@@ -66,6 +70,13 @@ class MainWindow : public QMainWindow {
 
 		std::vector<Track> m_tracks; // std::vector zawierający metadane i ścieżki plików audio
 
+		QStandardItemModel *m_middleModel; // Model dla środkowego panelu (listy playlist)
+
+		enum class ViewMode { Library, Playlists, None };
+		ViewMode m_currentViewMode = ViewMode::None;
+		QString getPlaylistsDir(); // Pomocnicza funkcja do folderu
+		void loadPlaylistContent(const QString &playlistName); // Wczytuje zawartość playlisty
+
 	  private slots:
 		void showLibrary();   // Wyświetla wszystkie ścieżki dźwiękowe w m_middleTreeView
 		void showPlaylists(); // Wyświetla wszystkie playlisty w m_middleTreeView
@@ -78,6 +89,13 @@ class MainWindow : public QMainWindow {
 
 		void rowClicked(const QModelIndex &current); // Pobiera dane z piosenki z kliniętego przez użytkownika wiersza
 		void extractMetadata(const QString &filePath); // Funkcja pomocnicza do ekstrakcji danych
+
+		void onMiddleViewClicked(const QModelIndex &index); // Kliknięcie w playlistę
+		void onPlaylistContextMenu(const QPoint &pos);      // Menu: Nowa playlista
+		void onSongContextMenu(const QPoint &pos);          // Menu: Dodaj do playlisty
+
+		void createNewPlaylist(); // Logika tworzenia pliku
+		void addSongToPlaylist(const QString &playlistName); // Dodawanie utworu
 };
 
 #endif /* MAINWINDOW_HPP */
