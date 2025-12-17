@@ -38,6 +38,13 @@ SideBar::SideBar(QWidget *parent)
 	m_settingsButton->setIconSize(ICON_SIZE);
 	m_settingsButton->setStatusTip(tr("Settings"));
 
+	connect(m_showLibraryButton, &QToolButton::clicked, this, &SideBar::showLibraryClicked);
+	connect(m_showPlaylistsButton, &QToolButton::clicked, this, &SideBar::showPlaylistsClicked);
+	connect(m_showFavoriteButton, &QToolButton::clicked, this, &SideBar::showFavoriteClicked);
+	connect(m_showAuthorsButton, &QToolButton::clicked, this, &SideBar::showAuthorsClicked);
+	connect(m_showAlbumsButton, &QToolButton::clicked, this, &SideBar::showAlbumsClicked);
+	connect(m_settingsDialog, &SettingsDialog::settingsChanged, this, &SideBar::settingsChanged);
+
 	connect(m_settingsButton, &QToolButton::clicked, m_settingsDialog, [this]() {
 			m_settingsDialog->show();
 			m_settingsDialog->raise();

@@ -15,6 +15,14 @@ class SideBar : public QWidget {
   public:
 	explicit SideBar(QWidget *parent = nullptr);
 
+signals:
+	void showLibraryClicked();
+	void showPlaylistsClicked();
+	void showFavoriteClicked();
+	void showAuthorsClicked();
+	void showAlbumsClicked();
+	void settingsClicked();
+	void settingsChanged();
 private:
 	QVBoxLayout *m_sideBarLayout;  // Układ elementów GUI dla paska bocznego
 
