@@ -7,6 +7,7 @@
 #include "track.hpp"
 #include "treemodel.hpp"
 #include "sidebar.h"
+#include "logs.hpp"
 
 // Qt
 #include <QAction>
@@ -97,5 +98,6 @@ class MainWindow : public QMainWindow {
 		void createNewPlaylist(); // Logika tworzenia pliku
 		void addSongToPlaylist(const QString &playlistName); // Dodawanie utworu
 };
+
 
 #endif /* MAINWINDOW_HPP */
