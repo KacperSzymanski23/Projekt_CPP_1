@@ -7,7 +7,8 @@ src = files(
   'track.cpp',
   'treeitem.cpp',
   'treemodel.cpp',
-  'sidebar.cpp'
+  'sidebar.cpp',
+  'logs.cpp'
 )
 
 moc_headers = files(
