@@ -198,51 +198,60 @@ void MainWindow::scanLibrary() {
 		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"}; // Wspierane typy plików
 
 		for (const auto &file : QDirListing(library.path(), AUDIO_FILE_FILTER, FLAGS)) {
-				TagLib::FileRef fileRef{file.filePath().toUtf8().data()};
+				TagLib::FileRef fileRef{QFile::encodeName(file.filePath()).constData()};
 				QFileInfo fileInfo(file.filePath());
 				Track track{};
 
-				extractMetadata(fileInfo.absoluteFilePath());
+				extractMetadata(file.absoluteFilePath(), fileRef);
 		}
 
 }
 
-void MainWindow::extractMetadata(const QString &filePath) {
-	TagLib::FileRef fileRef{filePath.toUtf8().data()};
-	QFileInfo fileInfo(filePath);
-
-	if (fileRef.tag() != nullptr) {
-		Track track{};
-		constexpr float MIB = 1024.0F * 1024.0F;
-
-		const uint32_t NUMBER{fileRef.tag()->track()};
-		const TagLib::String TITLE{fileRef.tag()->title().to8Bit(true)};
-		const TagLib::String ALBUM{fileRef.tag()->album().to8Bit(true)};
-		const TagLib::String ARTIST{fileRef.tag()->artist().to8Bit(true)};
-		const int32_t DURATION_IN_SECONDS{fileRef.audioProperties()->lengthInSeconds()};
-		const uint32_t YEAR{fileRef.tag()->year()};
-		const int32_t BITRATE{fileRef.audioProperties()->bitrate()};
-		const QString COVER_ART_PATH{findCoverArt(fileInfo)};
-		const QTime DURATION{0, DURATION_IN_SECONDS / 60, DURATION_IN_SECONDS % 60};
-
-
-		const float FILE_SIZE = static_cast<float>(fileInfo.size()) / MIB;
-
-		track.number = NUMBER;
-		track.title = TITLE.toCString();
-		track.album = ALBUM.toCString();
-		track.artist = ARTIST.toCString();
-		track.duration = DURATION.toString("mm:ss");
-		track.year = YEAR;
-		track.bitrate = QString::number(BITRATE) + " kbps";
-		track.fileSize = QString::number(FILE_SIZE, 'f', 1) + " MiB";
-		track.coverArtPath = COVER_ART_PATH;
-		track.path = filePath;
-
-		m_tracks.emplace_back(track);
+void MainWindow::extractMetadata(const QString &filePath, const TagLib::FileRef &fileRef) {
+	if (fileRef.isNull() || fileRef.tag() == nullptr) {
+		return;
 	}
 
+	if (filePath.isEmpty()) {
+		return;
+	}
+
+	const QFileInfo FILE_INFO{filePath};
+	const TagLib::Tag *TAG{fileRef.tag()};
+	const TagLib::AudioProperties *AUDIO_PROPERTIES{fileRef.audioProperties()};
+
+	const uint32_t NUMBER{TAG->track()};
+	const QString TITLE{QString::fromStdWString(TAG->title().toWString())};
+	const QString ALBUM{QString::fromStdWString(TAG->album().toWString())};
+	const QString ARTIST{QString::fromStdWString(TAG->artist().toWString())};
+	const uint32_t YEAR{TAG->year()};
+
+	const int32_t DURATION_IN_SECONDS{AUDIO_PROPERTIES->lengthInSeconds()};
+	const int32_t BITRATE{AUDIO_PROPERTIES->bitrate()};
+
+	const QString COVER_ART_PATH{findCoverArt(FILE_INFO)};
+
+	const QTime DURATION{0, DURATION_IN_SECONDS / 60, DURATION_IN_SECONDS % 60};
+
+	constexpr float MIB = 1024.0F * 1024.0F;
+	const float FILE_SIZE = static_cast<float>(FILE_INFO.size()) / MIB;
+
+	Track track{};
+
+	track.number = NUMBER;
+	track.title = TITLE;
+	track.album = ALBUM;
+	track.artist = ARTIST;
+	track.duration = DURATION.toString("mm:ss");
+	track.year = YEAR;
+	track.bitrate = QString::number(BITRATE) + " kbps";
+	track.fileSize = QString::number(FILE_SIZE, 'f', 1) + " MiB";
+	track.coverArtPath = COVER_ART_PATH;
+	track.path = QDir::toNativeSeparators(filePath);
+
+	m_tracks.emplace_back(track);
 }
+
 void MainWindow::rowClicked(const QModelIndex &current) {
 		QVariant data = TreeModel::dataAtColumn(current, Qt::DisplayRole, 9);
 
@@ -333,7 +342,8 @@ void MainWindow::loadPlaylistContent(const QString &filename) {
 			QString line = in.readLine();
 			if (!line.isEmpty() && QFile::exists(line)) {
 
-				extractMetadata(line);
+				const TagLib::FileRef FILE_REF{QFile::encodeName(line).constData()};
+				extractMetadata(line, FILE_REF);
 			}
 		}
 		file.close();

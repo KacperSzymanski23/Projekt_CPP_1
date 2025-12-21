@@ -28,6 +28,8 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QMenu>
+// TabLib
+#include <taglib/fileref.h>
 
 class MainWindow : public QMainWindow {
 		Q_OBJECT
@@ -89,7 +91,7 @@ class MainWindow : public QMainWindow {
 		void readWindowGeometrySettings();            // Funkcja slot zapisująca stan okna
 
 		void rowClicked(const QModelIndex &current); // Pobiera dane z piosenki z kliniętego przez użytkownika wiersza
-		void extractMetadata(const QString &filePath); // Funkcja pomocnicza do ekstrakcji danych
+		void extractMetadata(const QString &filePath, const TagLib::FileRef &fileRef); // Funkcja pomocnicza do ekstrakcji danych
 
 		void onMiddleViewClicked(const QModelIndex &index); // Kliknięcie w playlistę
 		void onPlaylistContextMenu(const QPoint &pos);      // Menu: Nowa playlista
