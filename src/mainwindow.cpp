@@ -1,19 +1,19 @@
 #include "mainwindow.hpp"
 #include "icons.hpp"
 // Qt
+#include <QCoreApplication>
 #include <QDirListing>
 #include <QMediaMetaData>
 #include <QScreen>
-#include <QCoreApplication>
 // TagLib
 #include <taglib/fileref.h>
 
 MainWindow::MainWindow()
 	: m_centralWidget(new QWidget(this))
 	, m_sideBarWidget(new SideBar(this))
-//	, m_settingsButton(new QToolButton(this))
+	//	, m_settingsButton(new QToolButton(this))
 	, m_playbackControlsWidget(new PlayerControls(this))
-//	, m_settingsDialog(new SettingsDialog(this))
+	//	, m_settingsDialog(new SettingsDialog(this))
 	, m_settings(Settings("config.cfg"))
 	, m_coverLabel(new QLabel(this))
 	, m_middleTreeView(new QTreeView(this))
@@ -22,7 +22,7 @@ MainWindow::MainWindow()
 	, m_mainGridLayout(new QGridLayout(this))
 	, m_audioPlayer(new QMediaPlayer(this))
 	, m_audioOutput(new QAudioOutput(this))
-	, m_middleModel(new QStandardItemModel(this)){
+	, m_middleModel(new QStandardItemModel(this)) {
 
 		readWindowGeometrySettings();
 
@@ -53,8 +53,8 @@ MainWindow::MainWindow()
 		});
 
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, [this]() {
-			scanLibrary();
-			showLibrary();
+				scanLibrary();
+				showLibrary();
 		});
 
 		scanLibrary();
@@ -63,7 +63,6 @@ MainWindow::MainWindow()
 		showLibrary();
 
 		m_mainGridLayout->setSpacing(5);
-
 
 		m_middleTreeView->setModel(m_middleModel);
 		m_middleTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -74,7 +73,7 @@ MainWindow::MainWindow()
 		m_coverLabel->setPixmap(m_coverImage);
 		m_coverLabel->setScaledContents(true);
 
-//		m_mainGridLayout->addWidget(m_settingsButton, 0, 0, 1, 1);
+		//		m_mainGridLayout->addWidget(m_settingsButton, 0, 0, 1, 1);
 		m_mainGridLayout->addWidget(m_playbackControlsWidget, 0, 1, 1, 32);
 		m_mainGridLayout->addWidget(m_sideBarWidget, 1, 0, 13, 1);
 		m_mainGridLayout->addWidget(m_middleTreeView, 1, 1, 9, 5);
@@ -95,7 +94,7 @@ MainWindow::MainWindow()
 }
 void MainWindow::setupPlayerModel() {
 		if (m_playerMainTreeView->model()) {
-			delete m_playerMainTreeView->model();
+				delete m_playerMainTreeView->model();
 		}
 		const QVariantList COLUMNS_NAME{"Number", "Title", "Album", "Author", "Duration", "Year", "Bitrate", "File Size", "Path"};
 
@@ -145,28 +144,28 @@ void MainWindow::readWindowGeometrySettings() {
 }
 
 void MainWindow::showLibrary() {
-	m_currentViewMode = ViewMode::Library;
-	if (m_middleModel) {
-		m_middleModel->clear();
-	}
-	scanLibrary();
+		m_currentViewMode = ViewMode::Library;
+		if (m_middleModel) {
+				m_middleModel->clear();
+		}
+		scanLibrary();
 
-	setupPlayerModel();
+		setupPlayerModel();
 }
 
 void MainWindow::showPlaylists() {
-	m_currentViewMode = ViewMode::Playlists;
-	m_middleModel->clear();
-	m_middleModel->setHorizontalHeaderLabels({"Playlists"});
+		m_currentViewMode = ViewMode::Playlists;
+		m_middleModel->clear();
+		m_middleModel->setHorizontalHeaderLabels({"Playlists"});
 
-	QDir dir = getPlaylistsDir();
-	QStringList files = dir.entryList({"*.txt"}, QDir::Files);
+		QDir dir = getPlaylistsDir();
+		QStringList files = dir.entryList({"*.txt"}, QDir::Files);
 
-	for (const QString &f : files) {
-		QStandardItem *item = new QStandardItem(Icons::PLAYLIST, QFileInfo(f).baseName());
-		item->setData(f);
-		m_middleModel->appendRow(item);
-	}
+		for (const QString &f : files) {
+				QStandardItem *item = new QStandardItem(Icons::PLAYLIST, QFileInfo(f).baseName());
+				item->setData(f);
+				m_middleModel->appendRow(item);
+		}
 }
 
 void MainWindow::showFavorite() {
@@ -178,14 +177,13 @@ void MainWindow::showAlbums() {
 void MainWindow::showAuthors() {
 }
 
-
 void MainWindow::scanLibrary() {
 		m_tracks.clear();
 
 		m_settings.loadSettings();
 		QString pathStr = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
 		if (pathStr.isEmpty()) {
-			pathStr = QDir::homePath() + "/Music";
+				pathStr = QDir::homePath() + "/Music";
 		}
 		QDir library{pathStr};
 
@@ -204,52 +202,51 @@ void MainWindow::scanLibrary() {
 
 				extractMetadata(file.absoluteFilePath(), fileRef);
 		}
-
 }
 
 void MainWindow::extractMetadata(const QString &filePath, const TagLib::FileRef &fileRef) {
-	if (fileRef.isNull() || fileRef.tag() == nullptr) {
-		return;
-	}
+		if (fileRef.isNull() || fileRef.tag() == nullptr) {
+				return;
+		}
 
-	if (filePath.isEmpty()) {
-		return;
-	}
+		if (filePath.isEmpty()) {
+				return;
+		}
 
-	const QFileInfo FILE_INFO{filePath};
-	const TagLib::Tag *TAG{fileRef.tag()};
-	const TagLib::AudioProperties *AUDIO_PROPERTIES{fileRef.audioProperties()};
+		const QFileInfo FILE_INFO{filePath};
+		const TagLib::Tag *TAG{fileRef.tag()};
+		const TagLib::AudioProperties *AUDIO_PROPERTIES{fileRef.audioProperties()};
 
-	const uint32_t NUMBER{TAG->track()};
-	const QString TITLE{QString::fromStdWString(TAG->title().toWString())};
-	const QString ALBUM{QString::fromStdWString(TAG->album().toWString())};
-	const QString ARTIST{QString::fromStdWString(TAG->artist().toWString())};
-	const uint32_t YEAR{TAG->year()};
+		const uint32_t NUMBER{TAG->track()};
+		const QString TITLE{QString::fromStdWString(TAG->title().toWString())};
+		const QString ALBUM{QString::fromStdWString(TAG->album().toWString())};
+		const QString ARTIST{QString::fromStdWString(TAG->artist().toWString())};
+		const uint32_t YEAR{TAG->year()};
 
-	const int32_t DURATION_IN_SECONDS{AUDIO_PROPERTIES->lengthInSeconds()};
-	const int32_t BITRATE{AUDIO_PROPERTIES->bitrate()};
+		const int32_t DURATION_IN_SECONDS{AUDIO_PROPERTIES->lengthInSeconds()};
+		const int32_t BITRATE{AUDIO_PROPERTIES->bitrate()};
 
-	const QString COVER_ART_PATH{findCoverArt(FILE_INFO)};
+		const QString COVER_ART_PATH{findCoverArt(FILE_INFO)};
 
-	const QTime DURATION{0, DURATION_IN_SECONDS / 60, DURATION_IN_SECONDS % 60};
+		const QTime DURATION{0, DURATION_IN_SECONDS / 60, DURATION_IN_SECONDS % 60};
 
-	constexpr float MIB = 1024.0F * 1024.0F;
-	const float FILE_SIZE = static_cast<float>(FILE_INFO.size()) / MIB;
+		constexpr float MIB = 1024.0F * 1024.0F;
+		const float FILE_SIZE = static_cast<float>(FILE_INFO.size()) / MIB;
 
-	Track track{};
+		Track track{};
 
-	track.number = NUMBER;
-	track.title = TITLE;
-	track.album = ALBUM;
-	track.artist = ARTIST;
-	track.duration = DURATION.toString("mm:ss");
-	track.year = YEAR;
-	track.bitrate = QString::number(BITRATE) + " kbps";
-	track.fileSize = QString::number(FILE_SIZE, 'f', 1) + " MiB";
-	track.coverArtPath = COVER_ART_PATH;
-	track.path = QDir::toNativeSeparators(filePath);
+		track.number = NUMBER;
+		track.title = TITLE;
+		track.album = ALBUM;
+		track.artist = ARTIST;
+		track.duration = DURATION.toString("mm:ss");
+		track.year = YEAR;
+		track.bitrate = QString::number(BITRATE) + " kbps";
+		track.fileSize = QString::number(FILE_SIZE, 'f', 1) + " MiB";
+		track.coverArtPath = COVER_ART_PATH;
+		track.path = QDir::toNativeSeparators(filePath);
 
-	m_tracks.emplace_back(track);
+		m_tracks.emplace_back(track);
 }
 
 void MainWindow::rowClicked(const QModelIndex &current) {
@@ -277,139 +274,130 @@ QString MainWindow::findCoverArt(const QFileInfo &fileInfo) {
 }
 
 QString MainWindow::getPlaylistsDir() {
-	m_settings.loadSettings();
-	std::string libPathStd = m_settings.getSettingsEntry("libraryDirectory");
-	QString libPath = QString::fromStdString(libPathStd);
-	if (libPath.isEmpty()) {
-		libPath = QCoreApplication::applicationDirPath();
-	}
+		m_settings.loadSettings();
+		std::string libPathStd = m_settings.getSettingsEntry("libraryDirectory");
+		QString libPath = QString::fromStdString(libPathStd);
+		if (libPath.isEmpty()) {
+				libPath = QCoreApplication::applicationDirPath();
+		}
 
+		QString path = libPath + "/playlists";
 
-	QString path = libPath + "/playlists";
+		QDir dir(path);
+		if (!dir.exists()) {
+				dir.mkpath(".");
+		}
 
-
-	QDir dir(path);
-	if (!dir.exists()) {
-		dir.mkpath(".");
-	}
-
-	return path;
+		return path;
 }
 
 void MainWindow::onPlaylistContextMenu(const QPoint &pos) {
-	if (m_currentViewMode != ViewMode::Playlists) return;
+		if (m_currentViewMode != ViewMode::Playlists)
+				return;
 
-	QMenu menu(this);
-	QAction *newAction = menu.addAction("Nowa Playlista");
+		QMenu menu(this);
+		QAction *newAction = menu.addAction("Nowa Playlista");
 
-
-
-	QAction *selected = menu.exec(m_middleTreeView->mapToGlobal(pos));
-	if (selected == newAction) {
-		createNewPlaylist();
-	}
+		QAction *selected = menu.exec(m_middleTreeView->mapToGlobal(pos));
+		if (selected == newAction) {
+				createNewPlaylist();
+		}
 }
 
 void MainWindow::createNewPlaylist() {
-	bool ok;
-	QString name = QInputDialog::getText(this, "Nowa Playlista", "Podaj nazwę:", QLineEdit::Normal, "", &ok);
+		bool ok;
+		QString name = QInputDialog::getText(this, "Nowa Playlista", "Podaj nazwę:", QLineEdit::Normal, "", &ok);
 
-	if (ok && !name.isEmpty()) {
-		QString filePath = getPlaylistsDir() + "/" + name + ".txt";
-		QFile file(filePath);
-		if (file.open(QIODevice::WriteOnly)) {
-			file.close();
-			showPlaylists();
+		if (ok && !name.isEmpty()) {
+				QString filePath = getPlaylistsDir() + "/" + name + ".txt";
+				QFile file(filePath);
+				if (file.open(QIODevice::WriteOnly)) {
+						file.close();
+						showPlaylists();
+				}
 		}
-	}
 }
 
 void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
-	if (m_currentViewMode == ViewMode::Playlists) {
+		if (m_currentViewMode == ViewMode::Playlists) {
 
-		QString filename = m_middleModel->itemFromIndex(index)->data().toString();
-		loadPlaylistContent(filename);
-	}
+				QString filename = m_middleModel->itemFromIndex(index)->data().toString();
+				loadPlaylistContent(filename);
+		}
 }
 
 void MainWindow::loadPlaylistContent(const QString &filename) {
-	m_tracks.clear();
+		m_tracks.clear();
 
-	QFile file(getPlaylistsDir() + "/" + filename);
-	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		QTextStream in(&file);
-		while (!in.atEnd()) {
-			QString line = in.readLine();
-			if (!line.isEmpty() && QFile::exists(line)) {
+		QFile file(getPlaylistsDir() + "/" + filename);
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+				QTextStream in(&file);
+				while (!in.atEnd()) {
+						QString line = in.readLine();
+						if (!line.isEmpty() && QFile::exists(line)) {
 
-				const TagLib::FileRef FILE_REF{QFile::encodeName(line).constData()};
-				extractMetadata(line, FILE_REF);
-			}
+								const TagLib::FileRef FILE_REF{QFile::encodeName(line).constData()};
+								extractMetadata(line, FILE_REF);
+						}
+				}
+				file.close();
 		}
-		file.close();
-	}
 
-	setupPlayerModel();
+		setupPlayerModel();
 }
 
 void MainWindow::onSongContextMenu(const QPoint &pos) {
-	QModelIndex index = m_playerMainTreeView->indexAt(pos);
-	if (!index.isValid()) return;
+		QModelIndex index = m_playerMainTreeView->indexAt(pos);
+		if (!index.isValid())
+				return;
 
+		QString filePath = TreeModel::dataAtColumn(index, Qt::DisplayRole, 8).toString();
 
-	QString filePath = TreeModel::dataAtColumn(index, Qt::DisplayRole, 8).toString();
+		QMenu menu(this);
+		QMenu *subMenu = menu.addMenu("Dodaj do playlisty");
 
-	QMenu menu(this);
-	QMenu *subMenu = menu.addMenu("Dodaj do playlisty");
+		QDir dir = getPlaylistsDir();
+		QStringList playlists = dir.entryList({"*.txt"}, QDir::Files);
 
+		if (playlists.isEmpty()) {
+				subMenu->addAction("Brak playlist")->setEnabled(false);
+		} else {
+				for (const QString &pl : playlists) {
+						QAction *act = subMenu->addAction(QFileInfo(pl).baseName());
 
-	QDir dir = getPlaylistsDir();
-	QStringList playlists = dir.entryList({"*.txt"}, QDir::Files);
-
-	if (playlists.isEmpty()) {
-		subMenu->addAction("Brak playlist")->setEnabled(false);
-	} else {
-		for (const QString &pl : playlists) {
-			QAction *act = subMenu->addAction(QFileInfo(pl).baseName());
-
-			connect(act, &QAction::triggered, this, [this, pl, filePath]() {
-				QFile file(getPlaylistsDir() + "/" + pl);
-				if (file.open(QIODevice::Append | QIODevice::Text)) {
-					QTextStream out(&file);
-					out << filePath << "\n";
-					file.close();
+						connect(act, &QAction::triggered, this, [this, pl, filePath]() {
+								QFile file(getPlaylistsDir() + "/" + pl);
+								if (file.open(QIODevice::Append | QIODevice::Text)) {
+										QTextStream out(&file);
+										out << filePath << "\n";
+										file.close();
+								}
+						});
 				}
-			});
 		}
-	}
 
-	menu.exec(m_playerMainTreeView->mapToGlobal(pos));
+		menu.exec(m_playerMainTreeView->mapToGlobal(pos));
 }
 
 void MainWindow::addSongToPlaylist(const QString &playlistName) {
 
-	QModelIndex index = m_playerMainTreeView->currentIndex();
-	if (!index.isValid()) return;
+		QModelIndex index = m_playerMainTreeView->currentIndex();
+		if (!index.isValid())
+				return;
 
+		QString filePath = TreeModel::dataAtColumn(index, Qt::DisplayRole, 8).toString();
+		if (filePath.isEmpty())
+				return;
 
-	QString filePath = TreeModel::dataAtColumn(index, Qt::DisplayRole, 8).toString();
-	if (filePath.isEmpty()) return;
+		QString fileName = playlistName;
+		if (!fileName.endsWith(".txt")) {
+				fileName += ".txt";
+		}
 
-
-	QString fileName = playlistName;
-	if (!fileName.endsWith(".txt")) {
-		fileName += ".txt";
-	}
-
-	QFile file(getPlaylistsDir() + "/" + fileName);
-	if (file.open(QIODevice::Append | QIODevice::Text)) {
-		QTextStream out(&file);
-		out << filePath << "\n";
-		file.close();
-
-	}
+		QFile file(getPlaylistsDir() + "/" + fileName);
+		if (file.open(QIODevice::Append | QIODevice::Text)) {
+				QTextStream out(&file);
+				out << filePath << "\n";
+				file.close();
+		}
 }
-
-
-
-

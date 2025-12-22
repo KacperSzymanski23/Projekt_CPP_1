@@ -4,37 +4,38 @@
 
 #include "settingsdialog.hpp"
 // Qt
-#include <QWidget>
+#include <QSpacerItem>
 #include <QToolButton>
 #include <QVBoxLayout>
-#include <QSpacerItem>
+#include <QWidget>
 
 class SideBar : public QWidget {
-	Q_OBJECT
+		Q_OBJECT
 
-  public:
-	explicit SideBar(QWidget *parent = nullptr);
+	  public:
+		explicit SideBar(QWidget *parent = nullptr);
 
-signals:
-	void showLibraryClicked();
-	void showPlaylistsClicked();
-	void showFavoriteClicked();
-	void showAuthorsClicked();
-	void showAlbumsClicked();
-	void settingsClicked();
-	void settingsChanged();
-private:
-	QVBoxLayout *m_sideBarLayout;  // Układ elementów GUI dla paska bocznego
+	  signals:
+		void showLibraryClicked();
+		void showPlaylistsClicked();
+		void showFavoriteClicked();
+		void showAuthorsClicked();
+		void showAlbumsClicked();
+		void settingsClicked();
+		void settingsChanged();
 
-	SettingsDialog *m_settingsDialog; // Okno zawierające ustawiania programu
+	  private:
+		QVBoxLayout *m_sideBarLayout; // Układ elementów GUI dla paska bocznego
 
-	QToolButton *m_showLibraryButton;
-	QToolButton *m_showPlaylistsButton;
-	QToolButton *m_showFavoriteButton;
-	QToolButton *m_showAuthorsButton;
-	QToolButton *m_showAlbumsButton;
+		SettingsDialog *m_settingsDialog; // Okno zawierające ustawiania programu
 
-	QToolButton *m_settingsButton; // Przycisk optwierający ustawienia programu
+		QToolButton *m_showLibraryButton;
+		QToolButton *m_showPlaylistsButton;
+		QToolButton *m_showFavoriteButton;
+		QToolButton *m_showAuthorsButton;
+		QToolButton *m_showAlbumsButton;
+
+		QToolButton *m_settingsButton; // Przycisk optwierający ustawienia programu
 };
 
 #endif // SIDEBAR_HPP
