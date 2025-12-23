@@ -7,7 +7,7 @@ project(
 )
 
 qt6 = import('qt6')
-qt_dep = dependency('qt6', modules: ['Core', 'Gui', 'Widgets', 'Multimedia'])
+qt_dep = dependency('qt6', modules: ['Core', 'Gui', 'Widgets', 'Multimedia', 'Concurrent'])
 
 taglib_dep = dependency('taglib')
 

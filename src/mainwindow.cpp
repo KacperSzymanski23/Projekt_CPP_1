@@ -3,8 +3,10 @@
 // Qt
 #include <QCoreApplication>
 #include <QDirListing>
+#include <QFuture>
 #include <QMediaMetaData>
 #include <QScreen>
+#include <QtConcurrent>
 // TagLib
 #include <taglib/fileref.h>
 // Tracy
@@ -55,14 +57,8 @@ MainWindow::MainWindow()
 				m_playbackControlsWidget->setPlayerState(arg);
 		});
 
-		connect(m_sideBarWidget, &SideBar::settingsChanged, this, [this]() {
-				scanLibrary();
-				showLibrary();
-		});
+		connect(m_sideBarWidget, &SideBar::settingsChanged, this, &MainWindow::showLibrary);
 
-		scanLibrary();
-
-		setupPlayerModel();
 		showLibrary();
 
 		m_mainGridLayout->setSpacing(5);
@@ -206,28 +202,43 @@ void MainWindow::scanLibrary() {
 				return;
 		}
 
-		constexpr float MIB = 1024.0F * 1024.0F;
 		constexpr auto FLAGS = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::FilesOnly;
 		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"}; // Wspierane typy plików
 
-		for (const auto &file : QDirListing(library.path(), AUDIO_FILE_FILTER, FLAGS)) {
-				TagLib::FileRef fileRef{QFile::encodeName(file.filePath()).constData()};
-				QFileInfo fileInfo(file.filePath());
-				Track track{};
+		QStringList filePaths{};
 
-				extractMetadata(file.absoluteFilePath(), fileRef);
+		for (const auto &file : QDirListing(library.path(), AUDIO_FILE_FILTER, FLAGS)) {
+				filePaths.append(file.absoluteFilePath());
+		}
+
+		if (filePaths.isEmpty()) {
+				return;
+		}
+
+		QFuture<Track> future = QtConcurrent::mapped(filePaths, [this](const QString &filePath) -> Track {
+				TagLib::FileRef fileRef{QFile::encodeName(filePath).constData()};
+
+				return extractMetadata(filePath, fileRef);
+		});
+		future.waitForFinished();
+
+		const auto results = future.results();
+		m_tracks.reserve(results.size());
+
+		for (const auto &track : results) {
+				m_tracks.push_back(std::move(track));
 		}
 }
 
-void MainWindow::extractMetadata(const QString &filePath, const TagLib::FileRef &fileRef) {
+Track MainWindow::extractMetadata(const QString &filePath, const TagLib::FileRef &fileRef) {
 		ZoneScoped;
 
 		if (fileRef.isNull() || fileRef.tag() == nullptr) {
-				return;
+				return Track{};
 		}
 
 		if (filePath.isEmpty()) {
-				return;
+				return Track{};
 		}
 
 		const QFileInfo FILE_INFO{filePath};
@@ -263,7 +274,7 @@ void MainWindow::extractMetadata(const QString &filePath, const TagLib::FileRef 
 		track.coverArtPath = COVER_ART_PATH;
 		track.path = QDir::toNativeSeparators(filePath);
 
-		m_tracks.emplace_back(track);
+		return track;
 }
 
 void MainWindow::rowClicked(const QModelIndex &current) {
@@ -281,14 +292,14 @@ void MainWindow::rowClicked(const QModelIndex &current) {
 QString MainWindow::findCoverArt(const QFileInfo &fileInfo) {
 		ZoneScoped;
 
+		const QString FILE_PATH{fileInfo.absolutePath()};
+
 		constexpr auto FLAGS = QDirListing::IteratorFlag::Default;
 
-		const QStringList IMAGE_FILE_FILTER = {"*.jpg", "*.jpeg", "*.png", "*.webp"}; // Wspierane typy plików dla grafiki okładki
+		const QStringList COVER_FILES = {"cover.jpg", "cover.jpeg", "cover.png", "cover.webp"}; // Wspierane typy plików dla grafiki okładki
 
-		for (const auto &file : QDirListing(fileInfo.absolutePath(), IMAGE_FILE_FILTER, FLAGS)) {
-				if (file.baseName() == "cover") {
-						return file.absoluteFilePath();
-				}
+		for (const auto &file : QDirListing(FILE_PATH, COVER_FILES, FLAGS)) {
+				return file.absoluteFilePath();
 		}
 
 		return nullptr;

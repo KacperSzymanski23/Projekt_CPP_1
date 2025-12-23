@@ -88,8 +88,8 @@ class MainWindow : public QMainWindow {
 		void closeEvent(QCloseEvent *event) override; // Funkcja slot obsługująca zamykanie okna
 		void readWindowGeometrySettings();            // Funkcja slot zapisująca stan okna
 
-		void rowClicked(const QModelIndex &current);                                   // Pobiera dane z piosenki z kliniętego przez użytkownika wiersza
-		void extractMetadata(const QString &filePath, const TagLib::FileRef &fileRef); // Funkcja pomocnicza do ekstrakcji danych
+		void rowClicked(const QModelIndex &current);                                    // Pobiera dane z piosenki z kliniętego przez użytkownika wiersza
+		Track extractMetadata(const QString &filePath, const TagLib::FileRef &fileRef); // Funkcja pomocnicza do ekstrakcji danych
 
 		void onMiddleViewClicked(const QModelIndex &index); // Kliknięcie w playlistę
 		void onPlaylistContextMenu(const QPoint &pos);      // Menu: Nowa playlista
