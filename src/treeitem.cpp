@@ -1,4 +1,6 @@
 #include "treeitem.hpp"
+// Tracy
+#include <tracy/Tracy.hpp>
 
 TreeItem::TreeItem(QVariantList data, TreeItem *parent)
 	: m_itemData(std::move(data))
@@ -6,10 +8,14 @@ TreeItem::TreeItem(QVariantList data, TreeItem *parent)
 }
 
 void TreeItem::appendChild(std::unique_ptr<TreeItem> &&child) {
+		ZoneScoped;
+
 		m_childItems.push_back(std::move(child));
 }
 
 TreeItem *TreeItem::child(int32_t row) const {
+		ZoneScoped;
+
 		if (row >= 0 && row < childCount()) {
 				return m_childItems.at(row).get();
 		}
@@ -34,6 +40,8 @@ TreeItem *TreeItem::parentItem() const {
 }
 
 int32_t TreeItem::row() const {
+		ZoneScoped;
+
 		if (m_parentItem == nullptr) {
 				return 0;
 		}

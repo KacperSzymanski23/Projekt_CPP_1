@@ -2,6 +2,8 @@
 // STD
 #include <fstream>
 #include <iostream>
+// Tracy
+#include <tracy/Tracy.hpp>
 
 Settings::Settings(const std::string &settingsPath)
 	: m_settingsPath(settingsPath) {
@@ -10,6 +12,8 @@ Settings::Settings(const std::string &settingsPath)
 }
 
 std::string Settings::trim(const std::string &str) {
+		ZoneScoped;
+
 		std::string trimmed = str;
 
 		trimmed.erase(0, trimmed.find_first_not_of(" \n\r\t"));
@@ -19,6 +23,8 @@ std::string Settings::trim(const std::string &str) {
 }
 
 bool Settings::parseLine(const std::string &line, std::string &entryKey, std::string &entryValue) {
+		ZoneScoped;
+
 		const std::string TRIMMED_LINE = trim(line);
 
 		if (TRIMMED_LINE.empty()) {
@@ -44,6 +50,8 @@ bool Settings::parseLine(const std::string &line, std::string &entryKey, std::st
 }
 
 bool Settings::loadSettings() {
+		ZoneScoped;
+
 		std::ifstream settingsFile(m_settingsPath);
 
 		if (!settingsFile.is_open()) {
@@ -68,6 +76,8 @@ bool Settings::loadSettings() {
 }
 
 bool Settings::saveSettings() {
+		ZoneScoped;
+
 		std::ofstream settingsFile(m_settingsPath, std::ios::trunc);
 
 		if (!settingsFile.is_open()) {
@@ -86,6 +96,8 @@ bool Settings::saveSettings() {
 }
 
 std::string Settings::getSettingsEntry(const std::string &entryKey) {
+		ZoneScoped;
+
 		const auto ENTRY_VALUE = m_settings.find(entryKey);
 		const auto LAST_ENTRY = m_settings.end();
 
@@ -97,6 +109,8 @@ std::string Settings::getSettingsEntry(const std::string &entryKey) {
 }
 
 void Settings::setSettingsEntry(const std::string &entryKey, const std::string &entryValue) {
+		ZoneScoped;
+
 		if (isEntryKeyExists(entryKey)) {
 				m_settings.at(entryKey) = entryValue;
 		}

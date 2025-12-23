@@ -1,5 +1,7 @@
 #include "sidebar.h"
 #include "icons.hpp"
+// Tracy
+#include <tracy/Tracy.hpp>
 
 SideBar::SideBar(QWidget *parent)
 	: QWidget(parent)
@@ -11,6 +13,7 @@ SideBar::SideBar(QWidget *parent)
 	, m_showAuthorsButton(new QToolButton(this))
 	, m_showAlbumsButton(new QToolButton(this))
 	, m_settingsButton(new QToolButton(this)) {
+		ZoneScoped;
 
 		constexpr QSize ICON_SIZE = QSize(20, 20);
 

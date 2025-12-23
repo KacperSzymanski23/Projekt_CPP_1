@@ -7,6 +7,8 @@
 #include <QScreen>
 // TagLib
 #include <taglib/fileref.h>
+// Tracy
+#include <tracy/Tracy.hpp>
 
 MainWindow::MainWindow()
 	: m_centralWidget(new QWidget(this))
@@ -23,6 +25,7 @@ MainWindow::MainWindow()
 	, m_audioPlayer(new QMediaPlayer(this))
 	, m_audioOutput(new QAudioOutput(this))
 	, m_middleModel(new QStandardItemModel(this)) {
+		ZoneScoped;
 
 		readWindowGeometrySettings();
 
@@ -93,6 +96,8 @@ MainWindow::MainWindow()
 		connect(m_playerMainTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::onSongContextMenu);
 }
 void MainWindow::setupPlayerModel() {
+		ZoneScoped;
+
 		if (m_playerMainTreeView->model()) {
 				delete m_playerMainTreeView->model();
 		}
@@ -110,6 +115,8 @@ void MainWindow::setupPlayerModel() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
+		ZoneScoped;
+
 		QSettings qsettings{};
 
 		qsettings.beginGroup("Geometry");
@@ -127,6 +134,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::readWindowGeometrySettings() {
+		ZoneScoped;
+
 		QSettings qsettings{};
 
 		qsettings.beginGroup("Geometry");
@@ -144,6 +153,8 @@ void MainWindow::readWindowGeometrySettings() {
 }
 
 void MainWindow::showLibrary() {
+		ZoneScoped;
+
 		m_currentViewMode = ViewMode::Library;
 		if (m_middleModel) {
 				m_middleModel->clear();
@@ -154,6 +165,8 @@ void MainWindow::showLibrary() {
 }
 
 void MainWindow::showPlaylists() {
+		ZoneScoped;
+
 		m_currentViewMode = ViewMode::Playlists;
 		m_middleModel->clear();
 		m_middleModel->setHorizontalHeaderLabels({"Playlists"});
@@ -178,6 +191,8 @@ void MainWindow::showAuthors() {
 }
 
 void MainWindow::scanLibrary() {
+		ZoneScoped;
+
 		m_tracks.clear();
 
 		m_settings.loadSettings();
@@ -205,6 +220,8 @@ void MainWindow::scanLibrary() {
 }
 
 void MainWindow::extractMetadata(const QString &filePath, const TagLib::FileRef &fileRef) {
+		ZoneScoped;
+
 		if (fileRef.isNull() || fileRef.tag() == nullptr) {
 				return;
 		}
@@ -250,6 +267,8 @@ void MainWindow::extractMetadata(const QString &filePath, const TagLib::FileRef 
 }
 
 void MainWindow::rowClicked(const QModelIndex &current) {
+		ZoneScoped;
+
 		QVariant data = TreeModel::dataAtColumn(current, Qt::DisplayRole, 9);
 
 		m_coverImage = data.value<QString>();
@@ -260,6 +279,8 @@ void MainWindow::rowClicked(const QModelIndex &current) {
 }
 
 QString MainWindow::findCoverArt(const QFileInfo &fileInfo) {
+		ZoneScoped;
+
 		constexpr auto FLAGS = QDirListing::IteratorFlag::Default;
 
 		const QStringList IMAGE_FILE_FILTER = {"*.jpg", "*.jpeg", "*.png", "*.webp"}; // Wspierane typy plików dla grafiki okładki
@@ -274,6 +295,8 @@ QString MainWindow::findCoverArt(const QFileInfo &fileInfo) {
 }
 
 QString MainWindow::getPlaylistsDir() {
+		ZoneScoped;
+
 		m_settings.loadSettings();
 		std::string libPathStd = m_settings.getSettingsEntry("libraryDirectory");
 		QString libPath = QString::fromStdString(libPathStd);
@@ -292,6 +315,8 @@ QString MainWindow::getPlaylistsDir() {
 }
 
 void MainWindow::onPlaylistContextMenu(const QPoint &pos) {
+		ZoneScoped;
+
 		if (m_currentViewMode != ViewMode::Playlists)
 				return;
 
@@ -305,6 +330,8 @@ void MainWindow::onPlaylistContextMenu(const QPoint &pos) {
 }
 
 void MainWindow::createNewPlaylist() {
+		ZoneScoped;
+
 		bool ok;
 		QString name = QInputDialog::getText(this, "Nowa Playlista", "Podaj nazwę:", QLineEdit::Normal, "", &ok);
 
@@ -319,6 +346,8 @@ void MainWindow::createNewPlaylist() {
 }
 
 void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
+		ZoneScoped;
+
 		if (m_currentViewMode == ViewMode::Playlists) {
 
 				QString filename = m_middleModel->itemFromIndex(index)->data().toString();
@@ -327,6 +356,8 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 }
 
 void MainWindow::loadPlaylistContent(const QString &filename) {
+		ZoneScoped;
+
 		m_tracks.clear();
 
 		QFile file(getPlaylistsDir() + "/" + filename);
@@ -347,6 +378,8 @@ void MainWindow::loadPlaylistContent(const QString &filename) {
 }
 
 void MainWindow::onSongContextMenu(const QPoint &pos) {
+		ZoneScoped;
+
 		QModelIndex index = m_playerMainTreeView->indexAt(pos);
 		if (!index.isValid())
 				return;
@@ -380,6 +413,7 @@ void MainWindow::onSongContextMenu(const QPoint &pos) {
 }
 
 void MainWindow::addSongToPlaylist(const QString &playlistName) {
+		ZoneScoped;
 
 		QModelIndex index = m_playerMainTreeView->currentIndex();
 		if (!index.isValid())

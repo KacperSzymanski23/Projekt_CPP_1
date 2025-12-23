@@ -2,6 +2,8 @@
 #include "icons.hpp"
 // Qt
 #include <QFileDialog>
+// Tracy
+#include <tracy/Tracy.hpp>
 
 SettingsDialog::SettingsDialog(QWidget *parent)
 	: QDialog(parent)
@@ -13,6 +15,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 	, m_saveButton(new QPushButton(this))
 	, m_cancelButton(new QPushButton(this))
 	, m_applyButton(new QPushButton(this)) {
+		ZoneScoped;
 
 		m_libraryDirectoryLabel->setText("Library path");
 
@@ -55,6 +58,8 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 }
 
 void SettingsDialog::applySettings() {
+		ZoneScoped;
+
 		// libraryDirectory
 		const std::string LIBRARY_DIRECTORY{m_libraryDirectory.absolutePath().toStdString()};
 

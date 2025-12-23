@@ -2,6 +2,8 @@
 #include "treeitem.hpp"
 // Qt
 #include <QStringList>
+// Tracy
+#include <tracy/Tracy.hpp>
 
 TreeModel::TreeModel(const std::vector<Track> &tracks, const QVariantList &columnsNames, QObject *parent)
 	: QAbstractItemModel(parent)
@@ -13,6 +15,8 @@ TreeModel::TreeModel(const std::vector<Track> &tracks, const QVariantList &colum
 TreeModel::~TreeModel() = default;
 
 int32_t TreeModel::columnCount(const QModelIndex &parent) const {
+		ZoneScoped;
+
 		if (parent.isValid()) {
 				return static_cast<TreeItem *>(parent.internalPointer())->columnCount();
 		}
@@ -20,6 +24,8 @@ int32_t TreeModel::columnCount(const QModelIndex &parent) const {
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int32_t role) const {
+		ZoneScoped;
+
 		if (!index.isValid() || role != Qt::DisplayRole) {
 				return {};
 		}
@@ -29,6 +35,8 @@ QVariant TreeModel::data(const QModelIndex &index, int32_t role) const {
 }
 
 QVariant TreeModel::dataAtColumn(const QModelIndex &index, int32_t role, int32_t column) {
+		ZoneScoped;
+
 		if (!index.isValid() || role != Qt::DisplayRole) {
 				return {};
 		}
@@ -38,6 +46,8 @@ QVariant TreeModel::dataAtColumn(const QModelIndex &index, int32_t role, int32_t
 }
 
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
+		ZoneScoped;
+
 		if (index.isValid()) {
 				return QAbstractItemModel::flags(index);
 		}
@@ -45,6 +55,8 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
 }
 
 QVariant TreeModel::headerData(int32_t section, Qt::Orientation orientation, int32_t role) const {
+		ZoneScoped;
+
 		if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
 				return m_rootItem->data(section);
 		}
@@ -52,6 +64,8 @@ QVariant TreeModel::headerData(int32_t section, Qt::Orientation orientation, int
 }
 
 QModelIndex TreeModel::index(int32_t row, int32_t column, const QModelIndex &parent) const {
+		ZoneScoped;
+
 		if (!hasIndex(row, column, parent)) {
 				return {};
 		}
@@ -71,6 +85,8 @@ QModelIndex TreeModel::index(int32_t row, int32_t column, const QModelIndex &par
 }
 
 QModelIndex TreeModel::parent(const QModelIndex &index) const {
+		ZoneScoped;
+
 		if (!index.isValid()) {
 				return {};
 		}
@@ -85,6 +101,8 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const {
 }
 
 int32_t TreeModel::rowCount(const QModelIndex &parent) const {
+		ZoneScoped;
+
 		if (parent.column() > 0) {
 				return 0;
 		}
@@ -105,6 +123,8 @@ void TreeModel::setColumnsNames(const QVariantList &columnsNames) {
 }
 
 void TreeModel::setupModelData(const std::vector<Track> &tracks, TreeItem *parent) {
+		ZoneScoped;
+
 		struct ParentIndentation {
 				TreeItem *parent;
 				qsizetype indentation;

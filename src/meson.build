@@ -24,8 +24,9 @@ qt_moc = qt6.compile_moc(headers: moc_headers, dependencies: qt_dep)
 app_exe = executable(
   meson.project_name(),
   sources: [src, qt_moc, resources],
-  dependencies: [qt_dep, taglib_dep, qlementine_dep, qlementine_icons_dep],
+  dependencies: [qt_dep, taglib_dep, qlementine_dep, qlementine_icons_dep, tracy_dep, win_libs,],
   include_directories: include_dir,
+  cpp_args: common_args,
 )
 
 test(

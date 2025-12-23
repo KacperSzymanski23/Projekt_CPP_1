@@ -2,6 +2,8 @@
 #include "icons.hpp"
 // Qt
 #include <QTime>
+// Tracy
+#include <tracy/Tracy.hpp>
 // STD
 #include <unistd.h>
 
@@ -17,6 +19,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 	, m_audioButton(new QToolButton(this))
 	, m_favoriteButton(new QToolButton(this))
 	, m_playbackControlsLayout(new QHBoxLayout(this)) {
+		ZoneScoped;
 
 		m_playbackControlsLayout->setSpacing(0);
 
@@ -93,6 +96,8 @@ bool PlayerControls::isMuted() const {
 }
 
 void PlayerControls::setPlayerState(QMediaPlayer::PlaybackState state) {
+		ZoneScoped;
+
 		if (state != m_playerState) {
 				m_playerState = state;
 
@@ -111,6 +116,8 @@ void PlayerControls::setPlayerState(QMediaPlayer::PlaybackState state) {
 }
 
 void PlayerControls::updateProgressLabel(int32_t progress) const {
+		ZoneScoped;
+
 		const QTime PROGRESS_TIME((progress / 3600) % 60, (progress / 60) % 60, progress % 60);
 		const QTime DURATION_TIME((m_duration / 3600) % 60, (m_duration / 60) % 60, m_duration % 60);
 
@@ -125,6 +132,8 @@ void PlayerControls::updateProgressLabel(int32_t progress) const {
 }
 
 void PlayerControls::updateVolumeIcon(int32_t volume) const {
+		ZoneScoped;
+
 		if (volume > 75) {
 				m_audioButton->setIcon(Icons::HIGH_VOLUME);
 		} else if (volume > 25) {
@@ -137,6 +146,8 @@ void PlayerControls::updateVolumeIcon(int32_t volume) const {
 }
 
 void PlayerControls::playPauseClicked() {
+		ZoneScoped;
+
 		if (m_playerState == QMediaPlayer::PlayingState) {
 				m_playerState = QMediaPlayer::PausedState;
 		} else {
@@ -194,6 +205,8 @@ void PlayerControls::setVolume(float volume) const {
 }
 
 void PlayerControls::setMuted(bool muted) {
+		ZoneScoped;
+
 		if (muted != m_playerMuted) {
 				m_playerMuted = muted;
 
