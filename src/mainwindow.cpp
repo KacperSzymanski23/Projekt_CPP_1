@@ -1,10 +1,12 @@
 #include "mainwindow.hpp"
 #include "icons.hpp"
 // Qt
-#include <QCoreApplication>
+#include <QAction>
 #include <QDirListing>
 #include <QFuture>
+#include <QInputDialog>
 #include <QMediaMetaData>
+#include <QMenu>
 #include <QScreen>
 #include <QtConcurrent>
 // TagLib
@@ -13,21 +15,18 @@
 #include <tracy/Tracy.hpp>
 
 MainWindow::MainWindow()
-	: m_centralWidget(new QWidget(this))
+	: m_playbackQueue(new PlaybackQueue(this))
+	, m_centralWidget(new QWidget(this))
 	, m_sideBarWidget(new SideBar(this))
-	//	, m_settingsButton(new QToolButton(this))
 	, m_playbackControlsWidget(new PlayerControls(this))
-	//	, m_settingsDialog(new SettingsDialog(this))
 	, m_settings(Settings("config.cfg"))
 	, m_coverLabel(new QLabel(this))
 	, m_middleTreeView(new QTreeView(this))
 	, m_playerMainTreeView(new QTreeView(this))
-
 	, m_mainGridLayout(new QGridLayout(this))
 	, m_audioPlayer(new QMediaPlayer(this))
 	, m_audioOutput(new QAudioOutput(this))
-	, m_middleModel(new QStandardItemModel(this))
-	, m_playbackQueue(new PlaybackQueue(this)) {
+	, m_middleModel(new QStandardItemModel(this)) {
 		ZoneScoped;
 
 		readWindowGeometrySettings();
@@ -59,10 +58,9 @@ MainWindow::MainWindow()
 		});
 
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, &MainWindow::showLibrary);
+		connect(m_sideBarWidget, &SideBar::settingsChanged, this, [this]() { m_settings.loadSettings(); });
 
 		showLibrary();
-
-		m_playbackQueue->setQueue(m_trackPaths);
 
 		connect(m_playbackControlsWidget, &PlayerControls::next, m_playbackQueue, [this]() {
 				m_playbackQueue->next();
@@ -92,8 +90,7 @@ MainWindow::MainWindow()
 		m_coverLabel->setPixmap(m_coverImage);
 		m_coverLabel->setScaledContents(true);
 
-		//		m_mainGridLayout->addWidget(m_settingsButton, 0, 0, 1, 1);
-		m_mainGridLayout->addWidget(m_playbackControlsWidget, 0, 1, 1, 32);
+		m_mainGridLayout->addWidget(m_playbackControlsWidget, 0, 0, 1, 33);
 		m_mainGridLayout->addWidget(m_sideBarWidget, 1, 0, 13, 1);
 		m_mainGridLayout->addWidget(m_middleTreeView, 1, 1, 9, 5);
 		m_mainGridLayout->addWidget(m_coverLabel, 10, 1, 4, 5);
@@ -111,6 +108,7 @@ MainWindow::MainWindow()
 		m_playerMainTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(m_playerMainTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::onSongContextMenu);
 }
+
 void MainWindow::setupPlayerModel() {
 		ZoneScoped;
 
@@ -178,6 +176,8 @@ void MainWindow::showLibrary() {
 		scanLibrary();
 
 		setupPlayerModel();
+
+		m_playbackQueue->setQueue(m_trackPaths);
 }
 
 void MainWindow::showPlaylists() {
@@ -211,7 +211,6 @@ void MainWindow::scanLibrary() {
 
 		m_tracks.clear();
 
-		m_settings.loadSettings();
 		QString pathStr = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
 		if (pathStr.isEmpty()) {
 				pathStr = QDir::homePath() + "/Music";

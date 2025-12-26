@@ -4,7 +4,6 @@
 
 #include "settingsdialog.hpp"
 // Qt
-#include <QSpacerItem>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QWidget>
