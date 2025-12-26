@@ -61,7 +61,7 @@ class PlayerControls : public QWidget {
 		void setLoop(bool loop);
 		void setFavorite(bool favorite);
 		void setTrackDuration(int32_t duration);
-		void setTrackProgress(int32_t progress) const;
+		void setTrackProgress(int32_t progress);
 
 	  private slots:
 		// Sloty obsługujące kliknięcia przycisków

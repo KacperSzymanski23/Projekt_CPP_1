@@ -30,12 +30,14 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_loopButton->setToolTip(tr("Loop Playback"));
 		m_loopButton->setCheckable(true);
 		m_playbackControlsLayout->addWidget(m_loopButton);
+		connect(m_loopButton, &QToolButton::clicked, this, &PlayerControls::loopClicked);
 
 		m_shuffleButton->setIcon(Icons::SHUFFLE);
 		m_shuffleButton->setIconSize(ICON_SIZE);
 		m_shuffleButton->setToolTip(tr("Shuffle"));
 		m_shuffleButton->setCheckable(true);
 		m_playbackControlsLayout->addWidget(m_shuffleButton);
+		connect(m_shuffleButton, &QToolButton::clicked, this, &PlayerControls::shuffleClicked);
 
 		m_previousButton->setIcon(Icons::PREVIOUS);
 		m_previousButton->setIconSize(ICON_SIZE);
@@ -242,10 +244,18 @@ void PlayerControls::setFavorite(bool favorite) {
 		}
 }
 
-void PlayerControls::setTrackProgress(int32_t progress) const {
-		m_progressSlider->setValue(progress / 1000);
+void PlayerControls::setTrackProgress(int32_t progress) {
+		ZoneScoped;
 
-		updateProgressLabel(progress / 1000);
+		const int32_t CURRENT_PROGRESS{progress / 1000};
+
+		m_progressSlider->setValue(CURRENT_PROGRESS);
+
+		if (CURRENT_PROGRESS == m_duration) {
+				emit next();
+		}
+
+		updateProgressLabel(CURRENT_PROGRESS);
 }
 
 void PlayerControls::setTrackDuration(int32_t duration) {

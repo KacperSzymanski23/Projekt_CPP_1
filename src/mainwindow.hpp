@@ -2,13 +2,13 @@
 #define MAINWINDOW_HPP
 
 #include "logs.hpp"
+#include "playbackqueue.hpp"
 #include "playercontrols.hpp"
 #include "settings.hpp"
 #include "settingsdialog.hpp"
 #include "sidebar.h"
 #include "track.hpp"
 #include "treemodel.hpp"
-
 // Qt
 #include <QAction>
 #include <QAudioOutput>
@@ -43,6 +43,8 @@ class MainWindow : public QMainWindow {
 
 		static QString findCoverArt(const QFileInfo &fileInfo); // Szuka okładki albumu w folderze
 
+		PlaybackQueue *m_playbackQueue;
+
 		QWidget *m_centralWidget; // Centraly widget okna
 		SideBar *m_sideBarWidget; // Widget dla bocznego paska narzędzi
 
@@ -70,6 +72,7 @@ class MainWindow : public QMainWindow {
 		QPixmap m_coverImage; // Okładka dla obecnie wybranej ścieżki dźwiękowej
 
 		std::vector<Track> m_tracks; // std::vector zawierający metadane i ścieżki plików audio
+		QList<QUrl> m_trackPaths;
 
 		QStandardItemModel *m_middleModel; // Model dla środkowego panelu (listy playlist)
 
@@ -88,6 +91,7 @@ class MainWindow : public QMainWindow {
 		void closeEvent(QCloseEvent *event) override; // Funkcja slot obsługująca zamykanie okna
 		void readWindowGeometrySettings();            // Funkcja slot zapisująca stan okna
 
+		void selectRow(int32_t currentRow) const;
 		void rowClicked(const QModelIndex &current);                                    // Pobiera dane z piosenki z kliniętego przez użytkownika wiersza
 		Track extractMetadata(const QString &filePath, const TagLib::FileRef &fileRef); // Funkcja pomocnicza do ekstrakcji danych
 

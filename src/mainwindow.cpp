@@ -26,7 +26,8 @@ MainWindow::MainWindow()
 	, m_mainGridLayout(new QGridLayout(this))
 	, m_audioPlayer(new QMediaPlayer(this))
 	, m_audioOutput(new QAudioOutput(this))
-	, m_middleModel(new QStandardItemModel(this)) {
+	, m_middleModel(new QStandardItemModel(this))
+	, m_playbackQueue(new PlaybackQueue(this)) {
 		ZoneScoped;
 
 		readWindowGeometrySettings();
@@ -60,6 +61,25 @@ MainWindow::MainWindow()
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, &MainWindow::showLibrary);
 
 		showLibrary();
+
+		m_playbackQueue->setQueue(m_trackPaths);
+
+		connect(m_playbackControlsWidget, &PlayerControls::next, m_playbackQueue, [this]() {
+				m_playbackQueue->next();
+				m_audioPlayer->play();
+		});
+		connect(m_playbackControlsWidget, &PlayerControls::previous, m_playbackQueue, [this]() {
+				m_playbackQueue->previous();
+				m_audioPlayer->play();
+		});
+
+		connect(m_playbackControlsWidget, &PlayerControls::changeShuffleState, m_playbackQueue, &PlaybackQueue::shuffle);
+		connect(m_playbackControlsWidget, &PlayerControls::changeLoopedState, m_playbackQueue, [this]() {
+				m_playbackQueue->setPlaybackMode(PlaybackQueue::CurrentItemInLoop);
+		});
+
+		connect(m_playbackQueue, &PlaybackQueue::currentMediaChanged, m_audioPlayer, &QMediaPlayer::setSource);
+		connect(m_playbackQueue, &PlaybackQueue::currentIndexChanged, this, &MainWindow::selectRow);
 
 		m_mainGridLayout->setSpacing(5);
 
@@ -205,20 +225,18 @@ void MainWindow::scanLibrary() {
 		constexpr auto FLAGS = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::FilesOnly;
 		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"}; // Wspierane typy plików
 
-		QStringList filePaths{};
-
 		for (const auto &file : QDirListing(library.path(), AUDIO_FILE_FILTER, FLAGS)) {
-				filePaths.append(file.absoluteFilePath());
+				m_trackPaths.append(file.absoluteFilePath());
 		}
 
-		if (filePaths.isEmpty()) {
+		if (m_trackPaths.isEmpty()) {
 				return;
 		}
 
-		QFuture<Track> future = QtConcurrent::mapped(filePaths, [this](const QString &filePath) -> Track {
-				TagLib::FileRef fileRef{QFile::encodeName(filePath).constData()};
+		QFuture<Track> future = QtConcurrent::mapped(m_trackPaths, [this](const QUrl &filePath) -> Track {
+				TagLib::FileRef fileRef{QFile::encodeName(filePath.toString()).constData()};
 
-				return extractMetadata(filePath, fileRef);
+				return extractMetadata(filePath.toString(), fileRef);
 		});
 		future.waitForFinished();
 
@@ -277,16 +295,25 @@ Track MainWindow::extractMetadata(const QString &filePath, const TagLib::FileRef
 		return track;
 }
 
+void MainWindow::selectRow(int32_t currentRow) const {
+		ZoneScoped;
+
+		const QModelIndex CURRENT_MODEL_INDEX = m_playerModel->index(currentRow, 0, QModelIndex());
+
+		m_playerMainTreeView->setCurrentIndex(CURRENT_MODEL_INDEX);
+		m_playerMainTreeView->selectionModel()->select(CURRENT_MODEL_INDEX, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+		m_playerMainTreeView->scrollTo(CURRENT_MODEL_INDEX);
+}
+
 void MainWindow::rowClicked(const QModelIndex &current) {
 		ZoneScoped;
 
-		QVariant data = TreeModel::dataAtColumn(current, Qt::DisplayRole, 9);
+		int32_t currentRow = current.row();
 
-		m_coverImage = data.value<QString>();
+		m_playbackQueue->setCurrentIndex(currentRow);
+
+		m_coverImage = m_tracks.at(currentRow).coverArtPath;
 		m_coverLabel->setPixmap(m_coverImage);
-
-		data = TreeModel::dataAtColumn(current, Qt::DisplayRole, 8);
-		m_audioPlayer->setSource(QUrl::fromLocalFile(data.value<QString>()));
 }
 
 QString MainWindow::findCoverArt(const QFileInfo &fileInfo) {
