@@ -1,5 +1,6 @@
 #include "playercontrols.hpp"
 #include "icons.hpp"
+#include "logs.hpp"
 // Qt
 #include <QTime>
 // Tracy
@@ -160,12 +161,14 @@ void PlayerControls::playPauseClicked() {
 				case QMediaPlayer::PlayingState:
 						emit play();
 						m_playPauseButton->setIcon(Icons::PAUSE);
+						logCreate("Played");
 
 						break;
 				case QMediaPlayer::PausedState:
 				case QMediaPlayer::StoppedState:
 						emit pause();
 						m_playPauseButton->setIcon(Icons::PLAY);
+						logCreate("Paused");
 
 						break;
 		}
@@ -173,29 +176,41 @@ void PlayerControls::playPauseClicked() {
 
 void PlayerControls::muteClicked() {
 		emit changeMuteState(!m_playerMuted);
+		if(isMuted()) {
+			logCreate("Muted");
+		}
+		else {
+			logCreate("Unmuted");
+		}		
+		
 }
 
 void PlayerControls::volumeSliderValueChanged() {
 		const float VOLUME = static_cast<float>(m_volumeSlider->value());
 
 		emit changeVolume(VOLUME / 100.0F);
+		logCreate("Changed volume");
 }
 
 void PlayerControls::shuffleClicked() {
 		emit changeShuffleState(!m_playerShuffled);
+		logCreate("Shuffled");
 }
 
 void PlayerControls::loopClicked() {
 		emit changeLoopedState(!m_playerLooped);
+		logCreate("Looped");
 }
 
 void PlayerControls::favoriteClicked() {
 		emit changeFavoriteState(!m_playerFavorite);
 		setFavorite(!m_playerFavorite);
+		logCreate("Set favourite");
 }
 
 void PlayerControls::progressSliderMoved() {
 		emit changeProgress(m_progressSlider->value() * 1000);
+		logCreate("Moved progress slider");
 }
 
 void PlayerControls::setVolume(float volume) const {
