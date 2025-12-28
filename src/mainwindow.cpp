@@ -143,7 +143,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 		}
 
 		qsettings.endGroup();
-
+		saveSettings();
 		QMainWindow::closeEvent(event);
 }
 
