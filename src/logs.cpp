@@ -19,7 +19,7 @@ void logCreate(const std::string &message) {
 		std::string filename;
 		oss << std::put_time(&local_time, "%d-%m-%Y_%H-%M");
 		filename = oss.str() + ".log";
-		std::ofstream file(filename, std::ios::app);
+		std::ofstream file("../logs/"+filename, std::ios::app);
 		if (!file) {
 				throw std::runtime_error("File can't be created");
 		}
@@ -27,3 +27,4 @@ void logCreate(const std::string &message) {
 		file.close();
 		return;
 }
+
