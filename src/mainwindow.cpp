@@ -131,39 +131,51 @@ void MainWindow::setupPlayerModel() {
 void MainWindow::closeEvent(QCloseEvent *event) {
 		ZoneScoped;
 
-		QSettings qsettings{};
-
-		qsettings.beginGroup("Geometry");
-
-		qsettings.setValue("geometry", saveGeometry());
-		qsettings.setValue("savestate", saveState());
+		//if not maximized saves coordinates and size of window
 		if (!isMaximized()) {
-				qsettings.setValue("pos", pos());
-				qsettings.setValue("size", size());
+			const auto s =size();
+			const auto p = pos();
+			m_settings.setSettingsEntry("window_width", std::to_string(s.width()));
+			m_settings.setSettingsEntry("window_height", std::to_string(s.height()));
+			m_settings.setSettingsEntry("window_pos_x", std::to_string(p.x()));
+			m_settings.setSettingsEntry("window_pos_y", std::to_string(p.y()));
 		}
+		
+		//saves if maximized
+		m_settings.getSettingsEntry("window_maximized", ?isMaximized() ? "1":"0");
 
-		qsettings.endGroup();
-		saveSettings();
+		m_settings.saveSettings();
 		QMainWindow::closeEvent(event);
 }
 
 void MainWindow::readWindowGeometrySettings() {
 		ZoneScoped;
 
-		QSettings qsettings{};
+		const auto maxStr   = m_settings.getSettingsEntry("Geometry_maximized");
+    	const auto posXStr  = m_settings.getSettingsEntry("Geometry_pos_x");
+    	const auto posYStr  = m_settings.getSettingsEntry("Geometry_pos_y");
+    	const auto widthStr = m_settings.getSettingsEntry("Geometry_width");
+    	const auto heightStr= m_settings.getSettingsEntry("Geometry_height");
 
-		qsettings.beginGroup("Geometry");
+		QPoint posDefault = pos();
+    	QSize  sizeDefault = size();
 
-		restoreGeometry(qsettings.value("geometry", saveGeometry()).toByteArray());
-		restoreState(qsettings.value("savestate", saveState()).toByteArray());
-		move(qsettings.value("pos", pos()).toPoint());
-		resize(qsettings.value("size", size()).toSize());
+		if (!posXStr.empty() && !posYStr.empty()) {
+        	posDefault.setX(std::stoi(posXStr));
+        	posDefault.setY(std::stoi(posYStr));
+    	}
 
-		if (qsettings.value("maximized", isMaximized()).toBool()) {
-				showMaximized();
+		if (!widthStr.empty() && !heightStr.empty()) {
+        	sizeDefault.setWidth(std::stoi(widthStr));
+        	sizeDefault.setHeight(std::stoi(heightStr));
+    	}
+		
+		move(posDefault);
+    	resize(sizeDefault);
+
+		if (!maxStr.empty()&&maxStr=="1") {
+			showMaximized();
 		}
-
-		qsettings.endGroup();
 }
 
 void MainWindow::showLibrary() {
