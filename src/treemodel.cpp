@@ -5,7 +5,7 @@
 // Tracy
 #include <tracy/Tracy.hpp>
 
-TreeModel::TreeModel(const std::vector<Track> &tracks, const QVariantList &columnsNames, QObject *parent)
+TreeModel::TreeModel(const QList<Library::TrackMetadata>  &tracks, const QVariantList &columnsNames, QObject *parent)
 	: QAbstractItemModel(parent)
 	, m_rootItem(std::make_unique<TreeItem>(columnsNames)) {
 
@@ -122,7 +122,7 @@ void TreeModel::setColumnsNames(const QVariantList &columnsNames) {
 		m_rootItem = std::make_unique<TreeItem>(columnsNames);
 }
 
-void TreeModel::setupModelData(const std::vector<Track> &tracks, TreeItem *parent) {
+void TreeModel::setupModelData(const QList<Library::TrackMetadata>  &tracks, TreeItem *parent) {
 		ZoneScoped;
 
 		struct ParentIndentation {
@@ -147,8 +147,6 @@ void TreeModel::setupModelData(const std::vector<Track> &tracks, TreeItem *paren
 				columnData << line.year;
 				columnData << line.bitrate;
 				columnData << line.fileSize;
-				columnData << line.path;
-				columnData << line.coverArtPath;
 
 				if (state.constLast().indentation < POSITION_ZERO) {
 						TreeItem *lastParent = state.constLast().parent;

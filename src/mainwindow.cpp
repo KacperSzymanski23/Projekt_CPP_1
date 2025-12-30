@@ -29,7 +29,9 @@ MainWindow::MainWindow()
 	, m_middleModel(new QStandardItemModel(this)) {
 		ZoneScoped;
 
-		readWindowGeometrySettings();
+
+		QUrl libraryPath = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
+		m_library = Library{libraryPath};
 
 		m_audioPlayer->setAudioOutput(m_audioOutput);
 
@@ -38,6 +40,8 @@ MainWindow::MainWindow()
 
 		connect(m_sideBarWidget, &SideBar::showLibraryClicked, this, &MainWindow::showLibrary);
 		connect(m_sideBarWidget, &SideBar::showPlaylistsClicked, this, &MainWindow::showPlaylists);
+		connect(m_sideBarWidget, &SideBar::showAlbumsClicked, this, &MainWindow::showAlbums);
+		connect(m_sideBarWidget, &SideBar::showAuthorsClicked, this, &MainWindow::showAuthors);
 
 		connect(m_playbackControlsWidget, &PlayerControls::pause, m_audioPlayer, &QMediaPlayer::pause);
 		connect(m_playbackControlsWidget, &PlayerControls::play, m_audioPlayer, &QMediaPlayer::play);
@@ -59,6 +63,8 @@ MainWindow::MainWindow()
 
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, &MainWindow::showLibrary);
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, [this]() { m_settings.loadSettings(); });
+
+		m_library.scanLibraryPath();
 
 		showLibrary();
 
@@ -107,17 +113,19 @@ MainWindow::MainWindow()
 
 		m_playerMainTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(m_playerMainTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::onSongContextMenu);
+
+		readWindowGeometrySettings();
 }
 
-void MainWindow::setupPlayerModel() {
+void MainWindow::setupPlayerModel(const QList<Library::TrackMetadata> &trackMetadatas) {
 		ZoneScoped;
 
 		if (m_playerMainTreeView->model()) {
 				delete m_playerMainTreeView->model();
 		}
-		const QVariantList COLUMNS_NAME{"Number", "Title", "Album", "Author", "Duration", "Year", "Bitrate", "File Size", "Path"};
+		const QVariantList COLUMNS_NAME{"Number", "Title", "Album", "Author", "Duration", "Year", "Bitrate", "File Size"};
 
-		m_playerModel = new TreeModel(m_tracks, COLUMNS_NAME, this);
+		m_playerModel = new TreeModel(trackMetadatas, COLUMNS_NAME, this);
 
 		m_playerMainTreeView->setModel(m_playerModel);
 
@@ -131,18 +139,18 @@ void MainWindow::setupPlayerModel() {
 void MainWindow::closeEvent(QCloseEvent *event) {
 		ZoneScoped;
 
-		//if not maximized saves coordinates and size of window
+		// if not maximized saves coordinates and size of window
 		if (!isMaximized()) {
-			const auto s =size();
-			const auto p = pos();
-			m_settings.setSettingsEntry("window_width", std::to_string(s.width()));
-			m_settings.setSettingsEntry("window_height", std::to_string(s.height()));
-			m_settings.setSettingsEntry("window_pos_x", std::to_string(p.x()));
-			m_settings.setSettingsEntry("window_pos_y", std::to_string(p.y()));
+				const auto s = size();
+				const auto p = pos();
+				m_settings.setSettingsEntry("window_width", std::to_string(s.width()));
+				m_settings.setSettingsEntry("window_height", std::to_string(s.height()));
+				m_settings.setSettingsEntry("window_pos_x", std::to_string(p.x()));
+				m_settings.setSettingsEntry("window_pos_y", std::to_string(p.y()));
 		}
-		
-		//saves if maximized
-		m_settings.getSettingsEntry("window_maximized", ?isMaximized() ? "1":"0");
+
+		// saves if maximized
+		m_settings.setSettingsEntry("window_maximized", isMaximized() ? "1" : "0");
 
 		m_settings.saveSettings();
 		QMainWindow::closeEvent(event);
@@ -158,23 +166,23 @@ void MainWindow::readWindowGeometrySettings() {
 		const auto heightStr = m_settings.getSettingsEntry("window_height");
 
 		QPoint posDefault = pos();
-    	QSize  sizeDefault = size();
+		QSize sizeDefault = size();
 
 		if (!posXStr.empty() && !posYStr.empty()) {
-        	posDefault.setX(std::stoi(posXStr));
-        	posDefault.setY(std::stoi(posYStr));
-    	}
+				posDefault.setX(std::stoi(posXStr));
+				posDefault.setY(std::stoi(posYStr));
+		}
 
 		if (!widthStr.empty() && !heightStr.empty()) {
-        	sizeDefault.setWidth(std::stoi(widthStr));
-        	sizeDefault.setHeight(std::stoi(heightStr));
-    	}
-		
-		move(posDefault);
-    	resize(sizeDefault);
+				sizeDefault.setWidth(std::stoi(widthStr));
+				sizeDefault.setHeight(std::stoi(heightStr));
+		}
 
-		if (!maxStr.empty()&&maxStr=="1") {
-			showMaximized();
+		move(posDefault);
+		resize(sizeDefault);
+
+		if (!maxStr.empty() && maxStr == "1") {
+				showMaximized();
 		}
 }
 
@@ -185,11 +193,6 @@ void MainWindow::showLibrary() {
 		if (m_middleModel) {
 				m_middleModel->clear();
 		}
-		scanLibrary();
-
-		setupPlayerModel();
-
-		m_playbackQueue->setQueue(m_trackPaths);
 }
 
 void MainWindow::showPlaylists() {
@@ -213,97 +216,31 @@ void MainWindow::showFavorite() {
 }
 
 void MainWindow::showAlbums() {
+		ZoneScoped;
+
+		m_currentViewMode = ViewMode::Albums;
+		m_middleModel->clear();
+		m_middleModel->setHorizontalHeaderLabels({"Albums"});
+
+		for (const auto &artist : m_library.getArtistList()) {
+				for (const auto &album : artist.getAlbumsList()) {
+						QStandardItem *item = new QStandardItem(Icons::ALBUMS, album.getTitle());
+						m_middleModel->appendRow(item);
+				}
+		}
 }
 
 void MainWindow::showAuthors() {
-}
-
-void MainWindow::scanLibrary() {
 		ZoneScoped;
 
-		m_tracks.clear();
+		m_currentViewMode = ViewMode::Artists;
+		m_middleModel->clear();
+		m_middleModel->setHorizontalHeaderLabels({"Artist"});
 
-		QString pathStr = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
-		if (pathStr.isEmpty()) {
-				pathStr = QDir::homePath() + "/Music";
+		for (const auto &artist : m_library.getArtistList()) {
+				QStandardItem *item = new QStandardItem(Icons::AUTHORS, artist.getName());
+				m_middleModel->appendRow(item);
 		}
-		QDir library{pathStr};
-
-		if (!library.exists()) {
-				return;
-		}
-
-		constexpr auto FLAGS = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::FilesOnly;
-		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a"}; // Wspierane typy plików
-
-		for (const auto &file : QDirListing(library.path(), AUDIO_FILE_FILTER, FLAGS)) {
-				m_trackPaths.append(file.absoluteFilePath());
-		}
-
-		if (m_trackPaths.isEmpty()) {
-				return;
-		}
-
-		QFuture<Track> future = QtConcurrent::mapped(m_trackPaths, [this](const QUrl &filePath) -> Track {
-				TagLib::FileRef fileRef{QFile::encodeName(filePath.toString()).constData()};
-
-				return extractMetadata(filePath.toString(), fileRef);
-		});
-		future.waitForFinished();
-
-		const auto results = future.results();
-		m_tracks.reserve(results.size());
-
-		for (const auto &track : results) {
-				m_tracks.push_back(std::move(track));
-		}
-}
-
-Track MainWindow::extractMetadata(const QString &filePath, const TagLib::FileRef &fileRef) {
-		ZoneScoped;
-
-		if (fileRef.isNull() || fileRef.tag() == nullptr) {
-				return Track{};
-		}
-
-		if (filePath.isEmpty()) {
-				return Track{};
-		}
-
-		const QFileInfo FILE_INFO{filePath};
-		const TagLib::Tag *TAG{fileRef.tag()};
-		const TagLib::AudioProperties *AUDIO_PROPERTIES{fileRef.audioProperties()};
-
-		const uint32_t NUMBER{TAG->track()};
-		const QString TITLE{QString::fromStdWString(TAG->title().toWString())};
-		const QString ALBUM{QString::fromStdWString(TAG->album().toWString())};
-		const QString ARTIST{QString::fromStdWString(TAG->artist().toWString())};
-		const uint32_t YEAR{TAG->year()};
-
-		const int32_t DURATION_IN_SECONDS{AUDIO_PROPERTIES->lengthInSeconds()};
-		const int32_t BITRATE{AUDIO_PROPERTIES->bitrate()};
-
-		const QString COVER_ART_PATH{findCoverArt(FILE_INFO)};
-
-		const QTime DURATION{0, DURATION_IN_SECONDS / 60, DURATION_IN_SECONDS % 60};
-
-		constexpr float MIB = 1024.0F * 1024.0F;
-		const float FILE_SIZE = static_cast<float>(FILE_INFO.size()) / MIB;
-
-		Track track{};
-
-		track.number = NUMBER;
-		track.title = TITLE;
-		track.album = ALBUM;
-		track.artist = ARTIST;
-		track.duration = DURATION.toString("mm:ss");
-		track.year = YEAR;
-		track.bitrate = QString::number(BITRATE) + " kbps";
-		track.fileSize = QString::number(FILE_SIZE, 'f', 1) + " MiB";
-		track.coverArtPath = COVER_ART_PATH;
-		track.path = QDir::toNativeSeparators(filePath);
-
-		return track;
 }
 
 void MainWindow::selectRow(int32_t currentRow) const {
@@ -322,25 +259,6 @@ void MainWindow::rowClicked(const QModelIndex &current) {
 		int32_t currentRow = current.row();
 
 		m_playbackQueue->setCurrentIndex(currentRow);
-
-		m_coverImage = m_tracks.at(currentRow).coverArtPath;
-		m_coverLabel->setPixmap(m_coverImage);
-}
-
-QString MainWindow::findCoverArt(const QFileInfo &fileInfo) {
-		ZoneScoped;
-
-		const QString FILE_PATH{fileInfo.absolutePath()};
-
-		constexpr auto FLAGS = QDirListing::IteratorFlag::Default;
-
-		const QStringList COVER_FILES = {"cover.jpg", "cover.jpeg", "cover.png", "cover.webp"}; // Wspierane typy plików dla grafiki okładki
-
-		for (const auto &file : QDirListing(FILE_PATH, COVER_FILES, FLAGS)) {
-				return file.absoluteFilePath();
-		}
-
-		return nullptr;
 }
 
 QString MainWindow::getPlaylistsDir() {
@@ -398,16 +316,29 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 		ZoneScoped;
 
 		if (m_currentViewMode == ViewMode::Playlists) {
-
 				QString filename = m_middleModel->itemFromIndex(index)->data().toString();
 				loadPlaylistContent(filename);
+		}
+		if (m_currentViewMode == ViewMode::Albums) {
+				const int32_t ROW = index.row();
+
+				const Library::Album ALBUM{m_library.getAlbumsList().at(ROW)};
+				const QList PATHS{ALBUM.getTracksPathsList()};
+				const QList TRACKS{ALBUM.getTracksList()};
+
+				m_coverImage = ALBUM.getCoverArtPath().toString();
+				m_coverLabel->setPixmap(m_coverImage);
+
+				m_playbackQueue->setQueue(PATHS);
+				setupPlayerModel(TRACKS);
 		}
 }
 
 void MainWindow::loadPlaylistContent(const QString &filename) {
 		ZoneScoped;
 
-		m_tracks.clear();
+		QList<Library::TrackMetadata> trackList{};
+		QList<QUrl> pathList{};
 
 		QFile file(getPlaylistsDir() + "/" + filename);
 		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -417,13 +348,16 @@ void MainWindow::loadPlaylistContent(const QString &filename) {
 						if (!line.isEmpty() && QFile::exists(line)) {
 
 								const TagLib::FileRef FILE_REF{QFile::encodeName(line).constData()};
-								extractMetadata(line, FILE_REF);
+
+								trackList.append(Library::extractMetadata(line, FILE_REF));
+								pathList.append(line);
 						}
 				}
 				file.close();
 		}
 
-		setupPlayerModel();
+		m_playbackQueue->setQueue(pathList);
+		setupPlayerModel(trackList);
 }
 
 void MainWindow::onSongContextMenu(const QPoint &pos) {

@@ -4,12 +4,12 @@ src = files(
   'playercontrols.cpp',
   'settings.cpp',
   'settingsdialog.cpp',
-  'track.cpp',
   'treeitem.cpp',
   'treemodel.cpp',
   'sidebar.cpp',
   'logs.cpp',
   'playbackqueue.cpp',
+  'library.cpp',
 )
 
 moc_headers = files(

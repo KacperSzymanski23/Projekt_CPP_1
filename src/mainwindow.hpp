@@ -1,12 +1,12 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#include "library.hpp"
 #include "logs.hpp"
 #include "playbackqueue.hpp"
 #include "playercontrols.hpp"
 #include "settings.hpp"
 #include "sidebar.h"
-#include "track.hpp"
 #include "treemodel.hpp"
 // Qt
 #include <QAudioOutput>
@@ -31,10 +31,7 @@ class MainWindow : public QMainWindow {
 		MainWindow();
 
 	  private:
-		void setupPlayerModel(); // Tworzy model elemetów dla m_playerMainTreeView
-		void scanLibrary();      // Skanuje wskananą ścieżkę w poszukiwaniu plików audio
-
-		static QString findCoverArt(const QFileInfo &fileInfo); // Szuka okładki albumu w folderze
+		void setupPlayerModel(const QList<Library::TrackMetadata> &trackMetadatas); // Tworzy model elemetów dla m_playerMainTreeView
 
 		PlaybackQueue *m_playbackQueue;
 
@@ -44,6 +41,7 @@ class MainWindow : public QMainWindow {
 		PlayerControls *m_playbackControlsWidget; // Widget umożliwiający sterowanei odtwarzaniem
 
 		Settings m_settings; // Ustawienia
+		Library m_library;
 
 		QLabel *m_coverLabel; // Etykieta wyświetlająca okładkę dla każdej ścieżki
 
@@ -64,12 +62,9 @@ class MainWindow : public QMainWindow {
 
 		QPixmap m_coverImage; // Okładka dla obecnie wybranej ścieżki dźwiękowej
 
-		std::vector<Track> m_tracks; // std::vector zawierający metadane i ścieżki plików audio
-		QList<QUrl> m_trackPaths;
-
 		QStandardItemModel *m_middleModel; // Model dla środkowego panelu (listy playlist)
 
-		enum class ViewMode { Library, Playlists, None };
+		enum class ViewMode { Library = 0, Playlists = 1, Albums = 2, Artists = 3, Favorite = 4, None = 5 };
 		ViewMode m_currentViewMode = ViewMode::None;
 		QString getPlaylistsDir();                             // Pomocnicza funkcja do folderu
 		void loadPlaylistContent(const QString &playlistName); // Wczytuje zawartość playlisty
@@ -85,8 +80,7 @@ class MainWindow : public QMainWindow {
 		void readWindowGeometrySettings();            // Funkcja slot zapisująca stan okna
 
 		void selectRow(int32_t currentRow) const;
-		void rowClicked(const QModelIndex &current);                                    // Pobiera dane z piosenki z kliniętego przez użytkownika wiersza
-		Track extractMetadata(const QString &filePath, const TagLib::FileRef &fileRef); // Funkcja pomocnicza do ekstrakcji danych
+		void rowClicked(const QModelIndex &current); // Pobiera dane z piosenki z kliniętego przez użytkownika wiersza
 
 		void onMiddleViewClicked(const QModelIndex &index); // Kliknięcie w playlistę
 		void onPlaylistContextMenu(const QPoint &pos);      // Menu: Nowa playlista
