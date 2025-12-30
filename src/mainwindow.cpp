@@ -151,11 +151,11 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 void MainWindow::readWindowGeometrySettings() {
 		ZoneScoped;
 
-		const auto maxStr   = m_settings.getSettingsEntry("Geometry_maximized");
-    	const auto posXStr  = m_settings.getSettingsEntry("Geometry_pos_x");
-    	const auto posYStr  = m_settings.getSettingsEntry("Geometry_pos_y");
-    	const auto widthStr = m_settings.getSettingsEntry("Geometry_width");
-    	const auto heightStr= m_settings.getSettingsEntry("Geometry_height");
+		const auto maxStr = m_settings.getSettingsEntry("window_maximized");
+		const auto posXStr = m_settings.getSettingsEntry("window_pos_x");
+		const auto posYStr = m_settings.getSettingsEntry("window_pos_y");
+		const auto widthStr = m_settings.getSettingsEntry("window_width");
+		const auto heightStr = m_settings.getSettingsEntry("window_height");
 
 		QPoint posDefault = pos();
     	QSize  sizeDefault = size();
