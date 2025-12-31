@@ -189,6 +189,12 @@ void PlaybackQueue::shuffle() {
 }
 
 void PlaybackQueue::next() {
+		ZoneScoped;
+
+		if (m_queue.isEmpty()) {
+				return;
+		}
+
 		m_currentIndex = nextIndex(1);
 
 		emit currentIndexChanged(m_currentIndex);
@@ -196,6 +202,12 @@ void PlaybackQueue::next() {
 }
 
 void PlaybackQueue::previous() {
+		ZoneScoped;
+
+		if (m_queue.isEmpty()) {
+				return;
+		}
+
 		m_currentIndex = previousIndex(1);
 
 		emit currentIndexChanged(m_currentIndex);
@@ -203,6 +215,8 @@ void PlaybackQueue::previous() {
 }
 
 void PlaybackQueue::setCurrentIndex(int32_t index) {
+		ZoneScoped;
+
 		if (index < 0 || index >= m_queue.size()) {
 				index = -1;
 		}
