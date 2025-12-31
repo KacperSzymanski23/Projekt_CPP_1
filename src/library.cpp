@@ -110,6 +110,22 @@ QList<Library::Album> Library::Artist::getAlbumsList() const {
 		return m_albums;
 }
 
+Library::Album Library::Artist::getAlbumByIndex(uint32_t index) const {
+		return m_albums.at(index);
+}
+
+Library::Album Library::Artist::findAlbumByTitle(const QString &albumTitle) const {
+		ZoneScoped;
+
+		for (const auto &album : m_albums) {
+				if (album.getTitle() == albumTitle) {
+						return album;
+				}
+		}
+
+		return Album();
+}
+
 void Library::Artist::appendAlbum(const Album &album) {
 		m_albums.append(std::move(album));
 }
@@ -205,6 +221,16 @@ QList<Library::Artist> Library::getArtistList() const {
 		return m_artists;
 }
 
+QList<Library::Album> Library::getAlbumsList() const {
+		ZoneScoped;
+
+		return m_albums;
+}
+
+Library::Album Library::getAlbumByIndex(uint32_t index) const {
+		return m_albums.at(index);
+}
+
 Library::Artist Library::findArtistByName(const QString &artistName) const {
 		ZoneScoped;
 
@@ -217,22 +243,8 @@ Library::Artist Library::findArtistByName(const QString &artistName) const {
 		return Artist(nullptr);
 }
 
-Library::Album Library::findAlbumByTitle(const QString &albumTitle) const {
-		ZoneScoped;
-
-		for (const auto &album : m_albums) {
-				if (album.getTitle() == albumTitle) {
-						return album;
-				}
-		}
-
-		return Album();
-}
-
-QList<Library::Album> Library::getAlbumsList() const {
-		ZoneScoped;
-
-		return m_albums;
+Library::Artist Library::getArtistByIndex(int32_t index) const {
+		return m_artists.at(index);
 }
 
 void Library::groupTracks(const QList<TrackMetadata> &tracks, const QList<QUrl> &paths) {

@@ -60,6 +60,9 @@ class Library {
 				void setAlbumsList(const QList<Album> &albums);
 				QList<Album> getAlbumsList() const;
 
+				Album getAlbumByIndex(uint32_t index) const;
+				Album findAlbumByTitle(const QString &albumTitle) const;
+
 				void appendAlbum(const Album &album);
 
 			  private:
@@ -76,10 +79,11 @@ class Library {
 		void scanLibraryPath();
 
 		QList<Artist> getArtistList() const;
+		QList<Album> getAlbumsList() const;
+		Album getAlbumByIndex(uint32_t index) const;
 
 		Artist findArtistByName(const QString &artistName) const;
-		Album findAlbumByTitle(const QString &albumTitle) const;
-		QList<Album> getAlbumsList() const;
+		Artist getArtistByIndex(int32_t index) const;
 
 		void groupTracks(const QList<TrackMetadata> &tracksMetadatas, const QList<QUrl> &path);
 

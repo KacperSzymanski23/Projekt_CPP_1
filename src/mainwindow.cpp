@@ -29,7 +29,6 @@ MainWindow::MainWindow()
 	, m_middleModel(new QStandardItemModel(this)) {
 		ZoneScoped;
 
-
 		QUrl libraryPath = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
 		m_library = Library{libraryPath};
 
@@ -41,7 +40,6 @@ MainWindow::MainWindow()
 		connect(m_sideBarWidget, &SideBar::showLibraryClicked, this, &MainWindow::showLibrary);
 		connect(m_sideBarWidget, &SideBar::showPlaylistsClicked, this, &MainWindow::showPlaylists);
 		connect(m_sideBarWidget, &SideBar::showAlbumsClicked, this, &MainWindow::showAlbums);
-		connect(m_sideBarWidget, &SideBar::showAuthorsClicked, this, &MainWindow::showAuthors);
 
 		connect(m_playbackControlsWidget, &PlayerControls::pause, m_audioPlayer, &QMediaPlayer::pause);
 		connect(m_playbackControlsWidget, &PlayerControls::play, m_audioPlayer, &QMediaPlayer::play);
@@ -66,6 +64,8 @@ MainWindow::MainWindow()
 
 		m_library.scanLibraryPath();
 
+		m_libraryModel = new MiddleTreeModel(m_library.getArtistList(), "Library", this);
+
 		showLibrary();
 
 		connect(m_playbackControlsWidget, &PlayerControls::next, m_playbackQueue, [this]() {
@@ -87,7 +87,6 @@ MainWindow::MainWindow()
 
 		m_mainGridLayout->setSpacing(5);
 
-		m_middleTreeView->setModel(m_middleModel);
 		m_middleTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 		m_middleTreeView->header()->setDefaultAlignment(Qt::AlignCenter);
 		m_playerMainTreeView->header()->setDefaultAlignment(Qt::AlignCenter);
@@ -125,7 +124,7 @@ void MainWindow::setupPlayerModel(const QList<Library::TrackMetadata> &trackMeta
 		}
 		const QVariantList COLUMNS_NAME{"Number", "Title", "Album", "Author", "Duration", "Year", "Bitrate", "File Size"};
 
-		m_playerModel = new TreeModel(trackMetadatas, COLUMNS_NAME, this);
+		m_playerModel = new PlayerTreeModel(trackMetadatas, COLUMNS_NAME, this);
 
 		m_playerMainTreeView->setModel(m_playerModel);
 
@@ -190,16 +189,22 @@ void MainWindow::showLibrary() {
 		ZoneScoped;
 
 		m_currentViewMode = ViewMode::Library;
-		if (m_middleModel) {
-				m_middleModel->clear();
-		}
+
+		m_middleTreeView->setModel(m_libraryModel);
 }
 
 void MainWindow::showPlaylists() {
 		ZoneScoped;
 
 		m_currentViewMode = ViewMode::Playlists;
-		m_middleModel->clear();
+		if (m_middleModel) {
+				m_middleModel->clear();
+		}
+
+		if (m_middleModel == nullptr) {
+				return;
+		}
+
 		m_middleModel->setHorizontalHeaderLabels({"Playlists"});
 
 		QDir dir = getPlaylistsDir();
@@ -210,6 +215,8 @@ void MainWindow::showPlaylists() {
 				item->setData(f);
 				m_middleModel->appendRow(item);
 		}
+
+		m_middleTreeView->setModel(m_middleModel);
 }
 
 void MainWindow::showFavorite() {
@@ -219,7 +226,14 @@ void MainWindow::showAlbums() {
 		ZoneScoped;
 
 		m_currentViewMode = ViewMode::Albums;
-		m_middleModel->clear();
+		if (m_middleModel) {
+				m_middleModel->clear();
+		}
+
+		if (m_middleModel == nullptr) {
+				return;
+		}
+
 		m_middleModel->setHorizontalHeaderLabels({"Albums"});
 
 		for (const auto &artist : m_library.getArtistList()) {
@@ -228,19 +242,8 @@ void MainWindow::showAlbums() {
 						m_middleModel->appendRow(item);
 				}
 		}
-}
 
-void MainWindow::showAuthors() {
-		ZoneScoped;
-
-		m_currentViewMode = ViewMode::Artists;
-		m_middleModel->clear();
-		m_middleModel->setHorizontalHeaderLabels({"Artist"});
-
-		for (const auto &artist : m_library.getArtistList()) {
-				QStandardItem *item = new QStandardItem(Icons::AUTHORS, artist.getName());
-				m_middleModel->appendRow(item);
-		}
+		m_middleTreeView->setModel(m_middleModel);
 }
 
 void MainWindow::selectRow(int32_t currentRow) const {
@@ -315,14 +318,29 @@ void MainWindow::createNewPlaylist() {
 void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 		ZoneScoped;
 
+		const int32_t ROW = index.row();
+		const int32_t PARENT_ROW = index.parent().row();
+
 		if (m_currentViewMode == ViewMode::Playlists) {
 				QString filename = m_middleModel->itemFromIndex(index)->data().toString();
 				loadPlaylistContent(filename);
-		}
-		if (m_currentViewMode == ViewMode::Albums) {
-				const int32_t ROW = index.row();
+		} else if (m_currentViewMode == ViewMode::Library) {
+				if (PARENT_ROW == -1) {
+						return;
+				}
 
-				const Library::Album ALBUM{m_library.getAlbumsList().at(ROW)};
+				const Library::Artist ARTIST{m_library.getArtistByIndex(PARENT_ROW)};
+				const Library::Album ALBUM{ARTIST.getAlbumByIndex(ROW)};
+				const QList PATHS{ALBUM.getTracksPathsList()};
+				const QList TRACKS{ALBUM.getTracksList()};
+
+				m_coverImage = ALBUM.getCoverArtPath().toString();
+				m_coverLabel->setPixmap(m_coverImage);
+
+				m_playbackQueue->setQueue(PATHS);
+				setupPlayerModel(TRACKS);
+		} else if (m_currentViewMode == ViewMode::Albums) {
+				const Library::Album ALBUM{m_library.getAlbumByIndex(ROW)};
 				const QList PATHS{ALBUM.getTracksPathsList()};
 				const QList TRACKS{ALBUM.getTracksList()};
 
@@ -367,7 +385,7 @@ void MainWindow::onSongContextMenu(const QPoint &pos) {
 		if (!index.isValid())
 				return;
 
-		QString filePath = TreeModel::dataAtColumn(index, Qt::DisplayRole, 8).toString();
+		QString filePath = TreeModel::data(index, Qt::DisplayRole, 8).toString();
 
 		QMenu menu(this);
 		QMenu *subMenu = menu.addMenu("Dodaj do playlisty");
@@ -402,7 +420,7 @@ void MainWindow::addSongToPlaylist(const QString &playlistName) {
 		if (!index.isValid())
 				return;
 
-		QString filePath = TreeModel::dataAtColumn(index, Qt::DisplayRole, 8).toString();
+		QString filePath = TreeModel::data(index, Qt::DisplayRole, 8).toString();
 		if (filePath.isEmpty())
 				return;
 
