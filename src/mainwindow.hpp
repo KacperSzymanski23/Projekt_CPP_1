@@ -91,7 +91,8 @@ class MainWindow : public QMainWindow {
 		void onPlaylistContextMenu(const QPoint &pos);      // Menu: Nowa playlista
 		void onSongContextMenu(const QPoint &pos);          // Menu: Dodaj do playlisty
 
-		void createNewPlaylist();                            // Logika tworzenia pliku
+		void createNewPlaylist(const QString &playlistName);                            // Logika tworzenia pliku
+		void createNewPlaylistDialog();                            // Okno dialogowe tworzenia pliku
 		void addSongToPlaylist(const QString &playlistName); // Dodawanie utworu
 };
 
