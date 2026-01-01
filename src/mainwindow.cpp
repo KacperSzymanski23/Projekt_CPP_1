@@ -62,6 +62,7 @@ MainWindow::MainWindow()
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, &MainWindow::showLibrary);
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, [this]() { m_settings.loadSettings(); });
 
+		// m_library.oldScanLibraryPath();
 		m_library.scanLibraryPath();
 
 		m_libraryModel = new MiddleTreeModel(m_library.getArtistList(), "Library", this);
@@ -237,8 +238,8 @@ void MainWindow::showAlbums() {
 		m_middleModel->setHorizontalHeaderLabels({"Albums"});
 
 		for (const auto &artist : m_library.getArtistList()) {
-				for (const auto &album : artist.getAlbumsList()) {
-						QStandardItem *item = new QStandardItem(Icons::ALBUMS, album.getTitle());
+				for (const auto &album : artist.getItems()) {
+						QStandardItem *item = new QStandardItem(Icons::ALBUMS, album.getName());
 						m_middleModel->appendRow(item);
 				}
 		}
@@ -324,25 +325,27 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 		if (m_currentViewMode == ViewMode::Playlists) {
 				QString filename = m_middleModel->itemFromIndex(index)->data().toString();
 				loadPlaylistContent(filename);
+
 		} else if (m_currentViewMode == ViewMode::Library) {
 				if (PARENT_ROW == -1) {
 						return;
 				}
 
-				const Library::Artist ARTIST{m_library.getArtistByIndex(PARENT_ROW)};
-				const Library::Album ALBUM{ARTIST.getAlbumByIndex(ROW)};
+				const Library::Artist ARTIST{m_library.getArtist(PARENT_ROW)};
+				const Library::Album ALBUM{ARTIST.getItem(ROW)};
 				const QList PATHS{ALBUM.getTracksPathsList()};
-				const QList TRACKS{ALBUM.getTracksList()};
+				const QList TRACKS{ALBUM.getItems()};
 
 				m_coverImage = ALBUM.getCoverArtPath().toString();
 				m_coverLabel->setPixmap(m_coverImage);
 
 				m_playbackQueue->setQueue(PATHS);
 				setupPlayerModel(TRACKS);
+
 		} else if (m_currentViewMode == ViewMode::Albums) {
-				const Library::Album ALBUM{m_library.getAlbumByIndex(ROW)};
+				const Library::Album ALBUM{m_library.getAlbum(ROW)};
 				const QList PATHS{ALBUM.getTracksPathsList()};
-				const QList TRACKS{ALBUM.getTracksList()};
+				const QList TRACKS{ALBUM.getItems()};
 
 				m_coverImage = ALBUM.getCoverArtPath().toString();
 				m_coverLabel->setPixmap(m_coverImage);
