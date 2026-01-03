@@ -8,22 +8,13 @@
 // Tracy
 #include <tracy/Tracy.hpp>
 
-Library::Album::Album(const QString &title, const QUrl &coverArtPath, const QList<TrackMetadata> &tracks, const QList<QUrl> &tracksPaths)
-	: m_title(title)
+Library::Album::Album(const QString &title, const QUrl &coverArtPath, const QList<TrackMetadata> &tracks, const QList<QUrl> &paths)
+	: Collection(title, tracks)
 	, m_coverArtPath(coverArtPath)
-	, m_tracks(tracks)
-	, m_tracksPaths(tracksPaths) {
+	, m_tracksPaths(paths) {
 		ZoneScoped;
 
 		findCoverArt(m_coverArtPath);
-}
-
-void Library::Album::setTitle(const QString &title) {
-		m_title = title;
-}
-
-QString Library::Album::getTitle() const {
-		return m_title;
 }
 
 void Library::Album::setCoverArtPath(const QUrl &path) {
@@ -34,11 +25,11 @@ QUrl Library::Album::getCoverArtPath() const {
 		return m_coverArtPath;
 }
 
-void Library::Album::setData(const QList<TrackMetadata> &tracks, const QList<QUrl> &tracksPaths) {
+void Library::Album::setData(const QList<TrackMetadata> &tracks, const QList<QUrl> &paths) {
 		ZoneScoped;
 
-		m_tracks = std::move(tracks);
-		m_tracksPaths = std::move(tracksPaths);
+		p_items = std::move(tracks);
+		m_tracksPaths = std::move(paths);
 
 		findCoverArt(m_coverArtPath);
 }
@@ -46,22 +37,16 @@ void Library::Album::setData(const QList<TrackMetadata> &tracks, const QList<QUr
 void Library::Album::appendData(const TrackMetadata &track, const QUrl &path) {
 		ZoneScoped;
 
-		m_tracks.append(track);
+		p_items.append(track);
 		m_tracksPaths.append(path);
 }
 
-Library::TrackMetadata Library::Album::getTrackByIndex(uint32_t index) const {
-		return m_tracks.at(index);
-}
+QUrl Library::Album::getUrl(uint32_t index) const {
+		if (index < m_tracksPaths.size()) {
+				return m_tracksPaths.at(index);
+		}
 
-QList<Library::TrackMetadata> Library::Album::getTracksList() const {
-		ZoneScoped;
-
-		return m_tracks;
-}
-
-QUrl Library::Album::getUrlByIndex(uint32_t index) const {
-		return m_tracksPaths.at(index);
+		return {};
 }
 
 QList<QUrl> Library::Album::getTracksPathsList() const {
@@ -88,30 +73,23 @@ void Library::Album::findCoverArt(const QUrl &path) {
 }
 
 Library::Artist::Artist(const QString &name, const QList<Album> &albums)
-	: m_name(name)
-	, m_albums(albums) {
+	: Collection(name, albums) {
 }
 
-void Library::Artist::setName(const QString &name) {
-		m_name = name;
-}
-
-QString Library::Artist::getName() const {
-		return m_name;
-}
-
-void Library::Artist::setAlbumsList(const QList<Album> &albums) {
+Library::Album Library::Artist::findAlbum(const QString &title) const {
 		ZoneScoped;
 
-		m_albums = std::move(albums);
-}
+		for (const auto &album : p_items) {
+				if (album.getName() == title) {
+						return album;
+				}
+		}
 
-QList<Library::Album> Library::Artist::getAlbumsList() const {
-		return m_albums;
+		return Album();
 }
 
 void Library::Artist::appendAlbum(const Album &album) {
-		m_albums.append(std::move(album));
+		p_items.append(std::move(album));
 }
 
 Library::Library(const QUrl &libraryPath)
@@ -169,9 +147,9 @@ void Library::scanLibraryPath() {
 		if (m_libraryPath.isEmpty()) {
 				m_libraryPath = QDir::homePath() + "/Music";
 		}
-		QDir library{m_libraryPath.toString()};
+		const QDir LIBRARY{m_libraryPath.toString()};
 
-		if (!library.exists()) {
+		if (!LIBRARY.exists()) {
 				return;
 		}
 
@@ -179,24 +157,33 @@ void Library::scanLibraryPath() {
 		const QStringList AUDIO_FILE_FILTER = {"*.mp4", "*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a", "*.mka"}; // Wspierane typy plików
 
 		QList<QUrl> tracksPaths;
-		for (const auto &file : QDirListing(library.path(), AUDIO_FILE_FILTER, FLAGS)) {
+		for (const auto &file : QDirListing(LIBRARY.path(), AUDIO_FILE_FILTER, FLAGS)) {
 				tracksPaths.append(file.absoluteFilePath());
 		}
 
-		if (tracksPaths.isEmpty()) {
-				return;
-		}
+		using Collector = QHash<QString, QHash<QString, QList<QPair<TrackMetadata, QUrl>>>>;
 
-		QFuture<TrackMetadata> future = QtConcurrent::mapped(tracksPaths, [](const QUrl &filePath) -> TrackMetadata {
-				TagLib::FileRef fileRef{QFile::encodeName(filePath.toString()).constData()};
+		auto mapData = [](const QUrl &filePath) -> QPair<TrackMetadata, QUrl> {
+				ZoneScopedN("mapData");
 
-				return extractMetadata(filePath.toString(), fileRef);
-		});
+				const QString FILE_PATH = filePath.toString();
+				const QByteArray ENCODED_PATH = QFile::encodeName(FILE_PATH);
+				const TagLib::FileRef FILE_REF(ENCODED_PATH.constData(), true, TagLib::AudioProperties::Fast);
+
+				return {extractMetadata(FILE_PATH, FILE_REF), QUrl(FILE_PATH)};
+		};
+
+		auto reduce = [](Collector &collector, const QPair<TrackMetadata, QUrl> &item) {
+				ZoneScopedN("reduce");
+
+				const TrackMetadata &meta = item.first;
+				collector[meta.artist][meta.album].append(item);
+		};
+
+		QFuture<Collector> future = QtConcurrent::mappedReduced(tracksPaths, mapData, reduce, QtConcurrent::UnorderedReduce);
 		future.waitForFinished();
 
-		const auto results = future.results();
-
-		groupTracks(results, tracksPaths);
+		groupTracks(future.result());
 }
 
 QList<Library::Artist> Library::getArtistList() const {
@@ -205,11 +192,27 @@ QList<Library::Artist> Library::getArtistList() const {
 		return m_artists;
 }
 
-Library::Artist Library::findArtistByName(const QString &artistName) const {
+QList<Library::Album> Library::getAlbumsList() const {
+		ZoneScoped;
+
+		return m_albums;
+}
+
+Library::Album Library::getAlbum(uint32_t index) const {
+		ZoneScoped;
+
+		if (index < m_albums.size()) {
+				return m_albums.at(index);
+		}
+
+		return {};
+}
+
+Library::Artist Library::getArtist(const QString &name) const {
 		ZoneScoped;
 
 		for (const auto &artist : m_artists) {
-				if (artist.getName() == artistName) {
+				if (artist.getName() == name) {
 						return artist;
 				}
 		}
@@ -217,46 +220,18 @@ Library::Artist Library::findArtistByName(const QString &artistName) const {
 		return Artist(nullptr);
 }
 
-Library::Album Library::findAlbumByTitle(const QString &albumTitle) const {
+Library::Artist Library::getArtist(int32_t index) const {
 		ZoneScoped;
 
-		for (const auto &album : m_albums) {
-				if (album.getTitle() == albumTitle) {
-						return album;
-				}
+		if (index < m_artists.size()) {
+				return m_artists.at(index);
 		}
 
-		return Album();
+		return Artist(nullptr);
 }
 
-QList<Library::Album> Library::getAlbumsList() const {
+void Library::groupTracks(const QHash<QString, QHash<QString, QList<QPair<TrackMetadata, QUrl>>>> &collector) {
 		ZoneScoped;
-
-		return m_albums;
-}
-
-void Library::groupTracks(const QList<TrackMetadata> &tracks, const QList<QUrl> &paths) {
-		ZoneScoped;
-
-		QHash<QString, QHash<QString, QList<QPair<TrackMetadata, QUrl>>>> collector;
-
-		const int32_t NUMBER_OF_TRACKS = tracks.size();
-		const int32_t NUMBER_OF_PATHS = paths.size();
-		const int32_t NUMBER_OF_ELEMENTS = qMax(NUMBER_OF_TRACKS, NUMBER_OF_PATHS);
-
-		for (int32_t i{0}; i < NUMBER_OF_ELEMENTS; ++i) {
-				if (i >= NUMBER_OF_TRACKS) {
-						break;
-				}
-
-				const TrackMetadata &TRACK = tracks.at(i);
-				QUrl path{};
-				if (i < NUMBER_OF_PATHS) {
-						path = paths.at(i);
-				}
-
-				collector[TRACK.artist][TRACK.album].append(qMakePair(TRACK, path));
-		}
 
 		m_artists.reserve(collector.size());
 

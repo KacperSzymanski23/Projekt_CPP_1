@@ -47,7 +47,7 @@ int32_t TreeItem::row() const {
 		}
 
 		// Szuka wskaźnika do obecnego TreeItem'u
-		const auto IT = std::find_if(m_parentItem->m_childItems.cbegin(), m_parentItem->m_childItems.cend(), [this](const std::unique_ptr<TreeItem> &treeItem) {
+		const auto IT = std::ranges::find_if(std::as_const(m_parentItem->m_childItems), [this](const std::unique_ptr<TreeItem> &treeItem) {
 				return treeItem.get() == this;
 		});
 

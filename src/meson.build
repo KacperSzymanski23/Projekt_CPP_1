@@ -10,6 +10,8 @@ src = files(
   'logs.cpp',
   'playbackqueue.cpp',
   'library.cpp',
+  'middletreemodel.cpp',
+  'playertreemodel.cpp',
 )
 
 moc_headers = files(
@@ -19,6 +21,8 @@ moc_headers = files(
   'treemodel.hpp',
   'playbackqueue.hpp',
   'sidebar.h',
+  'middletreemodel.hpp',
+  'playertreemodel.hpp',
 )
 
 qt_moc = qt6.compile_moc(headers: moc_headers, dependencies: qt_dep)

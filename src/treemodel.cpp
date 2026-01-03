@@ -5,11 +5,9 @@
 // Tracy
 #include <tracy/Tracy.hpp>
 
-TreeModel::TreeModel(const QList<Library::TrackMetadata>  &tracks, const QVariantList &columnsNames, QObject *parent)
+TreeModel::TreeModel(const QVariantList &columnsNames, QObject *parent)
 	: QAbstractItemModel(parent)
-	, m_rootItem(std::make_unique<TreeItem>(columnsNames)) {
-
-		setupModelData(tracks, m_rootItem.get());
+	, rootItem(std::make_unique<TreeItem>(columnsNames)) {
 }
 
 TreeModel::~TreeModel() = default;
@@ -20,7 +18,7 @@ int32_t TreeModel::columnCount(const QModelIndex &parent) const {
 		if (parent.isValid()) {
 				return static_cast<TreeItem *>(parent.internalPointer())->columnCount();
 		}
-		return m_rootItem->columnCount();
+		return rootItem->columnCount();
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int32_t role) const {
@@ -34,7 +32,7 @@ QVariant TreeModel::data(const QModelIndex &index, int32_t role) const {
 		return item->data(index.column());
 }
 
-QVariant TreeModel::dataAtColumn(const QModelIndex &index, int32_t role, int32_t column) {
+QVariant TreeModel::data(const QModelIndex &index, int32_t role, int32_t column) {
 		ZoneScoped;
 
 		if (!index.isValid() || role != Qt::DisplayRole) {
@@ -58,7 +56,7 @@ QVariant TreeModel::headerData(int32_t section, Qt::Orientation orientation, int
 		ZoneScoped;
 
 		if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-				return m_rootItem->data(section);
+				return rootItem->data(section);
 		}
 		return {};
 }
@@ -75,7 +73,7 @@ QModelIndex TreeModel::index(int32_t row, int32_t column, const QModelIndex &par
 		if (parent.isValid()) {
 				parentItem = static_cast<TreeItem *>(parent.internalPointer());
 		} else {
-				parentItem = m_rootItem.get();
+				parentItem = rootItem.get();
 		}
 
 		if (TreeItem *childItem = parentItem->child(row)) {
@@ -94,7 +92,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const {
 		TreeItem *childItem = static_cast<TreeItem *>(index.internalPointer());
 		TreeItem *parentItem = childItem->parentItem();
 
-		if (parentItem != m_rootItem.get()) {
+		if (parentItem != rootItem.get()) {
 				return createIndex(parentItem->row(), 0, parentItem);
 		}
 		return {};
@@ -112,50 +110,20 @@ int32_t TreeModel::rowCount(const QModelIndex &parent) const {
 		if (parent.isValid()) {
 				parentItem = static_cast<const TreeItem *>(parent.internalPointer());
 		} else {
-				parentItem = m_rootItem.get();
+				parentItem = rootItem.get();
 		}
 
 		return parentItem->childCount();
 }
 
 void TreeModel::setColumnsNames(const QVariantList &columnsNames) {
-		m_rootItem = std::make_unique<TreeItem>(columnsNames);
+		beginResetModel();
+		rootItem = std::make_unique<TreeItem>(columnsNames);
+		endResetModel();
 }
 
-void TreeModel::setupModelData(const QList<Library::TrackMetadata>  &tracks, TreeItem *parent) {
-		ZoneScoped;
-
-		struct ParentIndentation {
-				TreeItem *parent;
-				qsizetype indentation;
-		} __attribute__((aligned(16)));
-
-		constexpr qsizetype POSITION_ZERO{0};
-
-		QList<ParentIndentation> state{
-			{.parent = parent, .indentation = POSITION_ZERO}
-		};
-
-		for (const auto &line : tracks) {
-				QVariantList columnData;
-
-				columnData << line.number;
-				columnData << line.title;
-				columnData << line.album;
-				columnData << line.artist;
-				columnData << line.duration;
-				columnData << line.year;
-				columnData << line.bitrate;
-				columnData << line.fileSize;
-
-				if (state.constLast().indentation < POSITION_ZERO) {
-						TreeItem *lastParent = state.constLast().parent;
-						if (lastParent->childCount() > 0) {
-								state.append({.parent = lastParent->child(lastParent->childCount() - 1), .indentation = POSITION_ZERO});
-						}
-				}
-
-				TreeItem *lastParent = state.constLast().parent;
-				lastParent->appendChild(std::make_unique<TreeItem>(columnData, lastParent));
-		}
+void TreeModel::initModel() {
+		beginResetModel();
+		setupModelData(rootItem.get());
+		endResetModel();
 }

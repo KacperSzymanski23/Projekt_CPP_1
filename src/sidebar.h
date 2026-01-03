@@ -16,10 +16,9 @@ class SideBar : public QWidget {
 
 	  signals:
 		void showLibraryClicked();
+		void showAlbumsClicked();
 		void showPlaylistsClicked();
 		void showFavoriteClicked();
-		void showAuthorsClicked();
-		void showAlbumsClicked();
 		void settingsClicked();
 		void settingsChanged();
 
@@ -29,10 +28,9 @@ class SideBar : public QWidget {
 		SettingsDialog *m_settingsDialog; // Okno zawierające ustawiania programu
 
 		QToolButton *m_showLibraryButton;
+		QToolButton *m_showAlbumsButton;
 		QToolButton *m_showPlaylistsButton;
 		QToolButton *m_showFavoriteButton;
-		QToolButton *m_showAuthorsButton;
-		QToolButton *m_showAlbumsButton;
 
 		QToolButton *m_settingsButton; // Przycisk optwierający ustawienia programu
 };

@@ -3,8 +3,10 @@
 
 #include "library.hpp"
 #include "logs.hpp"
+#include "middletreemodel.hpp"
 #include "playbackqueue.hpp"
 #include "playercontrols.hpp"
+#include "playertreemodel.hpp"
 #include "settings.hpp"
 #include "sidebar.h"
 #include "treemodel.hpp"
@@ -55,26 +57,27 @@ class MainWindow : public QMainWindow {
 		QGridLayout *m_mainGridLayout; // Układ elementów GUI dla widgetu m_centralWidget
 		QVBoxLayout *m_middleListLayout;
 
-		TreeModel *m_playerModel;    // Model dla m_playerMainTreeView odpowiadający za liczbę i nazwy oraz zarządzanie kolumn i informacjami w
-		                             // QTreeView
-		QMediaPlayer *m_audioPlayer; // Objekt klasy umożliwiającej odtwarzanie i kontrolowanie odtwarzania plików zawierających audio
-		QAudioOutput *m_audioOutput; // Objekt klasy reprezentującej kanały wyjśća audio dla m_audioPlayer
+		MiddleTreeModel *m_libraryModel;
+		PlayerTreeModel *m_playerModel; // Model dla m_playerMainTreeView odpowiadający za liczbę i nazwy oraz zarządzanie kolumn i informacjami w
+		                                // QTreeView
+		QMediaPlayer *m_audioPlayer;    // Objekt klasy umożliwiającej odtwarzanie i kontrolowanie odtwarzania plików zawierających audio
+		QAudioOutput *m_audioOutput;    // Objekt klasy reprezentującej kanały wyjśća audio dla m_audioPlayer
 
 		QPixmap m_coverImage; // Okładka dla obecnie wybranej ścieżki dźwiękowej
 
 		QStandardItemModel *m_middleModel; // Model dla środkowego panelu (listy playlist)
 
-		enum class ViewMode { Library = 0, Playlists = 1, Albums = 2, Artists = 3, Favorite = 4, None = 5 };
+		enum class ViewMode { Library = 0, Albums = 1, Playlists = 2, Favorite = 3, None = 4 };
 		ViewMode m_currentViewMode = ViewMode::None;
 		QString getPlaylistsDir();                             // Pomocnicza funkcja do folderu
 		void loadPlaylistContent(const QString &playlistName); // Wczytuje zawartość playlisty
 
 	  private slots:
-		void showLibrary();   // Wyświetla wszystkie ścieżki dźwiękowe w m_middleTreeView
+
+		void showLibrary();   // Wyświetla wszystkich autorów i wraz z albumami w m_middleTreeView
+		void showAlbums();    // Wyświetla wszystkie albumy w m_middleTreeView
 		void showPlaylists(); // Wyświetla wszystkie playlisty w m_middleTreeView
 		void showFavorite();  // Wyświetla wszystkie ścieżki dźwiękowe z playlisty fovorite w m_middleTreeView
-		void showAuthors();   // Wyświetla wszystkich autorów albumów w m_middleTreeView
-		void showAlbums();    // Wyświetla wszystkie albumy w m_middleTreeView
 
 		void closeEvent(QCloseEvent *event) override; // Funkcja slot obsługująca zamykanie okna
 		void readWindowGeometrySettings();            // Funkcja slot zapisująca stan okna

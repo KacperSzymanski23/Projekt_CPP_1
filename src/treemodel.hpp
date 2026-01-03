@@ -15,11 +15,11 @@ class TreeModel : public QAbstractItemModel {
 	  public:
 		Q_DISABLE_COPY_MOVE(TreeModel)
 
-		explicit TreeModel(const QList<Library::TrackMetadata> &tracks, const QVariantList &columnsNames = {}, QObject *parent = nullptr);
+		explicit TreeModel(const QVariantList &columnsNames = {}, QObject *parent = nullptr);
 		~TreeModel() override;
 
 		[[nodiscard]] QVariant data(const QModelIndex &index, int32_t role) const override;                 // Zwraca daną zawartą w podanym indeksie
-		[[nodiscard]] static QVariant dataAtColumn(const QModelIndex &index, int32_t role, int32_t column); // Zwraca daną w podanym inkdeksie i kolumnie
+		[[nodiscard]] static QVariant data(const QModelIndex &index, int32_t role, int32_t column); // Zwraca daną w podanym inkdeksie i kolumnie
 		[[nodiscard]] Qt::ItemFlags flags(const QModelIndex &index) const override;                         // Zwraca flagi TreItem'u dla danego indeksu
 		[[nodiscard]] QVariant headerData(int32_t section, Qt::Orientation orientation, int32_t role) const override; // Zwraca dane nagłówka
 		[[nodiscard]] QModelIndex
@@ -30,10 +30,11 @@ class TreeModel : public QAbstractItemModel {
 
 		void setColumnsNames(const QVariantList &columnsNames); // Ustawia nazwy kolumn
 
-	  private:
-		static void setupModelData(const QList<Library::TrackMetadata>  &tracks, TreeItem *parent); // Wypełnia model danymi z listy metadanych piosenek
+	  protected:
+		void initModel();
+		virtual void setupModelData(TreeItem *parent) = 0; // Wypełnia model danymi z listy metadanych piosenek
 
-		std::unique_ptr<TreeItem> m_rootItem; // Wskaźnik do głównego TreeItem'u przechowującego wszystekie inne TreeItem
+		std::unique_ptr<TreeItem> rootItem; // Wskaźnik do głównego TreeItem'u przechowującego wszystekie inne TreeItem
 };
 
 #endif // TREEMODEL_HPP
