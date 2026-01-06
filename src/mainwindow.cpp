@@ -293,10 +293,18 @@ void MainWindow::onPlaylistContextMenu(const QPoint &pos) {
 
 		QMenu menu(this);
 		QAction *newAction = menu.addAction("Nowa Playlista");
+		QAction *deleteAction = menu.addAction("Usuń Playlistę");
 
 		QAction *selected = menu.exec(m_middleTreeView->mapToGlobal(pos));
 		if (selected == newAction) {
 				createNewPlaylist();
+		} else if (selected == deleteAction) {
+			QModelIndex index = m_middleTreeView->indexAt(pos);
+			if (index.isValid()) {
+				QString filename = m_middleModel->itemFromIndex(index)->data().toString();
+				QFile::remove(getPlaylistsDir() + "/" + filename);
+				showPlaylists();
+			}
 		}
 }
 
@@ -324,9 +332,11 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 
 		if (m_currentViewMode == ViewMode::Playlists) {
 				QString filename = m_middleModel->itemFromIndex(index)->data().toString();
+				m_currentPlaylistName = filename; // zapamietuje nazwe otwartej playlistyś
 				loadPlaylistContent(filename);
 
 		} else if (m_currentViewMode == ViewMode::Library) {
+				m_currentPlaylistName.clear();
 				if (PARENT_ROW == -1) {
 						return;
 				}
@@ -343,6 +353,7 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 				setupPlayerModel(TRACKS);
 
 		} else if (m_currentViewMode == ViewMode::Albums) {
+				m_currentPlaylistName.clear();
 				const Library::Album ALBUM{m_library.getAlbum(ROW)};
 				const QList PATHS{ALBUM.getTracksPathsList()};
 				const QList TRACKS{ALBUM.getItems()};

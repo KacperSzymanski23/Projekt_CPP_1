@@ -67,6 +67,8 @@ class MainWindow : public QMainWindow {
 
 		QStandardItemModel *m_middleModel; // Model dla środkowego panelu (listy playlist)
 
+		QString m_currentPlaylistName; // przechowuje nazwe otwartej playlisty
+
 		enum class ViewMode { Library = 0, Albums = 1, Playlists = 2, Favorite = 3, None = 4 };
 		ViewMode m_currentViewMode = ViewMode::None;
 		QString getPlaylistsDir();                             // Pomocnicza funkcja do folderu
