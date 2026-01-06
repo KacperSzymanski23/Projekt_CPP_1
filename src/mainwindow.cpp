@@ -393,38 +393,88 @@ void MainWindow::loadPlaylistContent(const QString &filename) {
 }
 
 void MainWindow::onSongContextMenu(const QPoint &pos) {
-		ZoneScoped;
+    ZoneScoped;
 
-		QModelIndex index = m_playerMainTreeView->indexAt(pos);
-		if (!index.isValid())
-				return;
+    QModelIndex index = m_playerMainTreeView->indexAt(pos);
+    if (!index.isValid())
+        return;
 
-		QString filePath = TreeModel::data(index, Qt::DisplayRole, 8).toString();
+    QMenu menu(this);
 
-		QMenu menu(this);
-		QMenu *subMenu = menu.addMenu("Dodaj do playlisty");
+    // widok playlisty
+    if (m_currentViewMode == ViewMode::Playlists) {
 
-		QDir dir = getPlaylistsDir();
-		QStringList playlists = dir.entryList({"*.txt"}, QDir::Files);
+        QAction *removeAction = menu.addAction("Usuń z playlisty");
 
-		if (playlists.isEmpty()) {
-				subMenu->addAction("Brak playlist")->setEnabled(false);
-		} else {
-				for (const QString &pl : playlists) {
-						QAction *act = subMenu->addAction(QFileInfo(pl).baseName());
+        // osbluga usuwania playlisty
+        connect(removeAction, &QAction::triggered, this, [this, index]() {
 
-						connect(act, &QAction::triggered, this, [this, pl, filePath]() {
-								QFile file(getPlaylistsDir() + "/" + pl);
-								if (file.open(QIODevice::Append | QIODevice::Text)) {
-										QTextStream out(&file);
-										out << filePath << "\n";
-										file.close();
-								}
-						});
-				}
-		}
+            if (m_currentPlaylistName.isEmpty()) return;
 
-		menu.exec(m_playerMainTreeView->mapToGlobal(pos));
+            int rowToRemove = index.row();
+            QString playlistPath = getPlaylistsDir() + "/" + m_currentPlaylistName;
+
+
+            QFile file(playlistPath);
+            if (file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+                QStringList lines;
+                QTextStream in(&file);
+
+
+                while (!in.atEnd()) {
+                    QString line = in.readLine().trimmed();
+                    if (!line.isEmpty() && QFile::exists(line)) {
+                        lines.append(line);
+                    }
+                }
+
+
+                if (rowToRemove >= 0 && rowToRemove < lines.size()) {
+                    lines.removeAt(rowToRemove);
+                }
+
+
+                file.resize(0);
+                QTextStream out(&file);
+                for (const QString &line : lines) {
+                    out << line << "\n";
+                }
+                file.close();
+
+
+                loadPlaylistContent(m_currentPlaylistName);
+            }
+        });
+    }
+    // obsluga albumow
+    else {
+        QString filePath = TreeModel::data(index, Qt::DisplayRole, 8).toString();
+
+        QMenu *subMenu = menu.addMenu("Dodaj do playlisty");
+
+        QDir dir = getPlaylistsDir();
+        QStringList playlists = dir.entryList({"*.txt"}, QDir::Files);
+
+        if (playlists.isEmpty()) {
+            subMenu->addAction("Brak playlist")->setEnabled(false);
+        } else {
+            for (const QString &pl : playlists) {
+                QAction *act = subMenu->addAction(QFileInfo(pl).baseName());
+
+                connect(act, &QAction::triggered, this, [this, pl, filePath]() {
+                    QFile file(getPlaylistsDir() + "/" + pl);
+                    if (file.open(QIODevice::Append | QIODevice::Text)) {
+                        QTextStream out(&file);
+                        out << filePath << "\n";
+                        file.close();
+                    }
+                });
+            }
+        }
+    }
+
+
+    menu.exec(m_playerMainTreeView->mapToGlobal(pos));
 }
 
 void MainWindow::addSongToPlaylist(const QString &playlistName) {
