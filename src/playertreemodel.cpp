@@ -28,6 +28,7 @@ void PlayerTreeModel::setupModelData(TreeItem *parent) {
 				columnData << line.year;
 				columnData << line.bitrate;
 				columnData << line.fileSize;
+				columnData << line.path;
 
 				parent->appendChild(std::make_unique<TreeItem>(columnData, parent));
 		}

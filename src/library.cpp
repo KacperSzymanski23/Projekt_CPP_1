@@ -138,6 +138,7 @@ Library::TrackMetadata Library::extractMetadata(const QString &path, const TagLi
 			.year = YEAR,
 			.bitrate = QString::number(BITRATE) + " kbps",
 			.fileSize = QString::number(FILE_SIZE, 'f', 1) + " MiB",
+			.path = path,
 		};
 }
 

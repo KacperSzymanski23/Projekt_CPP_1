@@ -20,6 +20,7 @@ class Library {
 				uint32_t year;
 				QString bitrate;
 				QString fileSize;
+				QString path;
 		};
 
 		class Album : public Collection<TrackMetadata>{
