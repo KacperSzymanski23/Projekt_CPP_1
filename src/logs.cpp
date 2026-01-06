@@ -9,7 +9,12 @@ std::tm timestamp() { // date and time mark
 		auto now = std::chrono::system_clock::now();
 		std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 		std::tm time;
-		errno_t err = localtime_s(&time, &now_time);
+#ifdef _WIN32
+	localtime_s(&time, &now_time);
+#else
+	localtime_r(&now_time, &time);
+#endif
+
 		return time;
 }
 
@@ -26,6 +31,5 @@ void logCreate(const std::string &message) {
 		}
 		file << message << "\n";
 		file.close();
-		return;
 }
 
