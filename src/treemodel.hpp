@@ -1,8 +1,8 @@
 #ifndef TREEMODEL_HPP
 #define TREEMODEL_HPP
 
-#include "treeitem.hpp"
 #include "library.hpp"
+#include "treeitem.hpp"
 // Qt
 #include <QAbstractItemModel>
 #include <QList>
@@ -18,9 +18,9 @@ class TreeModel : public QAbstractItemModel {
 		explicit TreeModel(const QVariantList &columnsNames = {}, QObject *parent = nullptr);
 		~TreeModel() override;
 
-		[[nodiscard]] QVariant data(const QModelIndex &index, int32_t role) const override;                 // Zwraca daną zawartą w podanym indeksie
+		[[nodiscard]] QVariant data(const QModelIndex &index, int32_t role) const override;         // Zwraca daną zawartą w podanym indeksie
 		[[nodiscard]] static QVariant data(const QModelIndex &index, int32_t role, int32_t column); // Zwraca daną w podanym inkdeksie i kolumnie
-		[[nodiscard]] Qt::ItemFlags flags(const QModelIndex &index) const override;                         // Zwraca flagi TreItem'u dla danego indeksu
+		[[nodiscard]] Qt::ItemFlags flags(const QModelIndex &index) const override;                 // Zwraca flagi TreItem'u dla danego indeksu
 		[[nodiscard]] QVariant headerData(int32_t section, Qt::Orientation orientation, int32_t role) const override; // Zwraca dane nagłówka
 		[[nodiscard]] QModelIndex
 		index(int32_t row, int32_t column, const QModelIndex &parent) const override; // Tworzy indeks dla elementu o podanym wierszu i kolumnie

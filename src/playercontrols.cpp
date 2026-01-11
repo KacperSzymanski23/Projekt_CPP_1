@@ -176,13 +176,11 @@ void PlayerControls::playPauseClicked() {
 
 void PlayerControls::muteClicked() {
 		emit changeMuteState(!m_playerMuted);
-		if(isMuted()) {
-			logCreate("Muted");
+		if (isMuted()) {
+				logCreate("Muted");
+		} else {
+				logCreate("Unmuted");
 		}
-		else {
-			logCreate("Unmuted");
-		}		
-		
 }
 
 void PlayerControls::volumeSliderValueChanged() {

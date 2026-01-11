@@ -23,7 +23,7 @@ class Library {
 				QString path;
 		};
 
-		class Album : public Collection<TrackMetadata>{
+		class Album : public Collection<TrackMetadata> {
 			  public:
 				Album(const QString &title, const QUrl &coverArtPath, const QList<TrackMetadata> &tracks = {}, const QList<QUrl> &tracksPaths = {});
 				Album() = default;
@@ -44,7 +44,7 @@ class Library {
 				QList<QUrl> m_tracksPaths;
 		};
 
-		class Artist : public Collection<Album>{
+		class Artist : public Collection<Album> {
 			  public:
 				explicit Artist(const QString &name, const QList<Album> &albums = {});
 
@@ -73,6 +73,9 @@ class Library {
 	  private:
 		QUrl m_libraryPath;
 		QList<Artist> m_artists;
+		// TODO(kacper): Sprawdzić czy można zastąpić m_artists
+		// Ta lista zawiera dane znajdujace się już w m_artists
+		// więc nieporzebnie zaśmieca pamięć
 		QList<Album> m_albums;
 };
 

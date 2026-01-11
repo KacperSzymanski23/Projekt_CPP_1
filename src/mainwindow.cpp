@@ -221,6 +221,9 @@ void MainWindow::showPlaylists() {
 }
 
 void MainWindow::showFavorite() {
+		// TODO(kacper): Zaimplementować funkcję wyświetlającą ulubione utwory
+		// Mam gotową implementację dla playlist
+		// ale jeszcze jej nie dodałem do gita
 }
 
 void MainWindow::showAlbums() {
@@ -299,12 +302,12 @@ void MainWindow::onPlaylistContextMenu(const QPoint &pos) {
 		if (selected == newAction) {
 				createNewPlaylist();
 		} else if (selected == deleteAction) {
-			QModelIndex index = m_middleTreeView->indexAt(pos);
-			if (index.isValid()) {
-				QString filename = m_middleModel->itemFromIndex(index)->data().toString();
-				QFile::remove(getPlaylistsDir() + "/" + filename);
-				showPlaylists();
-			}
+				QModelIndex index = m_middleTreeView->indexAt(pos);
+				if (index.isValid()) {
+						QString filename = m_middleModel->itemFromIndex(index)->data().toString();
+						QFile::remove(getPlaylistsDir() + "/" + filename);
+						showPlaylists();
+				}
 		}
 }
 
@@ -393,88 +396,85 @@ void MainWindow::loadPlaylistContent(const QString &filename) {
 }
 
 void MainWindow::onSongContextMenu(const QPoint &pos) {
-    ZoneScoped;
+		ZoneScoped;
 
-    QModelIndex index = m_playerMainTreeView->indexAt(pos);
-    if (!index.isValid())
-        return;
+		QModelIndex index = m_playerMainTreeView->indexAt(pos);
+		if (!index.isValid())
+				return;
 
-    QMenu menu(this);
+		QMenu menu(this);
 
-    // widok playlisty
-    if (m_currentViewMode == ViewMode::Playlists) {
+		// widok playlisty
+		if (m_currentViewMode == ViewMode::Playlists) {
 
-        QAction *removeAction = menu.addAction("Usuń z playlisty");
+				QAction *removeAction = menu.addAction("Usuń z playlisty");
 
-        // osbluga usuwania playlisty
-        connect(removeAction, &QAction::triggered, this, [this, index]() {
+				// osbluga usuwania playlisty
+				connect(removeAction, &QAction::triggered, this, [this, index]() {
+						if (m_currentPlaylistName.isEmpty())
+								return;
 
-            if (m_currentPlaylistName.isEmpty()) return;
+						int rowToRemove = index.row();
+						QString playlistPath = getPlaylistsDir() + "/" + m_currentPlaylistName;
 
-            int rowToRemove = index.row();
-            QString playlistPath = getPlaylistsDir() + "/" + m_currentPlaylistName;
+						QFile file(playlistPath);
+						if (file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+								QStringList lines;
+								QTextStream in(&file);
 
+								while (!in.atEnd()) {
+										QString line = in.readLine().trimmed();
+										if (!line.isEmpty() && QFile::exists(line)) {
+												lines.append(line);
+										}
+								}
 
-            QFile file(playlistPath);
-            if (file.open(QIODevice::ReadWrite | QIODevice::Text)) {
-                QStringList lines;
-                QTextStream in(&file);
+								if (rowToRemove >= 0 && rowToRemove < lines.size()) {
+										lines.removeAt(rowToRemove);
+								}
 
+								file.resize(0);
+								QTextStream out(&file);
+								for (const QString &line : lines) {
+										out << line << "\n";
+								}
+								file.close();
 
-                while (!in.atEnd()) {
-                    QString line = in.readLine().trimmed();
-                    if (!line.isEmpty() && QFile::exists(line)) {
-                        lines.append(line);
-                    }
-                }
+								loadPlaylistContent(m_currentPlaylistName);
+						}
+				});
+		}
+		// obsluga albumow
+		else {
+				// Funkcja data pobierająca dane z kolumny modelu
+				// to hack, który powstał zanim PlaybackQueue był zaimplementowany
+				// teraz m_playbackQueue.currentMedia() byłby lepszym rozwiązaniem
+				QString filePath = TreeModel::data(index, Qt::DisplayRole, 8).toString();
 
+				QMenu *subMenu = menu.addMenu("Dodaj do playlisty");
 
-                if (rowToRemove >= 0 && rowToRemove < lines.size()) {
-                    lines.removeAt(rowToRemove);
-                }
+				QDir dir = getPlaylistsDir();
+				QStringList playlists = dir.entryList({"*.txt"}, QDir::Files);
 
+				if (playlists.isEmpty()) {
+						subMenu->addAction("Brak playlist")->setEnabled(false);
+				} else {
+						for (const QString &pl : playlists) {
+								QAction *act = subMenu->addAction(QFileInfo(pl).baseName());
 
-                file.resize(0);
-                QTextStream out(&file);
-                for (const QString &line : lines) {
-                    out << line << "\n";
-                }
-                file.close();
+								connect(act, &QAction::triggered, this, [this, pl, filePath]() {
+										QFile file(getPlaylistsDir() + "/" + pl);
+										if (file.open(QIODevice::Append | QIODevice::Text)) {
+												QTextStream out(&file);
+												out << filePath << "\n";
+												file.close();
+										}
+								});
+						}
+				}
+		}
 
-
-                loadPlaylistContent(m_currentPlaylistName);
-            }
-        });
-    }
-    // obsluga albumow
-    else {
-        QString filePath = TreeModel::data(index, Qt::DisplayRole, 8).toString();
-
-        QMenu *subMenu = menu.addMenu("Dodaj do playlisty");
-
-        QDir dir = getPlaylistsDir();
-        QStringList playlists = dir.entryList({"*.txt"}, QDir::Files);
-
-        if (playlists.isEmpty()) {
-            subMenu->addAction("Brak playlist")->setEnabled(false);
-        } else {
-            for (const QString &pl : playlists) {
-                QAction *act = subMenu->addAction(QFileInfo(pl).baseName());
-
-                connect(act, &QAction::triggered, this, [this, pl, filePath]() {
-                    QFile file(getPlaylistsDir() + "/" + pl);
-                    if (file.open(QIODevice::Append | QIODevice::Text)) {
-                        QTextStream out(&file);
-                        out << filePath << "\n";
-                        file.close();
-                    }
-                });
-            }
-        }
-    }
-
-
-    menu.exec(m_playerMainTreeView->mapToGlobal(pos));
+		menu.exec(m_playerMainTreeView->mapToGlobal(pos));
 }
 
 void MainWindow::addSongToPlaylist(const QString &playlistName) {

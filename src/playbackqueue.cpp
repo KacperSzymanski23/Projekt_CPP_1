@@ -5,6 +5,12 @@
 // Tracy
 #include <tracy/Tracy.hpp>
 
+// TODO(kacper): Zastąpić QUrl na QString
+// QString jest trochę prostszym typem niż QUrl
+// więc z racji że program nie będzie odtwarzał muzyki z internetu
+// wszystkie QUrl'e można zastąpić QString'ami
+// Te zmiany powinny być wykonane także w innych klasach
+
 PlaybackQueue::PlaybackQueue(QObject *parent, const QList<QUrl> &queue, PlaybackMode playbackMode)
 	: QObject(parent)
 	, m_playbackMode(playbackMode)
