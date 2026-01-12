@@ -40,6 +40,7 @@ MainWindow::MainWindow()
 		connect(m_sideBarWidget, &SideBar::showLibraryClicked, this, &MainWindow::showLibrary);
 		connect(m_sideBarWidget, &SideBar::showPlaylistsClicked, this, &MainWindow::showPlaylists);
 		connect(m_sideBarWidget, &SideBar::showAlbumsClicked, this, &MainWindow::showAlbums);
+		connect(m_sideBarWidget, &SideBar::showFavoriteClicked, this, &MainWindow::showFavorite);
 
 		connect(m_playbackControlsWidget, &PlayerControls::pause, m_audioPlayer, &QMediaPlayer::pause);
 		connect(m_playbackControlsWidget, &PlayerControls::play, m_audioPlayer, &QMediaPlayer::play);
@@ -62,7 +63,6 @@ MainWindow::MainWindow()
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, &MainWindow::showLibrary);
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, [this]() { m_settings.loadSettings(); });
 
-		// m_library.oldScanLibraryPath();
 		m_library.scanLibraryPath();
 
 		m_libraryModel = new MiddleTreeModel(m_library.getArtistList(), "Library", this);
@@ -221,6 +221,9 @@ void MainWindow::showPlaylists() {
 }
 
 void MainWindow::showFavorite() {
+	createNewPlaylist("Favorite");
+	showPlaylists();
+	loadPlaylistContent("Favorite");
 }
 
 void MainWindow::showAlbums() {
@@ -296,24 +299,32 @@ void MainWindow::onPlaylistContextMenu(const QPoint &pos) {
 
 		QAction *selected = menu.exec(m_middleTreeView->mapToGlobal(pos));
 		if (selected == newAction) {
-				createNewPlaylist();
+				createNewPlaylistDialog();
 		}
 }
 
-void MainWindow::createNewPlaylist() {
+void MainWindow::createNewPlaylist(const QString &playlistName) {
 		ZoneScoped;
 
-		bool ok;
-		QString name = QInputDialog::getText(this, "Nowa Playlista", "Podaj nazwę:", QLineEdit::Normal, "", &ok);
-
-		if (ok && !name.isEmpty()) {
-				QString filePath = getPlaylistsDir() + "/" + name + ".txt";
+		if (playlistName.isEmpty()) {
+				QString filePath = getPlaylistsDir() + "/" + playlistName + ".txt";
 				QFile file(filePath);
 				if (file.open(QIODevice::WriteOnly)) {
 						file.close();
 						showPlaylists();
 				}
 		}
+}
+
+void MainWindow::createNewPlaylistDialog() {
+	ZoneScoped;
+
+	bool ok;
+	QString name = QInputDialog::getText(this, "Nowa Playlista", "Podaj nazwę:", QLineEdit::Normal, "", &ok);
+
+	if (ok) {
+		createNewPlaylist(name);
+	}
 }
 
 void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
