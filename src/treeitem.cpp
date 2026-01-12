@@ -13,7 +13,7 @@ void TreeItem::appendChild(std::unique_ptr<TreeItem> &&child) {
 		m_childItems.push_back(std::move(child));
 }
 
-TreeItem *TreeItem::child(int32_t row) const {
+TreeItem *TreeItem::child(size_t row) const {
 		ZoneScoped;
 
 		if (row >= 0 && row < childCount()) {
@@ -23,15 +23,15 @@ TreeItem *TreeItem::child(int32_t row) const {
 		return nullptr;
 }
 
-int32_t TreeItem::childCount() const {
-		return static_cast<int32_t>(m_childItems.size());
+size_t TreeItem::childCount() const {
+		return m_childItems.size();
 }
 
-int32_t TreeItem::columnCount() const {
-		return static_cast<int32_t>(m_itemData.count());
+qsizetype TreeItem::columnCount() const {
+		return m_itemData.count();
 }
 
-QVariant TreeItem::data(int32_t column) const {
+QVariant TreeItem::data(qsizetype column) const {
 		return m_itemData.value(column);
 }
 

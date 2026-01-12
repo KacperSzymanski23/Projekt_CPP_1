@@ -1,7 +1,6 @@
 #ifndef TREEMODEL_HPP
 #define TREEMODEL_HPP
 
-#include "library.hpp"
 #include "treeitem.hpp"
 // Qt
 #include <QAbstractItemModel>
@@ -34,7 +33,7 @@ class TreeModel : public QAbstractItemModel {
 		void initModel();
 		virtual void setupModelData(TreeItem *parent) = 0; // Wypełnia model danymi z listy metadanych piosenek
 
-		std::unique_ptr<TreeItem> rootItem; // Wskaźnik do głównego TreeItem'u przechowującego wszystekie inne TreeItem
+		std::unique_ptr<TreeItem> p_rootItem; // Wskaźnik do głównego TreeItem'u przechowującego wszystekie inne TreeItem
 };
 
 #endif // TREEMODEL_HPP

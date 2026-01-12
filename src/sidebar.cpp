@@ -8,9 +8,9 @@ SideBar::SideBar(QWidget *parent)
 	, m_sideBarLayout(new QVBoxLayout(this))
 	, m_settingsDialog(new SettingsDialog(this))
 	, m_showLibraryButton(new QToolButton(this))
+	, m_showAlbumsButton(new QToolButton(this))
 	, m_showPlaylistsButton(new QToolButton(this))
 	, m_showFavoriteButton(new QToolButton(this))
-	, m_showAlbumsButton(new QToolButton(this))
 	, m_settingsButton(new QToolButton(this)) {
 		ZoneScoped;
 

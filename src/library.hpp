@@ -29,13 +29,13 @@ class Library {
 				Album() = default;
 
 				void setCoverArtPath(const QUrl &path);
-				QUrl getCoverArtPath() const;
+				[[nodiscard]] QUrl getCoverArtPath() const;
 
 				void setData(const QList<TrackMetadata> &tracks, const QList<QUrl> &paths);
 				void appendData(const TrackMetadata &track, const QUrl &path);
 
-				QUrl getUrl(uint32_t index) const;
-				QList<QUrl> getTracksPathsList() const;
+				[[nodiscard]] QUrl getUrl(qsizetype index) const;
+				[[nodiscard]] QList<QUrl> getTracksPathsList() const;
 
 			  private:
 				void findCoverArt(const QUrl &path);
@@ -48,12 +48,12 @@ class Library {
 			  public:
 				explicit Artist(const QString &name, const QList<Album> &albums = {});
 
-				Album findAlbum(const QString &title) const;
+				[[nodiscard]] Album findAlbum(const QString &title) const;
 
 				void appendAlbum(const Album &album);
 		};
 
-		Library(const QUrl &libraryPath = {});
+		explicit Library(const QUrl &libraryPath = {});
 
 		void setLibraryPath(const QUrl &path);
 
@@ -61,12 +61,12 @@ class Library {
 
 		void scanLibraryPath();
 
-		QList<Artist> getArtistList() const;
-		QList<Album> getAlbumsList() const;
-		Album getAlbum(uint32_t index) const;
+		[[nodiscard]] QList<Artist> getArtistList() const;
+		[[nodiscard]] QList<Album> getAlbumsList() const;
+		[[nodiscard]] Album getAlbum(qsizetype index) const;
 
-		Artist getArtist(const QString &name) const;
-		Artist getArtist(int32_t index) const;
+		[[nodiscard]] Artist getArtist(const QString &name) const;
+		[[nodiscard]] Artist getArtist(qsizetype index) const;
 
 		void groupTracks(const QHash<QString, QHash<QString, QList<QPair<TrackMetadata, QUrl>>>> &collector);
 

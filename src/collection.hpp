@@ -3,20 +3,22 @@
 
 // Qt
 #include <QList>
+// STD
+#include <utility>
 
 template <typename ItemType>
 class Collection {
 	  public:
 		Collection() = default;
-		explicit Collection(const QString &name, QList<ItemType> items = {})
+		explicit Collection(QString name, QList<ItemType> items = {})
 			: p_items(items)
-			, p_name(name) {
+			, p_name(std::move(name)) {
 		}
 
 		void setName(const QString &name) {
 				p_name = name;
 		}
-		QString getName() const {
+		[[nodiscard]] QString getName() const {
 				return p_name;
 		}
 
@@ -27,7 +29,7 @@ class Collection {
 				return p_items;
 		}
 
-		ItemType getItem(uint32_t index) const {
+		ItemType getItem(qsizetype index) const {
 				if (index < p_items.size()) {
 						return p_items.at(index);
 				}

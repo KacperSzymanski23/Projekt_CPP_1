@@ -9,7 +9,6 @@
 #include "playertreemodel.hpp"
 #include "settings.hpp"
 #include "sidebar.h"
-#include "treemodel.hpp"
 // Qt
 #include <QAudioOutput>
 #include <QDir>
@@ -69,7 +68,7 @@ class MainWindow : public QMainWindow {
 
 		QString m_currentPlaylistName; // przechowuje nazwe otwartej playlisty
 
-		enum class ViewMode { Library = 0, Albums = 1, Playlists = 2, Favorite = 3, None = 4 };
+		enum class ViewMode : uint8_t { Library = 0, Albums = 1, Playlists = 2, Favorite = 3, None = 4 };
 		ViewMode m_currentViewMode = ViewMode::None;
 		QString getPlaylistsDir();                             // Pomocnicza funkcja do folderu
 		void loadPlaylistContent(const QString &playlistName); // Wczytuje zawartość playlisty
@@ -91,8 +90,8 @@ class MainWindow : public QMainWindow {
 		void onPlaylistContextMenu(const QPoint &pos);      // Menu: Nowa playlista
 		void onSongContextMenu(const QPoint &pos);          // Menu: Dodaj do playlisty
 
-		void createNewPlaylist(const QString &playlistName);                            // Logika tworzenia pliku
-		void createNewPlaylistDialog();                            // Okno dialogowe tworzenia pliku
+		void createNewPlaylist(const QString &playlistName); // Logika tworzenia pliku
+		void createNewPlaylistDialog();                      // Okno dialogowe tworzenia pliku
 		void addSongToPlaylist(const QString &playlistName); // Dodawanie utworu
 };
 

@@ -28,8 +28,8 @@ QUrl Library::Album::getCoverArtPath() const {
 void Library::Album::setData(const QList<TrackMetadata> &tracks, const QList<QUrl> &paths) {
 		ZoneScoped;
 
-		p_items = std::move(tracks);
-		m_tracksPaths = std::move(paths);
+		p_items = tracks;
+		m_tracksPaths = paths;
 
 		findCoverArt(m_coverArtPath);
 }
@@ -41,7 +41,7 @@ void Library::Album::appendData(const TrackMetadata &track, const QUrl &path) {
 		m_tracksPaths.append(path);
 }
 
-QUrl Library::Album::getUrl(uint32_t index) const {
+QUrl Library::Album::getUrl(qsizetype index) const {
 		if (index < m_tracksPaths.size()) {
 				return m_tracksPaths.at(index);
 		}
@@ -89,7 +89,7 @@ Library::Album Library::Artist::findAlbum(const QString &title) const {
 }
 
 void Library::Artist::appendAlbum(const Album &album) {
-		p_items.append(std::move(album));
+		p_items.append(album);
 }
 
 Library::Library(const QUrl &libraryPath)
@@ -211,7 +211,7 @@ QList<Library::Album> Library::getAlbumsList() const {
 		return m_albums;
 }
 
-Library::Album Library::getAlbum(uint32_t index) const {
+Library::Album Library::getAlbum(qsizetype index) const {
 		ZoneScoped;
 
 		if (index < m_albums.size()) {
@@ -233,7 +233,7 @@ Library::Artist Library::getArtist(const QString &name) const {
 		return Artist(nullptr);
 }
 
-Library::Artist Library::getArtist(int32_t index) const {
+Library::Artist Library::getArtist(qsizetype index) const {
 		ZoneScoped;
 
 		if (index < m_artists.size()) {
@@ -274,7 +274,7 @@ void Library::groupTracks(const QHash<QString, QHash<QString, QList<QPair<TrackM
 								album.appendData(track, path);
 						}
 
-						artist.appendAlbum(std::move(album));
+						artist.appendAlbum(album);
 						m_albums.append(std::move(album));
 				}
 

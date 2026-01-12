@@ -14,7 +14,7 @@
 PlaybackQueue::PlaybackQueue(QObject *parent, const QList<QUrl> &queue, PlaybackMode playbackMode)
 	: QObject(parent)
 	, m_playbackMode(playbackMode)
-	, m_queue(std::move(queue)) {
+	, m_queue(queue) {
 }
 
 PlaybackQueue::PlaybackMode PlaybackQueue::playbackMode() const {
@@ -32,14 +32,14 @@ void PlaybackQueue::setPlaybackMode(PlaybackMode mode) {
 		m_playbackMode = PlaybackMode::Sequential;
 }
 
-int32_t PlaybackQueue::nextIndex(int32_t index) {
+qsizetype PlaybackQueue::nextIndex(int32_t index) {
 		ZoneScoped;
 
 		if (m_queue.count() == 0) {
 				return -1;
 		}
 
-		int32_t nextIndex = m_currentIndex + index;
+		qsizetype nextIndex = m_currentIndex + index;
 
 		switch (m_playbackMode) {
 				case PlaybackMode::CurrentItemOnce:
@@ -78,14 +78,14 @@ int32_t PlaybackQueue::nextIndex(int32_t index) {
 		return nextIndex;
 }
 
-int32_t PlaybackQueue::previousIndex(int32_t index) {
+qsizetype PlaybackQueue::previousIndex(int32_t index) {
 		ZoneScoped;
 
 		if (m_queue.count() == 0) {
 				return -1;
 		}
 
-		int32_t previousIndex = m_currentIndex;
+		qsizetype previousIndex = m_currentIndex;
 
 		if (previousIndex < 0) {
 				previousIndex = m_queue.size();
@@ -133,7 +133,7 @@ int32_t PlaybackQueue::previousIndex(int32_t index) {
 		return previousIndex;
 }
 
-int32_t PlaybackQueue::currentIndex() const {
+qsizetype PlaybackQueue::currentIndex() const {
 		return m_currentIndex;
 }
 
@@ -143,7 +143,7 @@ QUrl PlaybackQueue::currentMedia() {
 		return m_queue.at(m_currentIndex);
 }
 
-int32_t PlaybackQueue::mediaCount() const {
+qsizetype PlaybackQueue::mediaCount() const {
 		return m_queue.count();
 }
 
@@ -155,7 +155,7 @@ void PlaybackQueue::addMedia(const QUrl &content) {
 		m_queue.append(content);
 }
 
-void PlaybackQueue::insertMedia(int32_t index, const QUrl &content) {
+void PlaybackQueue::insertMedia(qsizetype index, const QUrl &content) {
 		ZoneScoped;
 
 		index = qBound(0, index, m_queue.size());
@@ -163,7 +163,7 @@ void PlaybackQueue::insertMedia(int32_t index, const QUrl &content) {
 		m_queue.insert(index, content);
 }
 
-void PlaybackQueue::removeMedia(int32_t index) {
+void PlaybackQueue::removeMedia(qsizetype index) {
 		ZoneScoped;
 
 		index = qBound(0, index, m_queue.size() - 1);
@@ -172,7 +172,7 @@ void PlaybackQueue::removeMedia(int32_t index) {
 }
 
 void PlaybackQueue::setQueue(const QList<QUrl> &queue) {
-		m_queue = std::move(queue);
+		m_queue = queue;
 }
 
 void PlaybackQueue::clear() {
@@ -220,7 +220,7 @@ void PlaybackQueue::previous() {
 		emit currentMediaChanged(currentMedia());
 }
 
-void PlaybackQueue::setCurrentIndex(int32_t index) {
+void PlaybackQueue::setCurrentIndex(qsizetype index) {
 		ZoneScoped;
 
 		if (index < 0 || index >= m_queue.size()) {

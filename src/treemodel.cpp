@@ -7,7 +7,7 @@
 
 TreeModel::TreeModel(const QVariantList &columnsNames, QObject *parent)
 	: QAbstractItemModel(parent)
-	, rootItem(std::make_unique<TreeItem>(columnsNames)) {
+	, p_rootItem(std::make_unique<TreeItem>(columnsNames)) {
 }
 
 TreeModel::~TreeModel() = default;
@@ -18,7 +18,7 @@ int32_t TreeModel::columnCount(const QModelIndex &parent) const {
 		if (parent.isValid()) {
 				return static_cast<TreeItem *>(parent.internalPointer())->columnCount();
 		}
-		return rootItem->columnCount();
+		return p_rootItem->columnCount();
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int32_t role) const {
@@ -56,7 +56,7 @@ QVariant TreeModel::headerData(int32_t section, Qt::Orientation orientation, int
 		ZoneScoped;
 
 		if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-				return rootItem->data(section);
+				return p_rootItem->data(section);
 		}
 		return {};
 }
@@ -73,7 +73,7 @@ QModelIndex TreeModel::index(int32_t row, int32_t column, const QModelIndex &par
 		if (parent.isValid()) {
 				parentItem = static_cast<TreeItem *>(parent.internalPointer());
 		} else {
-				parentItem = rootItem.get();
+				parentItem = p_rootItem.get();
 		}
 
 		if (TreeItem *childItem = parentItem->child(row)) {
@@ -92,7 +92,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const {
 		TreeItem *childItem = static_cast<TreeItem *>(index.internalPointer());
 		TreeItem *parentItem = childItem->parentItem();
 
-		if (parentItem != rootItem.get()) {
+		if (parentItem != p_rootItem.get()) {
 				return createIndex(parentItem->row(), 0, parentItem);
 		}
 		return {};
@@ -110,20 +110,20 @@ int32_t TreeModel::rowCount(const QModelIndex &parent) const {
 		if (parent.isValid()) {
 				parentItem = static_cast<const TreeItem *>(parent.internalPointer());
 		} else {
-				parentItem = rootItem.get();
+				parentItem = p_rootItem.get();
 		}
 
-		return parentItem->childCount();
+		return static_cast<int32_t>(parentItem->childCount());
 }
 
 void TreeModel::setColumnsNames(const QVariantList &columnsNames) {
 		beginResetModel();
-		rootItem = std::make_unique<TreeItem>(columnsNames);
+		p_rootItem = std::make_unique<TreeItem>(columnsNames);
 		endResetModel();
 }
 
 void TreeModel::initModel() {
 		beginResetModel();
-		setupModelData(rootItem.get());
+		setupModelData(p_rootItem.get());
 		endResetModel();
 }

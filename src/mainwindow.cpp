@@ -120,7 +120,7 @@ MainWindow::MainWindow()
 void MainWindow::setupPlayerModel(const QList<Library::TrackMetadata> &trackMetadatas) {
 		ZoneScoped;
 
-		if (m_playerMainTreeView->model()) {
+		if (m_playerMainTreeView->model() != nullptr) {
 				delete m_playerMainTreeView->model();
 		}
 		const QVariantList COLUMNS_NAME{"Number", "Title", "Album", "Author", "Duration", "Year", "Bitrate", "File Size"};
@@ -141,12 +141,12 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 		// if not maximized saves coordinates and size of window
 		if (!isMaximized()) {
-				const auto s = size();
-				const auto p = pos();
-				m_settings.setSettingsEntry("window_width", std::to_string(s.width()));
-				m_settings.setSettingsEntry("window_height", std::to_string(s.height()));
-				m_settings.setSettingsEntry("window_pos_x", std::to_string(p.x()));
-				m_settings.setSettingsEntry("window_pos_y", std::to_string(p.y()));
+				const auto SIZE = size();
+				const auto POSITION = pos();
+				m_settings.setSettingsEntry("window_width", std::to_string(SIZE.width()));
+				m_settings.setSettingsEntry("window_height", std::to_string(SIZE.height()));
+				m_settings.setSettingsEntry("window_pos_x", std::to_string(POSITION.x()));
+				m_settings.setSettingsEntry("window_pos_y", std::to_string(POSITION.y()));
 		}
 
 		// saves if maximized
@@ -159,29 +159,29 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 void MainWindow::readWindowGeometrySettings() {
 		ZoneScoped;
 
-		const auto maxStr = m_settings.getSettingsEntry("window_maximized");
-		const auto posXStr = m_settings.getSettingsEntry("window_pos_x");
-		const auto posYStr = m_settings.getSettingsEntry("window_pos_y");
-		const auto widthStr = m_settings.getSettingsEntry("window_width");
-		const auto heightStr = m_settings.getSettingsEntry("window_height");
+		const auto MAX_STR = m_settings.getSettingsEntry("window_maximized");
+		const auto POS_X_STR = m_settings.getSettingsEntry("window_pos_x");
+		const auto POS_Y_STR = m_settings.getSettingsEntry("window_pos_y");
+		const auto WIDTH_STR = m_settings.getSettingsEntry("window_width");
+		const auto HEIGHT_STR = m_settings.getSettingsEntry("window_height");
 
 		QPoint posDefault = pos();
 		QSize sizeDefault = size();
 
-		if (!posXStr.empty() && !posYStr.empty()) {
-				posDefault.setX(std::stoi(posXStr));
-				posDefault.setY(std::stoi(posYStr));
+		if (!POS_X_STR.empty() && !POS_Y_STR.empty()) {
+				posDefault.setX(std::stoi(POS_X_STR));
+				posDefault.setY(std::stoi(POS_Y_STR));
 		}
 
-		if (!widthStr.empty() && !heightStr.empty()) {
-				sizeDefault.setWidth(std::stoi(widthStr));
-				sizeDefault.setHeight(std::stoi(heightStr));
+		if (!WIDTH_STR.empty() && !HEIGHT_STR.empty()) {
+				sizeDefault.setWidth(std::stoi(WIDTH_STR));
+				sizeDefault.setHeight(std::stoi(HEIGHT_STR));
 		}
 
 		move(posDefault);
 		resize(sizeDefault);
 
-		if (!maxStr.empty() && maxStr == "1") {
+		if (!MAX_STR.empty() && MAX_STR == "1") {
 				showMaximized();
 		}
 }
@@ -198,7 +198,7 @@ void MainWindow::showPlaylists() {
 		ZoneScoped;
 
 		m_currentViewMode = ViewMode::Playlists;
-		if (m_middleModel) {
+		if (m_middleModel != nullptr) {
 				m_middleModel->clear();
 		}
 
@@ -221,16 +221,16 @@ void MainWindow::showPlaylists() {
 }
 
 void MainWindow::showFavorite() {
-	createNewPlaylist("Favorite");
-	showPlaylists();
-	loadPlaylistContent("Favorite");
+		createNewPlaylist("Favorite");
+		showPlaylists();
+		loadPlaylistContent("Favorite");
 }
 
 void MainWindow::showAlbums() {
 		ZoneScoped;
 
 		m_currentViewMode = ViewMode::Albums;
-		if (m_middleModel) {
+		if (m_middleModel != nullptr) {
 				m_middleModel->clear();
 		}
 
@@ -291,8 +291,9 @@ QString MainWindow::getPlaylistsDir() {
 void MainWindow::onPlaylistContextMenu(const QPoint &pos) {
 		ZoneScoped;
 
-		if (m_currentViewMode != ViewMode::Playlists)
+		if (m_currentViewMode != ViewMode::Playlists) {
 				return;
+		}
 
 		QMenu menu(this);
 		QAction *newAction = menu.addAction("Nowa Playlista");
@@ -317,21 +318,21 @@ void MainWindow::createNewPlaylist(const QString &playlistName) {
 }
 
 void MainWindow::createNewPlaylistDialog() {
-	ZoneScoped;
+		ZoneScoped;
 
-	bool ok;
-	QString name = QInputDialog::getText(this, "Nowa Playlista", "Podaj nazwę:", QLineEdit::Normal, "", &ok);
+		bool ok = false;
+		QString name = QInputDialog::getText(this, "Nowa Playlista", "Podaj nazwę:", QLineEdit::Normal, "", &ok);
 
-	if (ok) {
-		createNewPlaylist(name);
-	}
+		if (ok) {
+				createNewPlaylist(name);
+		}
 }
 
 void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 		ZoneScoped;
 
-		const int32_t ROW = index.row();
-		const int32_t PARENT_ROW = index.parent().row();
+		const qsizetype ROW = index.row();
+		const qsizetype PARENT_ROW = index.parent().row();
 
 		if (m_currentViewMode == ViewMode::Playlists) {
 				QString filename = m_middleModel->itemFromIndex(index)->data().toString();
@@ -366,13 +367,13 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 		}
 }
 
-void MainWindow::loadPlaylistContent(const QString &filename) {
+void MainWindow::loadPlaylistContent(const QString &playlistName) {
 		ZoneScoped;
 
 		QList<Library::TrackMetadata> trackList{};
 		QList<QUrl> pathList{};
 
-		QFile file(getPlaylistsDir() + "/" + filename);
+		QFile file(getPlaylistsDir() + "/" + playlistName);
 		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 				QTextStream in(&file);
 				while (!in.atEnd()) {
@@ -396,8 +397,9 @@ void MainWindow::onSongContextMenu(const QPoint &pos) {
 		ZoneScoped;
 
 		QModelIndex index = m_playerMainTreeView->indexAt(pos);
-		if (!index.isValid())
+		if (!index.isValid()) {
 				return;
+		}
 
 		QString filePath = m_playbackQueue->currentMedia().toString();
 
@@ -431,12 +433,14 @@ void MainWindow::addSongToPlaylist(const QString &playlistName) {
 		ZoneScoped;
 
 		QModelIndex index = m_playerMainTreeView->currentIndex();
-		if (!index.isValid())
+		if (!index.isValid()) {
 				return;
+		}
 
 		QString filePath = TreeModel::data(index, Qt::DisplayRole, 8).toString();
-		if (filePath.isEmpty())
+		if (filePath.isEmpty()) {
 				return;
+		}
 
 		QString fileName = playlistName;
 		if (!fileName.endsWith(".txt")) {

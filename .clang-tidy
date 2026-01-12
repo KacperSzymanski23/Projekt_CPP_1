@@ -1,4 +1,4 @@
-Checks: "*,clang-diagnostic-*,clang-analyzer-*,performance-*,modernize-*,readability-*,llvm-*,misc-*,bugprone-*,-llvmlibc-*,-fuchsia-*,-hicpp-use-auto,-cppcoreguidelines-owning-memory,-modernize-use-trailing-return-type,-readability-identifier-length,-bugprone-easily-swappable-parameters,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-altera-unroll-loops, -cppcoreguidelines-pro-type-union-access, -misc-non-private-member-variables-in-classes,-readability-avoid-const-params-in-decls, -readability-redundant-access-specifiers, -boost-use-ranges, -modernize-use-auto, -hicpp-special-member-functions, -cert-err58-cpp"
+Checks: "*,clang-diagnostic-*,clang-analyzer-*,performance-*,modernize-*,readability-*,llvm-*,misc-*,bugprone-*,-llvmlibc-*,-fuchsia-*,-hicpp-use-auto,-cppcoreguidelines-owning-memory,-modernize-use-trailing-return-type,-readability-identifier-length,-bugprone-easily-swappable-parameters,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-altera-unroll-loops, -cppcoreguidelines-pro-type-union-access, -misc-non-private-member-variables-in-classes,-readability-avoid-const-params-in-decls, -readability-redundant-access-specifiers, -boost-use-ranges, -modernize-use-auto, -hicpp-special-member-functions, -cert-err58-cpp, -cppcoreguidelines-pro-type-member-init, -hicpp-member-init, -cppcoreguidelines-non-private-member-variables-in-classes"
 
 WarningsAsErrors: ""
 
@@ -14,8 +14,6 @@ ImplementationFileExtensions:
   - cc
   - cpp
   - cxx
-
-HeaderFilterRegex: ""
 
 FormatStyle: none
 
