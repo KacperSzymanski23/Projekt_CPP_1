@@ -111,11 +111,7 @@ std::string Settings::getSettingsEntry(const std::string &entryKey) {
 void Settings::setSettingsEntry(const std::string &entryKey, const std::string &entryValue) {
 		ZoneScoped;
 
-		if (isEntryKeyExists(entryKey)) {
-				m_settings.at(entryKey) = entryValue;
-		}
-
-		m_settings.emplace(entryKey, entryValue);
+		m_settings[entryKey] = entryValue;
 }
 
 bool Settings::isEntryKeyExists(const std::string &entryKey) {
