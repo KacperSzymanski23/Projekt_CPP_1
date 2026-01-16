@@ -10,7 +10,7 @@ std::tm timestamp() { // date and time mark
 		std::time_t nowTime = std::chrono::system_clock::to_time_t(now);
 		std::tm time;
 #ifdef _WIN32
-		localtime_s(&time, &now_time);
+		localtime_s(&time, &nowTime);
 #else
 		localtime_r(&nowTime, &time);
 #endif
