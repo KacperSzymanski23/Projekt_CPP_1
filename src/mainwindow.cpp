@@ -61,6 +61,14 @@ MainWindow::MainWindow()
 				m_playbackControlsWidget->setPlayerState(arg);
 		});
 
+		connect(m_playbackControlsWidget, &PlayerControls::changeFavoriteState, this, [this](bool arg) {
+				if (arg) {
+						addSongToPlaylist("Favorite.txt");
+				} else {
+						removeSongFromPlaylist("Favorite.txt", m_playbackQueue->currentMedia());
+				}
+		});
+
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, [this]() {
 				m_settings.loadSettings();
 
@@ -144,6 +152,31 @@ void MainWindow::setupPlayerModel(const QList<Library::TrackMetadata> &trackMeta
 		}
 
 		m_playerMainTreeView->show();
+}
+
+void MainWindow::loadPlaylistToList(const QString &playlistName, QList<QString> &tracksPaths) {
+		ZoneScoped;
+
+		if (playlistName.isEmpty()) {
+				return;
+		}
+
+		QString fileName = playlistName;
+		if (!fileName.endsWith(".txt")) {
+				fileName += ".txt";
+		}
+
+		QFile file(getPlaylistsDir() + "/" + fileName);
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+				QTextStream in(&file);
+				while (!in.atEnd()) {
+						QString line = in.readLine();
+						if (!line.isEmpty() && QFile::exists(line)) {
+								tracksPaths.append(line);
+						}
+				}
+				file.close();
+		}
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -467,5 +500,23 @@ void MainWindow::addSongToPlaylist(const QString &playlistName) {
 				QTextStream out(&file);
 				out << filePath << "\n";
 				file.close();
+		}
+}
+
+void MainWindow::removeSongFromPlaylist(const QString &playlistName, const QString &filePath) {
+		ZoneScoped;
+
+		QList<QString> paths{};
+		loadPlaylistToList(playlistName, paths);
+
+		if (paths.removeOne(filePath)) {
+				QFile file(getPlaylistsDir() + "/" + playlistName);
+				if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+						QTextStream out(&file);
+						for (const QString &path : paths) {
+								out << path << "\n";
+						}
+						file.close();
+				}
 		}
 }

@@ -33,6 +33,7 @@ class MainWindow : public QMainWindow {
 
 	  private:
 		void setupPlayerModel(const QList<Library::TrackMetadata> &trackMetadatas); // Tworzy model elemetów dla m_playerMainTreeView
+		void loadPlaylistToList(const QString &playlistName, QList<QString> &tracksPaths);
 
 		PlaybackQueue *m_playbackQueue;
 
@@ -93,6 +94,7 @@ class MainWindow : public QMainWindow {
 		void createNewPlaylist(const QString &playlistName); // Logika tworzenia pliku
 		void createNewPlaylistDialog();                      // Okno dialogowe tworzenia pliku
 		void addSongToPlaylist(const QString &playlistName); // Dodawanie utworu
+		void removeSongFromPlaylist(const QString &playlistName, const QString &filePath);
 };
 
 #endif /* MAINWINDOW_HPP */
