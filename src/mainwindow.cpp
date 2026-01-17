@@ -77,9 +77,6 @@ MainWindow::MainWindow()
 				m_library.setLibraryPath(libraryPath);
 				m_library.scanLibraryPath();
 
-				delete m_libraryModel;
-				m_libraryModel = nullptr;
-
 				showLibrary();
 		});
 
@@ -138,18 +135,25 @@ MainWindow::MainWindow()
 void MainWindow::setupPlayerModel(const QList<Library::TrackMetadata> &trackMetadatas) {
 		ZoneScoped;
 
-		if (m_playerMainTreeView->model() != nullptr) {
-				delete m_playerMainTreeView->model();
-		}
 		const QVariantList COLUMNS_NAME{"Number", "Title", "Album", "Author", "Duration", "Year", "Bitrate", "File Size"};
 
-		m_playerModel = new PlayerTreeModel(trackMetadatas, COLUMNS_NAME, this);
-
-		m_playerMainTreeView->setModel(m_playerModel);
-
-		for (int32_t c = 0; c < m_playerModel->columnCount(QModelIndex()); ++c) {
-				m_playerMainTreeView->resizeColumnToContents(c);
+		if (m_playerMainTreeView->model() == nullptr) {
+				m_playerModel = new PlayerTreeModel(trackMetadatas, COLUMNS_NAME, this);
+				m_playerMainTreeView->setModel(m_playerModel);
+		} else {
+				m_playerModel->updateModelData(trackMetadatas);
 		}
+
+		auto *header = m_playerMainTreeView->header();
+
+		header->setSectionResizeMode(0, QHeaderView::ResizeToContents); // Num
+		header->setSectionResizeMode(1, QHeaderView::Stretch);          // Title
+		header->setSectionResizeMode(2, QHeaderView::Stretch);          // Album
+		header->setSectionResizeMode(3, QHeaderView::Stretch);          // Author
+		header->setSectionResizeMode(4, QHeaderView::ResizeToContents); // Duration
+		header->setSectionResizeMode(5, QHeaderView::ResizeToContents); // Year
+		header->setSectionResizeMode(6, QHeaderView::ResizeToContents); // Bitrate
+		header->setSectionResizeMode(7, QHeaderView::Stretch);          // File Size
 
 		m_playerMainTreeView->show();
 }
@@ -234,11 +238,17 @@ void MainWindow::showLibrary() {
 
 		if (m_libraryModel == nullptr) {
 				m_libraryModel = new MiddleTreeModel(m_library.getArtistList(), "Library", this);
+		} else {
+				m_libraryModel->updateModelData(m_library.getArtistList());
 		}
 
 		m_currentViewMode = ViewMode::Library;
 
-		m_middleTreeView->setModel(m_libraryModel);
+		if (m_middleTreeView->model() != m_libraryModel) {
+				m_middleTreeView->setModel(m_libraryModel);
+		}
+
+		m_middleTreeView->show();
 }
 
 void MainWindow::showPlaylists() {

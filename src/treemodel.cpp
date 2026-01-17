@@ -124,6 +124,11 @@ void TreeModel::setColumnsNames(const QVariantList &columnsNames) {
 
 void TreeModel::initModel() {
 		beginResetModel();
+
+		if (p_rootItem != nullptr) {
+				p_rootItem->clearChildren();
+		}
+
 		setupModelData(p_rootItem.get());
 		endResetModel();
 }

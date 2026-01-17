@@ -2,6 +2,7 @@
 #define TREEMODEL_HPP
 
 #include "treeitem.hpp"
+
 // Qt
 #include <QAbstractItemModel>
 #include <QList>

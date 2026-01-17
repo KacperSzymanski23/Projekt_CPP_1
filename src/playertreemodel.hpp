@@ -19,6 +19,8 @@ class PlayerTreeModel : public TreeModel {
 		explicit PlayerTreeModel(const QList<Library::TrackMetadata> &tracks, const QVariantList &columnsNames = {}, QObject *parent = nullptr);
 		~PlayerTreeModel() override;
 
+		void updateModelData(const QList<Library::TrackMetadata> &trackMetadatas);
+
 	  protected:
 		void setupModelData(TreeItem *parent) override; // Wypełnia model danymi z listy metadanych piosenek
 

@@ -39,6 +39,10 @@ TreeItem *TreeItem::parentItem() const {
 		return m_parentItem;
 }
 
+void TreeItem::clearChildren() {
+		m_childItems.clear();
+}
+
 int32_t TreeItem::row() const {
 		ZoneScoped;
 

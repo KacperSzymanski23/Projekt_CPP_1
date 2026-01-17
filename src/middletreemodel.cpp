@@ -13,6 +13,14 @@ MiddleTreeModel::MiddleTreeModel(const QList<Library::Artist> &artists, const QS
 
 MiddleTreeModel::~MiddleTreeModel() = default;
 
+void MiddleTreeModel::updateModelData(const QList<Library::Artist> &artists) {
+		ZoneScopedN("updateMiddleModelData");
+
+		m_artists = artists;
+
+		initModel();
+}
+
 void MiddleTreeModel::setupModelData(TreeItem *parent) {
 		ZoneScopedN("setupMiddleModelData");
 

@@ -14,6 +14,14 @@ PlayerTreeModel::PlayerTreeModel(const QList<Library::TrackMetadata> &tracks, co
 
 PlayerTreeModel::~PlayerTreeModel() = default;
 
+void PlayerTreeModel::updateModelData(const QList<Library::TrackMetadata> &trackMetadatas) {
+		ZoneScopedN("updatePlayerModelData");
+
+		m_tracks = trackMetadatas;
+
+		initModel();
+}
+
 void PlayerTreeModel::setupModelData(TreeItem *parent) {
 		ZoneScopedN("setupPlayerModelData");
 

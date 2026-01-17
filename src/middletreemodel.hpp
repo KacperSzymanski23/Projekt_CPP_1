@@ -18,6 +18,8 @@ class MiddleTreeModel : public TreeModel {
 		explicit MiddleTreeModel(const QList<Library::Artist> &artists, const QString &columnName = {}, QObject *parent = nullptr);
 		~MiddleTreeModel() override;
 
+		void updateModelData(const QList<Library::Artist> &artists);
+
 	  protected:
 		void setupModelData(TreeItem *parent) override; // Wypełnia model danymi z listy metadanych piosenek
 

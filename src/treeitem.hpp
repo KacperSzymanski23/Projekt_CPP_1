@@ -16,6 +16,7 @@ class TreeItem {
 		[[nodiscard]] QVariant data(qsizetype column) const; // Zwraca daną w podanej w argumęcie kolumnę
 		[[nodiscard]] int32_t row() const;                   // Zwraca pozycję elementu w strukturze drzewa TreeItem'ów względem jego rodzica
 		[[nodiscard]] TreeItem *parentItem() const;          // Zwraca "rodzica" tego TreeItem'u
+		void clearChildren();                                // Usuwa wszystkie dzieci
 
 	  private:
 		std::vector<std::unique_ptr<TreeItem>> m_childItems; // std::vector z wskaźnikiem typy unique do TreeItem
