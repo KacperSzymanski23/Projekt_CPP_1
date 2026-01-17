@@ -19,10 +19,10 @@ std::tm timestamp() { // date and time mark
 }
 
 void logCreate(const std::string &message) {
-		std::tm localTime = timestamp();
+		static const std::tm LOCAL_TIME = timestamp();
 		std::ostringstream oss;
 		std::string filename;
-		oss << std::put_time(&localTime, "%d-%m-%Y_%H-%M");
+		oss << std::put_time(&LOCAL_TIME, "%d-%m-%Y_%H-%M");
 		filename = oss.str() + ".log";
 
 		std::ofstream file("../../logs/" + filename, std::ios::app);
