@@ -27,7 +27,6 @@ QVariant TreeModel::data(const QModelIndex &index, int32_t role) const {
 		ZoneScoped;
 
 		if (!index.isValid() || role != Qt::DisplayRole) {
-				logCreate("Invalid model index");
 				return {};
 		}
 
@@ -39,7 +38,6 @@ QVariant TreeModel::data(const QModelIndex &index, int32_t role, int32_t column)
 		ZoneScoped;
 
 		if (!index.isValid() || role != Qt::DisplayRole) {
-				logCreate("Invalid model index");
 				return {};
 		}
 
@@ -64,7 +62,7 @@ QVariant TreeModel::headerData(int32_t section, Qt::Orientation orientation, int
 		if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
 				return p_rootItem->data(section);
 		}
-		logCreate("Unexpected header data request");
+
 		return {};
 }
 

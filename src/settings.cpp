@@ -9,13 +9,12 @@
 Settings &Settings::getInstance() {
 		static Settings instance("config.cfg");
 
-		logCreate("Settings instance created.");
-
 		return instance;
 }
 
 Settings::Settings(const std::string &settingsPath)
 	: m_settingsPath(settingsPath) {
+		logCreate("Settings instance created");
 
 		loadSettings();
 }
@@ -64,7 +63,7 @@ bool Settings::loadSettings() {
 		std::ifstream settingsFile(m_settingsPath);
 
 		if (!settingsFile.is_open()) {
-				logCreate("Can't open settings file.");
+				logCreate("Can't open settings file");
 
 				settingsFile.close();
 				return false;
@@ -84,7 +83,7 @@ bool Settings::loadSettings() {
 
 		settingsFile.close();
 
-		logCreate("Settings loaded successfully.");
+		logCreate("Settings loaded successfully");
 		return true;
 }
 
@@ -94,7 +93,7 @@ bool Settings::saveSettings() {
 		std::ofstream settingsFile(m_settingsPath, std::ios::trunc);
 
 		if (!settingsFile.is_open()) {
-				logCreate("Can't open settings file.");
+				logCreate("Can't open settings file");
 
 				settingsFile.close();
 				return false;
@@ -106,7 +105,7 @@ bool Settings::saveSettings() {
 
 		settingsFile.close();
 
-		logCreate("Settings saved successfully.");
+		logCreate("Settings saved successfully");
 		return true;
 }
 
