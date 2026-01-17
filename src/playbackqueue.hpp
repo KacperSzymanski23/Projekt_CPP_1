@@ -3,7 +3,7 @@
 
 // Qt
 #include <QObject>
-#include <QUrl>
+#include <QString>
 
 class PlaybackQueue : public QObject {
 		Q_OBJECT
@@ -11,7 +11,7 @@ class PlaybackQueue : public QObject {
 	  public:
 		enum PlaybackMode : uint8_t { CurrentItemOnce = 0, CurrentItemInLoop = 1, Sequential = 2, Loop = 3, Shuffled = 4 };
 
-		explicit PlaybackQueue(QObject *parent = nullptr, const QList<QUrl> &queue = {}, PlaybackMode playbackMode = Sequential);
+		explicit PlaybackQueue(QObject *parent = nullptr, const QList<QString> &queue = {}, PlaybackMode playbackMode = Sequential);
 
 		[[nodiscard]] PlaybackMode playbackMode() const;
 		void setPlaybackMode(PlaybackMode mode);
@@ -20,16 +20,16 @@ class PlaybackQueue : public QObject {
 		qsizetype previousIndex(int32_t index);
 
 		[[nodiscard]] qsizetype currentIndex() const;
-		QUrl currentMedia();
+		QString currentMedia();
 
 		[[nodiscard]] qsizetype mediaCount() const;
 		bool isEmpty() const;
 
-		void addMedia(const QUrl &content);
-		void insertMedia(qsizetype index, const QUrl &content);
+		void addMedia(const QString &content);
+		void insertMedia(qsizetype index, const QString &content);
 		void removeMedia(qsizetype index);
 
-		void setQueue(const QList<QUrl> &queue);
+		void setQueue(const QList<QString> &queue);
 
 		void clear();
 
@@ -39,7 +39,7 @@ class PlaybackQueue : public QObject {
 		int32_t m_orderOfPlaybackIndex{0};
 
 		QList<int32_t> m_orderOfPlayback;
-		QList<QUrl> m_queue;
+		QList<QString> m_queue;
 
 	  public slots:
 		void shuffle();
@@ -51,7 +51,7 @@ class PlaybackQueue : public QObject {
 
 	  signals:
 		void currentIndexChanged(qsizetype index);
-		void currentMediaChanged(const QUrl &media);
+		void currentMediaChanged(const QString &media);
 
 		void mediaChanged(int32_t start, int32_t end);
 };

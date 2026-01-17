@@ -1,17 +1,10 @@
 #include "playbackqueue.hpp"
 // Qt
-#include <QDebug>
 #include <QRandomGenerator>
 // Tracy
 #include <tracy/Tracy.hpp>
 
-// TODO(kacper): Zastąpić QUrl na QString
-// QString jest trochę prostszym typem niż QUrl
-// więc z racji że program nie będzie odtwarzał muzyki z internetu
-// wszystkie QUrl'e można zastąpić QString'ami
-// Te zmiany powinny być wykonane także w innych klasach
-
-PlaybackQueue::PlaybackQueue(QObject *parent, const QList<QUrl> &queue, PlaybackMode playbackMode)
+PlaybackQueue::PlaybackQueue(QObject *parent, const QList<QString> &queue, PlaybackMode playbackMode)
 	: QObject(parent)
 	, m_playbackMode(playbackMode)
 	, m_queue(queue) {
@@ -137,7 +130,7 @@ qsizetype PlaybackQueue::currentIndex() const {
 		return m_currentIndex;
 }
 
-QUrl PlaybackQueue::currentMedia() {
+QString PlaybackQueue::currentMedia() {
 		m_currentIndex = qBound(0, m_currentIndex, m_queue.size());
 
 		return m_queue.at(m_currentIndex);
@@ -151,11 +144,11 @@ bool PlaybackQueue::isEmpty() const {
 		return m_queue.isEmpty();
 }
 
-void PlaybackQueue::addMedia(const QUrl &content) {
+void PlaybackQueue::addMedia(const QString &content) {
 		m_queue.append(content);
 }
 
-void PlaybackQueue::insertMedia(qsizetype index, const QUrl &content) {
+void PlaybackQueue::insertMedia(qsizetype index, const QString &content) {
 		ZoneScoped;
 
 		index = qBound(0, index, m_queue.size());
@@ -171,7 +164,7 @@ void PlaybackQueue::removeMedia(qsizetype index) {
 		m_queue.remove(index);
 }
 
-void PlaybackQueue::setQueue(const QList<QUrl> &queue) {
+void PlaybackQueue::setQueue(const QList<QString> &queue) {
 		m_queue = queue;
 }
 

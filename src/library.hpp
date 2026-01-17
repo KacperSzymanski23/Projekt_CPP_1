@@ -5,7 +5,6 @@
 // Qt
 #include <QList>
 #include <QString>
-#include <QUrl>
 // TagLib
 #include <taglib/fileref.h>
 
@@ -25,23 +24,23 @@ class Library {
 
 		class Album : public Collection<TrackMetadata> {
 			  public:
-				Album(const QString &title, const QUrl &coverArtPath, const QList<TrackMetadata> &tracks = {}, const QList<QUrl> &tracksPaths = {});
+				Album(const QString &title, const QString &coverArtPath, const QList<TrackMetadata> &tracks = {}, const QList<QString> &tracksPaths = {});
 				Album() = default;
 
-				void setCoverArtPath(const QUrl &path);
-				[[nodiscard]] QUrl getCoverArtPath() const;
+				void setCoverArtPath(const QString &path);
+				[[nodiscard]] QString getCoverArtPath() const;
 
-				void setData(const QList<TrackMetadata> &tracks, const QList<QUrl> &paths);
-				void appendData(const TrackMetadata &track, const QUrl &path);
+				void setData(const QList<TrackMetadata> &tracks, const QList<QString> &paths);
+				void appendData(const TrackMetadata &track, const QString &path);
 
-				[[nodiscard]] QUrl getUrl(qsizetype index) const;
-				[[nodiscard]] QList<QUrl> getTracksPathsList() const;
+				[[nodiscard]] QString getPath(qsizetype index) const;
+				[[nodiscard]] QList<QString> getTracksPathsList() const;
 
 			  private:
-				void findCoverArt(const QUrl &path);
+				void findCoverArt(const QString &path);
 
-				QUrl m_coverArtPath;
-				QList<QUrl> m_tracksPaths;
+				QString m_coverArtPath;
+				QList<QString> m_tracksPaths;
 		};
 
 		class Artist : public Collection<Album> {
@@ -53,11 +52,11 @@ class Library {
 				void appendAlbum(const Album &album);
 		};
 
-		explicit Library(const QUrl &libraryPath = {});
+		explicit Library(const QString &libraryPath = {});
 
-		void setLibraryPath(const QUrl &path);
+		void setLibraryPath(const QString &path);
 
-		static TrackMetadata extractMetadata(const QString &path, const TagLib::FileRef &ref);
+		static QPair<TrackMetadata, QString> extractMetadata(const QString &path);
 
 		void scanLibraryPath();
 
@@ -68,10 +67,10 @@ class Library {
 		[[nodiscard]] Artist getArtist(const QString &name) const;
 		[[nodiscard]] Artist getArtist(qsizetype index) const;
 
-		void groupTracks(const QHash<QString, QHash<QString, QList<QPair<TrackMetadata, QUrl>>>> &collector);
+		void groupTracks(QList<std::pair<TrackMetadata, QString>> &data);
 
 	  private:
-		QUrl m_libraryPath;
+		QString m_libraryPath;
 		QList<Artist> m_artists;
 		// TODO(kacper): Sprawdzić czy można zastąpić m_artists
 		// Ta lista zawiera dane znajdujace się już w m_artists

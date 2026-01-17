@@ -29,7 +29,7 @@ MainWindow::MainWindow()
 	, m_middleModel(new QStandardItemModel(this)) {
 		ZoneScoped;
 
-		QUrl libraryPath = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
+		QString libraryPath = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
 		m_library = Library{libraryPath};
 
 		m_audioPlayer->setAudioOutput(m_audioOutput);
@@ -348,7 +348,7 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 				const QList PATHS{ALBUM.getTracksPathsList()};
 				const QList TRACKS{ALBUM.getItems()};
 
-				m_coverImage = ALBUM.getCoverArtPath().toString();
+				m_coverImage = ALBUM.getCoverArtPath();
 				m_coverLabel->setPixmap(m_coverImage);
 
 				m_playbackQueue->setQueue(PATHS);
@@ -359,7 +359,7 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 				const QList PATHS{ALBUM.getTracksPathsList()};
 				const QList TRACKS{ALBUM.getItems()};
 
-				m_coverImage = ALBUM.getCoverArtPath().toString();
+				m_coverImage = ALBUM.getCoverArtPath();
 				m_coverLabel->setPixmap(m_coverImage);
 
 				m_playbackQueue->setQueue(PATHS);
@@ -371,7 +371,7 @@ void MainWindow::loadPlaylistContent(const QString &playlistName) {
 		ZoneScoped;
 
 		QList<Library::TrackMetadata> trackList{};
-		QList<QUrl> pathList{};
+		QList<QString> pathList{};
 
 		QFile file(getPlaylistsDir() + "/" + playlistName);
 		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -379,10 +379,9 @@ void MainWindow::loadPlaylistContent(const QString &playlistName) {
 				while (!in.atEnd()) {
 						QString line = in.readLine();
 						if (!line.isEmpty() && QFile::exists(line)) {
+								auto [metadata, path] = Library::extractMetadata(line);
 
-								const TagLib::FileRef FILE_REF{QFile::encodeName(line).constData()};
-
-								trackList.append(Library::extractMetadata(line, FILE_REF));
+								trackList.append(metadata);
 								pathList.append(line);
 						}
 				}
@@ -401,7 +400,7 @@ void MainWindow::onSongContextMenu(const QPoint &pos) {
 				return;
 		}
 
-		QString filePath = m_playbackQueue->currentMedia().toString();
+		QString filePath = m_playbackQueue->currentMedia();
 
 		QMenu menu(this);
 		QMenu *subMenu = menu.addMenu("Dodaj do playlisty");

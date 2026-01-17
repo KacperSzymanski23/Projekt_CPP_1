@@ -13,13 +13,13 @@ taglib_dep = dependency('taglib')
 
 qlementine_dep = dependency('qlementine')
 qlementine_icons_dep = dependency('qlementine-icons')
-tracy_dep = dependency('tracy', static : true)
+tracy_dep = dependency('tracy', static: true)
 
 include_dir = include_directories('include')
 
 common_args = []
 
-if get_option ('tracy_enable')
+if get_option('tracy_enable')
   common_args += ['-DTRACY_ENABLE', '-DTRACY_NO_EXIT']
 endif
 
