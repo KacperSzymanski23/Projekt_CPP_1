@@ -459,27 +459,27 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 						return;
 				}
 
-				const Library::Artist ARTIST{m_library.getArtist(PARENT_ROW)};
-				const Library::Album ALBUM{ARTIST.getItem(ROW)};
-				const QList PATHS{ALBUM.getTracksPathsList()};
-				const QList TRACKS{ALBUM.getItems()};
+				const Library::Artist &artist{m_library.getArtist(PARENT_ROW)};
+				const Library::Album &album{artist.getItem(ROW)};
+				const QList<QString> &paths{album.getTracksPathsList()};
+				const QList<Library::TrackMetadata> &tracks{album.getItems()};
 
-				m_coverImage = ALBUM.getCoverArtPath();
+				m_coverImage = album.getCoverArtPath();
 				m_coverLabel->setPixmap(m_coverImage);
 
-				m_playbackQueue->setQueue(PATHS);
-				setupPlayerModel(TRACKS);
+				m_playbackQueue->setQueue(paths);
+				setupPlayerModel(tracks);
 
 		} else if (m_currentViewMode == ViewMode::Albums) {
-				const Library::Album ALBUM{m_library.getAlbum(ROW)};
-				const QList PATHS{ALBUM.getTracksPathsList()};
-				const QList TRACKS{ALBUM.getItems()};
+				const Library::Album &album{m_library.getAlbum(ROW)};
+				const QList<QString> &paths{album.getTracksPathsList()};
+				const QList<Library::TrackMetadata> &tracks{album.getItems()};
 
-				m_coverImage = ALBUM.getCoverArtPath();
+				m_coverImage = album.getCoverArtPath();
 				m_coverLabel->setPixmap(m_coverImage);
 
-				m_playbackQueue->setQueue(PATHS);
-				setupPlayerModel(TRACKS);
+				m_playbackQueue->setQueue(paths);
+				setupPlayerModel(tracks);
 		}
 }
 
