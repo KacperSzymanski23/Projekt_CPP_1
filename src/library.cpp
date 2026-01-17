@@ -119,7 +119,7 @@ Library::TrackMetadata Library::extractMetadata(const QString &path, const TagLi
 		const uint32_t NUMBER{TAG->track()};
 		const QString TITLE{QString::fromStdWString(TAG->title().toWString())};
 		const QString ALBUM{QString::fromStdWString(TAG->album().toWString())};
-		const QString ARTIST{QString::fromStdWString(TAG->artist().toWString())};
+		QString artist{QString::fromStdWString(TAG->artist().toWString())};
 		const uint32_t YEAR{TAG->year()};
 
 		// Trzeba coś zrobić kiedy TITLE, ALBUM lub ARTIST jest puste
@@ -129,13 +129,13 @@ Library::TrackMetadata Library::extractMetadata(const QString &path, const TagLi
 
 		const QTime DURATION{0, DURATION_IN_SECONDS / 60, DURATION_IN_SECONDS % 60};
 
-		// Odczytywanie rozmiaru pliku może być zastąpione przez
-		// pomnożenie BITRATE * DURATION_IN_SECONDS a następnie
-		// podzielone przez 1024 * 8 (8 bitów na bajt i 1024 KiB na MiB)
-		constexpr float MIB = 1024.0F * 1024.0F;
-		const float FILE_SIZE = static_cast<float>(FILE_INFO.size()) / MIB;
+		constexpr double MIB = 1024.0 * 8.0;
+		const double FILE_SIZE = (DURATION_IN_SECONDS * BITRATE) / MIB;
 
-		// bitrate i fileSize można przechowywać jako int32_t a nie QString
+		if (PROPERTIES.contains("ALBUMARTIST")) {
+				artist = QString::fromStdWString(PROPERTIES["ALBUMARTIST"].front().toWString());
+		}
+
 		// path jest wogóle niepotrzebny ponieważ obecną ścieżkę można uzyskać
 		// z m_queue.currentMedia()
 		return {
