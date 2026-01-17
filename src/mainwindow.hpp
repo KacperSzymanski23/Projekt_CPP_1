@@ -2,7 +2,6 @@
 #define MAINWINDOW_HPP
 
 #include "library.hpp"
-#include "logs.hpp"
 #include "middletreemodel.hpp"
 #include "playbackqueue.hpp"
 #include "playercontrols.hpp"

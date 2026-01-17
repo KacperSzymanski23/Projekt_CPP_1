@@ -1,6 +1,7 @@
 #ifndef COLLECTION_HPP
 #define COLLECTION_HPP
 
+#include <logs.hpp>
 // Qt
 #include <QList>
 // STD
@@ -33,6 +34,8 @@ class Collection {
 				if (index < p_items.size()) {
 						return p_items.at(index);
 				}
+
+				logCreate("Index out of range: " + std::to_string(index));
 
 				return {};
 		}

@@ -1,4 +1,5 @@
 #include "library.hpp"
+#include "logs.hpp"
 // Qt
 #include <QDir>
 #include <QDirListing>
@@ -50,6 +51,8 @@ QString Library::Album::getPath(qsizetype index) const {
 				return m_tracksPaths.at(index);
 		}
 
+		logCreate("Index out of range: " + std::to_string(index));
+
 		return {};
 }
 
@@ -74,6 +77,8 @@ void Library::Album::findCoverArt(const QString &path) {
 						return;
 				}
 		}
+
+		logCreate("Cover art not found");
 }
 
 Library::Artist::Artist(const QString &name, const QList<Album> &albums)
@@ -89,7 +94,9 @@ Library::Album Library::Artist::findAlbum(const QString &title) const {
 				}
 		}
 
-		return Album();
+		logCreate("Album not found: " + title.toStdString());
+
+		return {};
 }
 
 void Library::Artist::appendAlbum(const Album &album) {
@@ -108,6 +115,7 @@ QPair<Library::TrackMetadata, QString> Library::extractMetadata(const QString &p
 		ZoneScoped;
 
 		if (path.isEmpty()) {
+				logCreate("Path is empty");
 				return {};
 		}
 
@@ -115,6 +123,7 @@ QPair<Library::TrackMetadata, QString> Library::extractMetadata(const QString &p
 		const TagLib::FileRef FILE_REF(ENCODED_PATH.constData(), true, TagLib::AudioProperties::Fast);
 
 		if (FILE_REF.isNull() || FILE_REF.tag() == nullptr) {
+				logCreate("FileRef is null");
 				return {};
 		}
 
@@ -159,10 +168,12 @@ QPair<Library::TrackMetadata, QString> Library::extractMetadata(const QString &p
 		}
 
 		if (metadata.artist.isEmpty()) {
+				logCreate("Artist name is empty");
 				metadata.artist = "Unknown";
 		}
 
 		if (metadata.album.isEmpty()) {
+				logCreate("Album name is empty");
 				metadata.album = "Unknown";
 		}
 
@@ -176,11 +187,13 @@ void Library::scanLibraryPath() {
 		m_artists.clear();
 
 		if (m_libraryPath.isEmpty()) {
+				logCreate("Library path is empty, using default path");
 				m_libraryPath = QDir::homePath() + "/Music";
 		}
 		const QDir LIBRARY{m_libraryPath};
 
 		if (!LIBRARY.exists()) {
+				logCreate("Library path does not exists");
 				return;
 		}
 
@@ -220,6 +233,8 @@ Library::Album Library::getAlbum(qsizetype index) const {
 				return m_albums.at(index);
 		}
 
+		logCreate("Index out of range: " + std::to_string(index));
+
 		return {};
 }
 
@@ -232,6 +247,8 @@ Library::Artist Library::getArtist(const QString &name) const {
 				}
 		}
 
+		logCreate("Artist not found: " + name.toStdString());
+
 		return Artist(nullptr);
 }
 
@@ -242,6 +259,8 @@ Library::Artist Library::getArtist(qsizetype index) const {
 				return m_artists.at(index);
 		}
 
+		logCreate("Index out of range: " + std::to_string(index));
+
 		return Artist(nullptr);
 }
 
@@ -249,6 +268,7 @@ void Library::groupTracks(QList<std::pair<TrackMetadata, QString>> &data) {
 		ZoneScoped;
 
 		if (data.isEmpty()) {
+				logCreate("Data is empty");
 				return;
 		}
 

@@ -1,5 +1,6 @@
 #include "mainwindow.hpp"
 #include "icons.hpp"
+#include "logs.hpp"
 // Qt
 #include <QAction>
 #include <QDirListing>
@@ -162,6 +163,7 @@ void MainWindow::loadPlaylistToList(const QString &playlistName, QList<QString> 
 		ZoneScoped;
 
 		if (playlistName.isEmpty()) {
+				logCreate("Playlist name is empty");
 				return;
 		}
 
@@ -260,6 +262,7 @@ void MainWindow::showPlaylists() {
 		}
 
 		if (m_middleModel == nullptr) {
+				logCreate("m_middleModel is nullptr");
 				return;
 		}
 
@@ -292,6 +295,7 @@ void MainWindow::showAlbums() {
 		}
 
 		if (m_middleModel == nullptr) {
+				logCreate("m_middleModel is nullptr");
 				return;
 		}
 
@@ -309,6 +313,11 @@ void MainWindow::showAlbums() {
 
 void MainWindow::selectRow(int32_t currentRow) const {
 		ZoneScoped;
+
+		if (currentRow == -1) {
+				logCreate("Current row is -1, invalid index");
+				return;
+		}
 
 		const QModelIndex CURRENT_MODEL_INDEX = m_playerModel->index(currentRow, 0, QModelIndex());
 
@@ -365,6 +374,7 @@ void MainWindow::createNewPlaylist(const QString &playlistName) {
 		ZoneScoped;
 
 		if (playlistName.isEmpty()) {
+				logCreate("Playlist name is empty");
 				return;
 		}
 
@@ -456,6 +466,7 @@ void MainWindow::onSongContextMenu(const QPoint &pos) {
 
 		QModelIndex index = m_playerMainTreeView->indexAt(pos);
 		if (!index.isValid()) {
+				logCreate("Invalid index at position: " + std::to_string(pos.x()) + ", " + std::to_string(pos.y()));
 				return;
 		}
 

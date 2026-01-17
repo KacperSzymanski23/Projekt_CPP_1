@@ -1,4 +1,5 @@
 #include "settings.hpp"
+#include "logs.hpp"
 // STD
 #include <fstream>
 #include <iostream>
@@ -7,6 +8,8 @@
 
 Settings &Settings::getInstance() {
 		static Settings instance("config.cfg");
+
+		logCreate("Settings instance created.");
 
 		return instance;
 }
@@ -44,7 +47,7 @@ bool Settings::parseLine(const std::string &line, std::string &entryKey, std::st
 		size_t const POSITION = TRIMMED_LINE.find_first_of('=');
 
 		if (POSITION == std::string::npos) {
-				std::cerr << "Invalid settings line '" << line << "'\n";
+				logCreate("Invalid settings line " + line);
 
 				return false;
 		}
@@ -61,7 +64,7 @@ bool Settings::loadSettings() {
 		std::ifstream settingsFile(m_settingsPath);
 
 		if (!settingsFile.is_open()) {
-				std::cerr << "Can't open settings file.\n";
+				logCreate("Can't open settings file.");
 
 				settingsFile.close();
 				return false;
@@ -80,6 +83,8 @@ bool Settings::loadSettings() {
 		}
 
 		settingsFile.close();
+
+		logCreate("Settings loaded successfully.");
 		return true;
 }
 
@@ -89,7 +94,7 @@ bool Settings::saveSettings() {
 		std::ofstream settingsFile(m_settingsPath, std::ios::trunc);
 
 		if (!settingsFile.is_open()) {
-				std::cerr << "Can't open settings file.\n";
+				logCreate("Can't open settings file.");
 
 				settingsFile.close();
 				return false;
@@ -100,6 +105,8 @@ bool Settings::saveSettings() {
 		}
 
 		settingsFile.close();
+
+		logCreate("Settings saved successfully.");
 		return true;
 }
 

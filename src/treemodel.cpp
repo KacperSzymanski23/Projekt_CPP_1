@@ -1,5 +1,7 @@
 #include "treemodel.hpp"
+#include "logs.hpp"
 #include "treeitem.hpp"
+
 // Qt
 #include <QStringList>
 // Tracy
@@ -25,6 +27,7 @@ QVariant TreeModel::data(const QModelIndex &index, int32_t role) const {
 		ZoneScoped;
 
 		if (!index.isValid() || role != Qt::DisplayRole) {
+				logCreate("Invalid model index");
 				return {};
 		}
 
@@ -36,6 +39,7 @@ QVariant TreeModel::data(const QModelIndex &index, int32_t role, int32_t column)
 		ZoneScoped;
 
 		if (!index.isValid() || role != Qt::DisplayRole) {
+				logCreate("Invalid model index");
 				return {};
 		}
 
@@ -46,10 +50,12 @@ QVariant TreeModel::data(const QModelIndex &index, int32_t role, int32_t column)
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
 		ZoneScoped;
 
-		if (index.isValid()) {
-				return QAbstractItemModel::flags(index);
+		if (!index.isValid()) {
+				logCreate("Invalid model index");
+				return {Qt::NoItemFlags};
 		}
-		return {Qt::NoItemFlags};
+
+		return QAbstractItemModel::flags(index);
 }
 
 QVariant TreeModel::headerData(int32_t section, Qt::Orientation orientation, int32_t role) const {
@@ -58,6 +64,7 @@ QVariant TreeModel::headerData(int32_t section, Qt::Orientation orientation, int
 		if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
 				return p_rootItem->data(section);
 		}
+		logCreate("Unexpected header data request");
 		return {};
 }
 
@@ -65,6 +72,7 @@ QModelIndex TreeModel::index(int32_t row, int32_t column, const QModelIndex &par
 		ZoneScoped;
 
 		if (!hasIndex(row, column, parent)) {
+				logCreate("Model has no index: " + std::to_string(row) + ", " + std::to_string(column));
 				return {};
 		}
 
@@ -86,6 +94,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const {
 		ZoneScoped;
 
 		if (!index.isValid()) {
+				logCreate("Invalid model index");
 				return {};
 		}
 

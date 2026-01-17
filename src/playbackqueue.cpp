@@ -1,4 +1,5 @@
 #include "playbackqueue.hpp"
+#include "logs.hpp"
 // Qt
 #include <QRandomGenerator>
 // Tracy
@@ -28,7 +29,8 @@ void PlaybackQueue::setPlaybackMode(PlaybackMode mode) {
 qsizetype PlaybackQueue::nextIndex(int32_t index) {
 		ZoneScoped;
 
-		if (m_queue.count() == 0) {
+		if (m_queue.isEmpty()) {
+				logCreate("Queue is empty");
 				return -1;
 		}
 
@@ -74,7 +76,8 @@ qsizetype PlaybackQueue::nextIndex(int32_t index) {
 qsizetype PlaybackQueue::previousIndex(int32_t index) {
 		ZoneScoped;
 
-		if (m_queue.count() == 0) {
+		if (m_queue.isEmpty()) {
+				logCreate("Queue is empty");
 				return -1;
 		}
 
@@ -131,6 +134,12 @@ qsizetype PlaybackQueue::currentIndex() const {
 }
 
 QString PlaybackQueue::currentMedia() {
+
+		if (m_currentIndex == -1) {
+				logCreate("Invalid index");
+				return {};
+		}
+
 		m_currentIndex = qBound(0, m_currentIndex, m_queue.size());
 
 		return m_queue.at(m_currentIndex);
@@ -190,10 +199,6 @@ void PlaybackQueue::shuffle() {
 void PlaybackQueue::next() {
 		ZoneScoped;
 
-		if (m_queue.isEmpty()) {
-				return;
-		}
-
 		m_currentIndex = nextIndex(1);
 
 		emit currentIndexChanged(m_currentIndex);
@@ -202,10 +207,6 @@ void PlaybackQueue::next() {
 
 void PlaybackQueue::previous() {
 		ZoneScoped;
-
-		if (m_queue.isEmpty()) {
-				return;
-		}
 
 		m_currentIndex = previousIndex(1);
 
@@ -217,6 +218,7 @@ void PlaybackQueue::setCurrentIndex(qsizetype index) {
 		ZoneScoped;
 
 		if (index < 0 || index >= m_queue.size()) {
+				logCreate("Index out of range: " + std::to_string(index));
 				index = -1;
 		}
 

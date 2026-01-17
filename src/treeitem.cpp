@@ -1,4 +1,5 @@
 #include "treeitem.hpp"
+#include "logs.hpp"
 // Tracy
 #include <tracy/Tracy.hpp>
 
@@ -19,6 +20,8 @@ TreeItem *TreeItem::child(size_t row) const {
 		if (row >= 0 && row < childCount()) {
 				return m_childItems.at(row).get();
 		}
+
+		logCreate("Row out of range: " + std::to_string(row));
 
 		return nullptr;
 }
@@ -47,6 +50,7 @@ int32_t TreeItem::row() const {
 		ZoneScoped;
 
 		if (m_parentItem == nullptr) {
+				logCreate("Item is orphaned, has no parent");
 				return 0;
 		}
 
@@ -59,6 +63,7 @@ int32_t TreeItem::row() const {
 		if (IT != m_parentItem->m_childItems.cend()) {
 				return static_cast<int32_t>(std::distance(m_parentItem->m_childItems.cbegin(), IT));
 		}
+
 		Q_ASSERT(false);
 		return -1;
 }
