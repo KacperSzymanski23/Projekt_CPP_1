@@ -7,7 +7,15 @@
 
 class Settings {
 	  public:
-		explicit Settings(const std::string &settingsPath);
+		static Settings &getInstance();
+
+		Settings(const Settings &) = delete;
+		Settings &operator=(const Settings &) = delete;
+
+		Settings(Settings &&) = delete;
+		Settings &operator=(Settings &&) = delete;
+
+		~Settings() = default;
 
 		bool loadSettings();
 		bool saveSettings();
@@ -18,6 +26,8 @@ class Settings {
 		bool isEntryKeyExists(const std::string &entryKey);
 
 	  private:
+		explicit Settings(const std::string &settingsPath);
+
 		static std::string trim(const std::string &str);
 		static bool parseLine(const std::string &line, std::string &entryKey, std::string &entryValue);
 

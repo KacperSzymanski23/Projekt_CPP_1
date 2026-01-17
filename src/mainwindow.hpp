@@ -41,7 +41,7 @@ class MainWindow : public QMainWindow {
 
 		PlayerControls *m_playbackControlsWidget; // Widget umożliwiający sterowanei odtwarzaniem
 
-		Settings m_settings; // Ustawienia
+		Settings &m_settings; // Ustawienia
 		Library m_library;
 
 		QLabel *m_coverLabel; // Etykieta wyświetlająca okładkę dla każdej ścieżki

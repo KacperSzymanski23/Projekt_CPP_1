@@ -8,7 +8,7 @@
 SettingsDialog::SettingsDialog(QWidget *parent)
 	: QDialog(parent)
 	, m_dialogGrigLayout(new QGridLayout(this))
-	, m_settings(Settings("config.cfg"))
+	, m_settings(Settings::getInstance())
 	, m_libraryDirectoryLabel(new QLabel(this))
 	, m_libraryDirectoryLineEdit(new QLineEdit(this))
 	, m_browserFilesButton(new QPushButton(this))

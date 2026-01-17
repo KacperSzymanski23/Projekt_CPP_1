@@ -5,6 +5,12 @@
 // Tracy
 #include <tracy/Tracy.hpp>
 
+Settings &Settings::getInstance() {
+		static Settings instance("config.cfg");
+
+		return instance;
+}
+
 Settings::Settings(const std::string &settingsPath)
 	: m_settingsPath(settingsPath) {
 

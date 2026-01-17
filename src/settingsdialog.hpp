@@ -19,7 +19,7 @@ class SettingsDialog : public QDialog {
 	  private:
 		QGridLayout *m_dialogGrigLayout;
 
-		Settings m_settings;
+		Settings &m_settings;
 
 		QLabel *m_libraryDirectoryLabel;
 		QLineEdit *m_libraryDirectoryLineEdit;
