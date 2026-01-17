@@ -31,8 +31,11 @@ class MainWindow : public QMainWindow {
 		MainWindow();
 
 	  private:
-		void setupPlayerModel(const QList<Library::TrackMetadata> &trackMetadatas); // Tworzy model elemetów dla m_playerMainTreeView
-		void loadPlaylistToList(const QString &playlistName, QList<QString> &tracksPaths);
+		void setupConnections(); // Tworzy połączenia pomiedzy slotami i sygnałami
+		void setupLayout();      // Tworzy układ okna
+
+		void setupPlayerModel(const QList<Library::TrackMetadata> &trackMetadatas);        // Tworzy model elemetów dla m_playerMainTreeView
+		void loadPlaylistToList(const QString &playlistName, QList<QString> &tracksPaths); // Załaduj zawartość playliste do listy
 
 		PlaybackQueue *m_playbackQueue;
 
@@ -41,8 +44,8 @@ class MainWindow : public QMainWindow {
 
 		PlayerControls *m_playbackControlsWidget; // Widget umożliwiający sterowanei odtwarzaniem
 
-		Settings &m_settings; // Ustawienia
-		Library m_library;
+		Settings &m_settings; // Ustawienia programu
+		Library m_library;    // Biblioteka muzyczna
 
 		QLabel *m_coverLabel; // Etykieta wyświetlająca okładkę dla każdej ścieżki
 
@@ -50,17 +53,16 @@ class MainWindow : public QMainWindow {
 
 		QTreeView *m_middleTreeView;     // QTreeView zawierający wybrane przez użytkownika elementy np. albumy, autorów itd.
 		QTreeView *m_playerMainTreeView; // QTreeView zawierające wszystkie ścieżki dźwiękowe w albumnie lub wszystkie albumy autorstwa
-		                                 // danego autora
+										 // danego autora
 
-		QVBoxLayout *m_sideBarLayout;  // Układ elementów GUI dla paska bocznego
-		QGridLayout *m_mainGridLayout; // Układ elementów GUI dla widgetu m_centralWidget
-		QVBoxLayout *m_middleListLayout;
+		QVBoxLayout *m_centralLayout;         // Układ wertykalny zawierający m_lowerHorizontalLayout i m_playbackControlsWidget
+		QHBoxLayout *m_lowerHorizontalLayout; // Układ poziomy zawierający m_sideBarWidget, m_middleVerticalLayout i m_playerMainTreeView
+		QVBoxLayout *m_middleVerticalLayout;  // Układ wertykalny zawierający m_middleTreeView i m_coverLabel
 
-		MiddleTreeModel *m_libraryModel;
-		PlayerTreeModel *m_playerModel; // Model dla m_playerMainTreeView odpowiadający za liczbę i nazwy oraz zarządzanie kolumn i informacjami w
-		                                // QTreeView
-		QMediaPlayer *m_audioPlayer;    // Objekt klasy umożliwiającej odtwarzanie i kontrolowanie odtwarzania plików zawierających audio
-		QAudioOutput *m_audioOutput;    // Objekt klasy reprezentującej kanały wyjśća audio dla m_audioPlayer
+		MiddleTreeModel *m_libraryModel; // Model dla m_middleTreeView odpowiadający wyświetlanie listy artystów i ich albumów z biblioteki
+		PlayerTreeModel *m_playerModel;  // Model dla m_playerMainTreeView odpowiadający za wyświetlanie metadanych plików audio
+		QMediaPlayer *m_audioPlayer;     // Objekt klasy umożliwiającej odtwarzanie i kontrolowanie odtwarzania plików zawierających audio
+		QAudioOutput *m_audioOutput;     // Objekt klasy reprezentującej kanały wyjśća audio dla m_audioPlayer
 
 		QPixmap m_coverImage; // Okładka dla obecnie wybranej ścieżki dźwiękowej
 
@@ -68,10 +70,10 @@ class MainWindow : public QMainWindow {
 
 		QString m_currentPlaylistName; // przechowuje nazwe otwartej playlisty
 
-		enum class ViewMode : uint8_t { Library = 0, Albums = 1, Playlists = 2, Favorite = 3, None = 4 };
-		ViewMode m_currentViewMode = ViewMode::None;
-		QString getPlaylistsDir();                             // Pomocnicza funkcja do folderu
-		void loadPlaylistContent(const QString &playlistName); // Wczytuje zawartość playlisty
+		enum class ViewMode : uint8_t { Library = 0, Albums = 1, Playlists = 2, Favorite = 3, None = 4 }; // Tryb wyswietlania dla m_middleTreeView
+		ViewMode m_currentViewMode = ViewMode::None;                                                      // Aktualny tryb wyswietlania
+		QString getPlaylistsDir();                                                                        // Pomocnicza funkcja do folderu
+		void loadPlaylistContent(const QString &playlistName);                                            // Wczytuje zawartość playlisty
 
 	  private slots:
 
@@ -83,17 +85,17 @@ class MainWindow : public QMainWindow {
 		void closeEvent(QCloseEvent *event) override; // Funkcja slot obsługująca zamykanie okna
 		void readWindowGeometrySettings();            // Funkcja slot zapisująca stan okna
 
-		void selectRow(int32_t currentRow) const;
+		void selectRow(int32_t currentRow) const;    // Zaznacza wiersz w m_playerMainTreeView o podanym indeksie
 		void rowClicked(const QModelIndex &current); // Pobiera dane z piosenki z kliniętego przez użytkownika wiersza
 
 		void onMiddleViewClicked(const QModelIndex &index); // Kliknięcie w playlistę
 		void onPlaylistContextMenu(const QPoint &pos);      // Menu: Nowa playlista
 		void onSongContextMenu(const QPoint &pos);          // Menu: Dodaj do playlisty
 
-		void createNewPlaylist(const QString &playlistName); // Logika tworzenia pliku
-		void createNewPlaylistDialog();                      // Okno dialogowe tworzenia pliku
-		void addSongToPlaylist(const QString &playlistName); // Dodawanie utworu
-		void removeSongFromPlaylist(const QString &playlistName, const QString &filePath);
+		void createNewPlaylist(const QString &playlistName);                               // Logika tworzenia pliku
+		void createNewPlaylistDialog();                                                    // Okno dialogowe tworzenia pliku
+		void addSongToPlaylist(const QString &playlistName);                               // Dodawanie utworu
+		void removeSongFromPlaylist(const QString &playlistName, const QString &filePath); // Usuwanie utworu z playlisty
 };
 
 #endif /* MAINWINDOW_HPP */

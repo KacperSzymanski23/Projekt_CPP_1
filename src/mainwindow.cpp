@@ -24,7 +24,9 @@ MainWindow::MainWindow()
 	, m_coverLabel(new QLabel(this))
 	, m_middleTreeView(new QTreeView(this))
 	, m_playerMainTreeView(new QTreeView(this))
-	, m_mainGridLayout(new QGridLayout(this))
+	, m_centralLayout(new QVBoxLayout(m_centralWidget))
+	, m_lowerHorizontalLayout(new QHBoxLayout())
+	, m_middleVerticalLayout(new QVBoxLayout())
 	, m_libraryModel(nullptr)
 	, m_audioPlayer(new QMediaPlayer(this))
 	, m_audioOutput(new QAudioOutput(this))
@@ -34,34 +36,58 @@ MainWindow::MainWindow()
 		QString libraryPath = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
 		m_library = Library{libraryPath};
 
+		m_library.scanLibraryPath();
+
 		m_audioPlayer->setAudioOutput(m_audioOutput);
 
 		m_playbackControlsWidget->setVolume(m_audioOutput->volume());
 		m_playbackControlsWidget->setMuted(m_playbackControlsWidget->isMuted());
 
+		m_middleTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
+		m_playerMainTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+		setupConnections();
+		setupLayout();
+
+		showLibrary();
+
+		readWindowGeometrySettings();
+}
+
+void MainWindow::setupConnections() {
+		ZoneScoped;
+
+		// Połączenia pomiedzy sygnałami z sidebara i slotami z mainwindow
 		connect(m_sideBarWidget, &SideBar::showLibraryClicked, this, &MainWindow::showLibrary);
 		connect(m_sideBarWidget, &SideBar::showPlaylistsClicked, this, &MainWindow::showPlaylists);
 		connect(m_sideBarWidget, &SideBar::showAlbumsClicked, this, &MainWindow::showAlbums);
 		connect(m_sideBarWidget, &SideBar::showFavoriteClicked, this, &MainWindow::showFavorite);
 
+		// Połączenia odpowiadające za pauzowanie i odpawzowywanie odtwarzania
 		connect(m_playbackControlsWidget, &PlayerControls::pause, m_audioPlayer, &QMediaPlayer::pause);
 		connect(m_playbackControlsWidget, &PlayerControls::play, m_audioPlayer, &QMediaPlayer::play);
 
+		// Połączenia odpowiadające za akualizowanie informacji długości obecnie odtwarzanego utworu i postepu odtwarzania
 		connect(m_audioPlayer, &QMediaPlayer::durationChanged, m_playbackControlsWidget, &PlayerControls::setTrackDuration);
 		connect(m_audioPlayer, &QMediaPlayer::positionChanged, m_playbackControlsWidget, &PlayerControls::setTrackProgress);
 
+		// Połączenia odpowiadające za zmiane progresu odtwarzania w QMediaPlayer
 		connect(m_playbackControlsWidget, &PlayerControls::changeProgress, m_audioPlayer, &QMediaPlayer::setPosition);
 
+		// Połączenia odpowiadające za zmianę głośności i wyciszanie odtwarzania w QAudioOutput
 		connect(m_playbackControlsWidget, &PlayerControls::changeVolume, m_audioOutput, &QAudioOutput::setVolume);
 		connect(m_playbackControlsWidget, &PlayerControls::changeMuteState, m_audioOutput, &QAudioOutput::setMuted);
 
+		// Połączenia odpowiadające za aktualizowanie głośności i stanu wyciszania PlayerControls
 		connect(m_audioOutput, &QAudioOutput::volumeChanged, m_playbackControlsWidget, &PlayerControls::setVolume);
 		connect(m_audioOutput, &QAudioOutput::mutedChanged, m_playbackControlsWidget, &PlayerControls::setMuted);
 
+		// Połączenie odpowiadające za aktualizowanie stanu odtwarzania w PlayerControls
 		connect(m_audioPlayer, &QMediaPlayer::playbackStateChanged, m_playbackControlsWidget, [this](QMediaPlayer::PlaybackState arg) {
 				m_playbackControlsWidget->setPlayerState(arg);
 		});
 
+		// Połączenie odpowiadające za aktualizowanie stanu "Favorite" PlayerControls
 		connect(m_playbackControlsWidget, &PlayerControls::changeFavoriteState, this, [this](bool arg) {
 				if (arg) {
 						addSongToPlaylist("Favorite.txt");
@@ -70,6 +96,7 @@ MainWindow::MainWindow()
 				}
 		});
 
+		// Połączenie odpowiadające za aktualizowanie m_library i modeli w przypadku zmiany ustawień programu
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, [this]() {
 				m_settings.loadSettings();
 
@@ -81,10 +108,7 @@ MainWindow::MainWindow()
 				showLibrary();
 		});
 
-		m_library.scanLibraryPath();
-
-		showLibrary();
-
+		// Połączenia odpowiadające za odtwarzanie kolejnego/poprzedniego utworu
 		connect(m_playbackControlsWidget, &PlayerControls::next, m_playbackQueue, [this]() {
 				m_playbackQueue->next();
 				m_audioPlayer->play();
@@ -94,43 +118,63 @@ MainWindow::MainWindow()
 				m_audioPlayer->play();
 		});
 
+		// Połączenia odpowiadające za aktualizowanie stanu "Shuffle" oraz "Loop" w PlaybackQueue
 		connect(m_playbackControlsWidget, &PlayerControls::changeShuffleState, m_playbackQueue, &PlaybackQueue::shuffle);
 		connect(m_playbackControlsWidget, &PlayerControls::changeLoopedState, m_playbackQueue, [this]() {
 				m_playbackQueue->setPlaybackMode(PlaybackQueue::CurrentItemInLoop);
 		});
 
+		// Połączenia odpowiadające za aktualizowanie ścierzki obecnie odtwarzanego utworu w QMediaPlayer
 		connect(m_playbackQueue, &PlaybackQueue::currentMediaChanged, m_audioPlayer, &QMediaPlayer::setSource);
 		connect(m_playbackQueue, &PlaybackQueue::currentIndexChanged, this, &MainWindow::selectRow);
 
-		m_mainGridLayout->setSpacing(5);
+		// Połączenia odpowiadające kliknięcia na elementy w m_middleTreeView i m_playerMainTreeView
+		connect(m_playerMainTreeView, &QTreeView::clicked, this, &MainWindow::rowClicked);
+		connect(m_middleTreeView, &QTreeView::clicked, this, &MainWindow::onMiddleViewClicked);
 
+		// Połączenie odpowiadające za otwieranie menu kontekstowego w m_middleTreeView i m_playerMainTreeView
+		connect(m_middleTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::onPlaylistContextMenu);
+		connect(m_playerMainTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::onSongContextMenu);
+}
+
+void MainWindow::setupLayout() {
+		ZoneScoped;
+
+		// Ustawienie skalowania okładki albumu
+		m_coverLabel->setPixmap(m_coverImage);
+		m_coverLabel->setScaledContents(true);
+		m_coverLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+		m_coverLabel->setMaximumSize(300, 300);
+
+		// Ustawienie marginesów i odstępów miedzy elementami w m_lowerHorizontalLayout
+		m_lowerHorizontalLayout->setSpacing(5);
+		m_lowerHorizontalLayout->setContentsMargins(0, 0, 0, 0);
+
+		m_lowerHorizontalLayout->addWidget(m_sideBarWidget);
+
+		// Dodawanie elementów do m_middleVerticalLayout
+		m_middleVerticalLayout->addWidget(m_middleTreeView, 3);
+		m_middleVerticalLayout->addWidget(m_coverLabel, 1);
+
+		// Dodanie zaganieżdzonego układu do m_lowerHorizontalLayout
+		m_lowerHorizontalLayout->addLayout(m_middleVerticalLayout);
+
+		m_lowerHorizontalLayout->addWidget(m_playerMainTreeView, 5);
+
+		// Ustawienie marginesów i odstępów miedzy elementami w m_centralLayout
+		m_centralLayout->setContentsMargins(0, 0, 10, 10);
+		m_centralLayout->setSpacing(5);
+
+		m_centralLayout->addWidget(m_playbackControlsWidget);
+
+		m_centralLayout->addLayout(m_lowerHorizontalLayout);
+
+		// Ustawienie stylów dla m_playerMainTreeView i m_middleTreeView
 		m_middleTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 		m_middleTreeView->header()->setDefaultAlignment(Qt::AlignCenter);
 		m_playerMainTreeView->header()->setDefaultAlignment(Qt::AlignCenter);
 
-		m_coverLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-		m_coverLabel->setPixmap(m_coverImage);
-		m_coverLabel->setScaledContents(true);
-
-		m_mainGridLayout->addWidget(m_playbackControlsWidget, 0, 0, 1, 33);
-		m_mainGridLayout->addWidget(m_sideBarWidget, 1, 0, 13, 1);
-		m_mainGridLayout->addWidget(m_middleTreeView, 1, 1, 9, 5);
-		m_mainGridLayout->addWidget(m_coverLabel, 10, 1, 4, 5);
-		m_mainGridLayout->addWidget(m_playerMainTreeView, 1, 6, 13, 27);
-
-		connect(m_playerMainTreeView, &QTreeView::clicked, this, &MainWindow::rowClicked);
-		connect(m_middleTreeView, &QTreeView::clicked, this, &MainWindow::onMiddleViewClicked);
-
-		m_centralWidget->setLayout(m_mainGridLayout);
 		setCentralWidget(m_centralWidget);
-
-		m_middleTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
-		connect(m_middleTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::onPlaylistContextMenu);
-
-		m_playerMainTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
-		connect(m_playerMainTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::onSongContextMenu);
-
-		readWindowGeometrySettings();
 }
 
 void MainWindow::setupPlayerModel(const QList<Library::TrackMetadata> &trackMetadatas) {
@@ -138,13 +182,16 @@ void MainWindow::setupPlayerModel(const QList<Library::TrackMetadata> &trackMeta
 
 		const QVariantList COLUMNS_NAME{"Number", "Title", "Album", "Author", "Duration", "Year", "Bitrate", "File Size"};
 
+		// Jeżeli model jest pusty to tworzymy nowy i przypisujemy go do m_playerMainTreeView
 		if (m_playerMainTreeView->model() == nullptr) {
 				m_playerModel = new PlayerTreeModel(trackMetadatas, COLUMNS_NAME, this);
 				m_playerMainTreeView->setModel(m_playerModel);
 		} else {
+				// Jeżeli model nie jest pusty to aktualizujemy jego dane
 				m_playerModel->updateModelData(trackMetadatas);
 		}
 
+		// Ustawienie rozmiaru poszczególnych kolumn w m_playerMainTreeView
 		auto *header = m_playerMainTreeView->header();
 
 		header->setSectionResizeMode(0, QHeaderView::ResizeToContents); // Num
