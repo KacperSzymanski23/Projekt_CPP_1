@@ -322,12 +322,14 @@ void MainWindow::createNewPlaylist(const QString &playlistName) {
 		ZoneScoped;
 
 		if (playlistName.isEmpty()) {
-				QString filePath = getPlaylistsDir() + "/" + playlistName + ".txt";
-				QFile file(filePath);
-				if (file.open(QIODevice::WriteOnly)) {
-						file.close();
-						showPlaylists();
-				}
+				return;
+		}
+
+		QString filePath = getPlaylistsDir() + "/" + playlistName + ".txt";
+		QFile file(filePath);
+		if (file.open(QIODevice::WriteOnly)) {
+				file.close();
+				showPlaylists();
 		}
 }
 
