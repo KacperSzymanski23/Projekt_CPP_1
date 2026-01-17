@@ -24,6 +24,7 @@ MainWindow::MainWindow()
 	, m_middleTreeView(new QTreeView(this))
 	, m_playerMainTreeView(new QTreeView(this))
 	, m_mainGridLayout(new QGridLayout(this))
+	, m_libraryModel(nullptr)
 	, m_audioPlayer(new QMediaPlayer(this))
 	, m_audioOutput(new QAudioOutput(this))
 	, m_middleModel(new QStandardItemModel(this)) {
@@ -60,12 +61,21 @@ MainWindow::MainWindow()
 				m_playbackControlsWidget->setPlayerState(arg);
 		});
 
-		connect(m_sideBarWidget, &SideBar::settingsChanged, this, &MainWindow::showLibrary);
-		connect(m_sideBarWidget, &SideBar::settingsChanged, this, [this]() { m_settings.loadSettings(); });
+		connect(m_sideBarWidget, &SideBar::settingsChanged, this, [this]() {
+				m_settings.loadSettings();
+
+				QString libraryPath = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
+
+				m_library.setLibraryPath(libraryPath);
+				m_library.scanLibraryPath();
+
+				delete m_libraryModel;
+				m_libraryModel = nullptr;
+
+				showLibrary();
+		});
 
 		m_library.scanLibraryPath();
-
-		m_libraryModel = new MiddleTreeModel(m_library.getArtistList(), "Library", this);
 
 		showLibrary();
 
@@ -188,6 +198,10 @@ void MainWindow::readWindowGeometrySettings() {
 
 void MainWindow::showLibrary() {
 		ZoneScoped;
+
+		if (m_libraryModel == nullptr) {
+				m_libraryModel = new MiddleTreeModel(m_library.getArtistList(), "Library", this);
+		}
 
 		m_currentViewMode = ViewMode::Library;
 

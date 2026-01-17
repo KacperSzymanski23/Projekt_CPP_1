@@ -61,13 +61,15 @@ bool Settings::loadSettings() {
 				return false;
 		}
 
+		m_settings.clear();
+
 		std::string line{};
 		std::string key{};
 		std::string value{};
 
 		while (std::getline(settingsFile, line)) {
 				if (parseLine(line, key, value)) {
-						m_settings.emplace(key, value);
+						m_settings[key] = value;
 				}
 		}
 

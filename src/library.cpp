@@ -172,6 +172,9 @@ QPair<Library::TrackMetadata, QString> Library::extractMetadata(const QString &p
 void Library::scanLibraryPath() {
 		ZoneScoped;
 
+		m_albums.clear();
+		m_artists.clear();
+
 		if (m_libraryPath.isEmpty()) {
 				m_libraryPath = QDir::homePath() + "/Music";
 		}
