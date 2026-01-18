@@ -10,9 +10,6 @@ int32_t main(int32_t argc, char *argv[]) {
 		// Objekt dla głównej klasy zarządzajacej GUI programu
 		QApplication app(argc, argv);
 
-		// Objekt okna programu
-		MainWindow mainWin;
-
 		// Objekt motywu programu
 		auto *style = new oclero::qlementine::QlementineStyle(&app);
 
@@ -31,8 +28,8 @@ int32_t main(int32_t argc, char *argv[]) {
 		auto *themeManager = new oclero::qlementine::ThemeManager(style);
 		themeManager->loadDirectory(":/themes");
 
-		// Domyślny motyw programu będzi ustaiony na Jasny
-		themeManager->setCurrentTheme("Light");
+		// Objekt okna programu
+		MainWindow mainWin{themeManager};
 
 		mainWin.show();
 		return QApplication::exec();

@@ -3,6 +3,7 @@
 
 #include "settings.hpp"
 // Qt
+#include <QComboBox>
 #include <QDialog>
 #include <QDir>
 #include <QGridLayout>
@@ -26,6 +27,10 @@ class SettingsDialog : public QDialog {
 		QLineEdit *m_libraryDirectoryLineEdit;
 		QPushButton *m_browserFilesButton;
 		QDir m_libraryDirectory;
+
+		// Inne elementy GUI zwiazane z zmianą motywu programu
+		QLabel *m_themeLabel;
+		QComboBox *m_themeComboBox;
 
 		// Przyciski do zapisu, anulowania i zastosowania ustawienia
 		QPushButton *m_saveButton;

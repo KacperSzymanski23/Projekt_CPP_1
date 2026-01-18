@@ -21,6 +21,8 @@
 #include <QStandardItemModel>
 #include <QTreeView>
 #include <QVBoxLayout>
+// Qlementine
+#include <oclero/qlementine/style/ThemeManager.hpp>
 // TabLib
 #include <taglib/fileref.h>
 
@@ -28,7 +30,7 @@ class MainWindow : public QMainWindow {
 		Q_OBJECT
 
 	  public:
-		MainWindow();
+		explicit MainWindow(oclero::qlementine::ThemeManager *themeManager = nullptr);
 
 	  private:
 		void setupConnections(); // Tworzy połączenia pomiedzy slotami i sygnałami
@@ -37,6 +39,9 @@ class MainWindow : public QMainWindow {
 		void setupPlayerModel(const QList<Library::TrackMetadata> &trackMetadatas);        // Tworzy model elemetów dla m_playerMainTreeView
 		void loadPlaylistToList(const QString &playlistName, QList<QString> &tracksPaths); // Załaduj zawartość playliste do listy
 
+		void updateTheme(); // Zaktualizowanie motywu programu
+
+		oclero::qlementine::ThemeManager *m_themeManager;
 		PlaybackQueue *m_playbackQueue;
 
 		QWidget *m_centralWidget; // Centraly widget okna

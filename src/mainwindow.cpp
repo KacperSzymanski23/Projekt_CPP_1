@@ -3,6 +3,7 @@
 #include "logs.hpp"
 // Qt
 #include <QAction>
+#include <QApplication>
 #include <QDirListing>
 #include <QFuture>
 #include <QInputDialog>
@@ -15,8 +16,9 @@
 // Tracy
 #include <tracy/Tracy.hpp>
 
-MainWindow::MainWindow()
-	: m_playbackQueue(new PlaybackQueue(this))
+MainWindow::MainWindow(oclero::qlementine::ThemeManager *themeManager)
+	: m_themeManager(themeManager)
+	, m_playbackQueue(new PlaybackQueue(this))
 	, m_centralWidget(new QWidget(this))
 	, m_sideBarWidget(new SideBar(this))
 	, m_playbackControlsWidget(new PlayerControls(this))
@@ -51,6 +53,8 @@ MainWindow::MainWindow()
 
 		setupConnections();
 		setupLayout();
+
+		updateTheme();
 
 		showLibrary();
 
@@ -102,6 +106,8 @@ void MainWindow::setupConnections() {
 		// Połączenie odpowiadające za aktualizowanie m_library i modeli w przypadku zmiany ustawień programu
 		connect(m_sideBarWidget, &SideBar::settingsChanged, this, [this]() {
 				m_settings.loadSettings();
+
+				updateTheme();
 
 				QString libraryPath = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
 
@@ -178,6 +184,22 @@ void MainWindow::setupLayout() {
 		m_playerMainTreeView->header()->setDefaultAlignment(Qt::AlignCenter);
 
 		setCentralWidget(m_centralWidget);
+}
+
+void MainWindow::updateTheme() {
+		ZoneScoped;
+
+		// Ustawienie aktualnego motywu
+		QString theme = QString::fromStdString(m_settings.getSettingsEntry("theme"));
+
+		// Sprawdza czy motyw jest pusty
+		if (theme.isEmpty()) {
+				// Jeżeli jest pusty to ustawia domyślny motyw
+				theme = "Light";
+		}
+
+		// Ustawienie aktualnego motywu
+		m_themeManager->setCurrentTheme(theme);
 }
 
 void MainWindow::setupPlayerModel(const QList<Library::TrackMetadata> &trackMetadatas) {

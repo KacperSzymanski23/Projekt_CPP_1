@@ -12,6 +12,8 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 	, m_libraryDirectoryLabel(new QLabel(this))
 	, m_libraryDirectoryLineEdit(new QLineEdit(this))
 	, m_browserFilesButton(new QPushButton(this))
+	, m_themeLabel(new QLabel(this))
+	, m_themeComboBox(new QComboBox(this))
 	, m_saveButton(new QPushButton(this))
 	, m_cancelButton(new QPushButton(this))
 	, m_applyButton(new QPushButton(this)) {
@@ -49,13 +51,24 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 		connect(m_cancelButton, &QPushButton::clicked, this, &SettingsDialog::close);
 		connect(m_applyButton, &QPushButton::clicked, this, &SettingsDialog::applySettings);
 
+		m_themeLabel->setText("Choose theme");
+
+		m_themeComboBox->addItem("Dark");
+		m_themeComboBox->addItem("Light");
+
+		m_themeComboBox->setCurrentIndex(m_settings.getSettingsEntry("theme") == "Dark" ? 0 : 1);
+
 		// Dodawanie elementów do m_dialogGrigLayout
 		m_dialogGrigLayout->addWidget(m_libraryDirectoryLabel, 0, 0, 1, 1);
 		m_dialogGrigLayout->addWidget(m_libraryDirectoryLineEdit, 0, 1, 1, 1);
 		m_dialogGrigLayout->addWidget(m_browserFilesButton, 0, 2, 1, 1);
-		m_dialogGrigLayout->addWidget(m_saveButton, 1, 2, 1, 1);
-		m_dialogGrigLayout->addWidget(m_cancelButton, 1, 3, 1, 1);
-		m_dialogGrigLayout->addWidget(m_applyButton, 1, 4, 1, 1);
+
+		m_dialogGrigLayout->addWidget(m_themeLabel, 1, 0, 1, 1);
+		m_dialogGrigLayout->addWidget(m_themeComboBox, 1, 1, 1, 1);
+
+		m_dialogGrigLayout->addWidget(m_saveButton, 2, 2, 1, 1);
+		m_dialogGrigLayout->addWidget(m_cancelButton, 2, 3, 1, 1);
+		m_dialogGrigLayout->addWidget(m_applyButton, 2, 4, 1, 1);
 
 		this->setLayout(m_dialogGrigLayout);
 }
@@ -65,8 +78,10 @@ void SettingsDialog::applySettings() {
 
 		// libraryDirectory
 		const std::string LIBRARY_DIRECTORY{m_libraryDirectory.absolutePath().toStdString()};
+		const std::string THEME{m_themeComboBox->currentText().toStdString()};
 
 		m_settings.setSettingsEntry("libraryDirectory", LIBRARY_DIRECTORY);
+		m_settings.setSettingsEntry("theme", THEME);
 		m_settings.saveSettings();
 
 		m_applyButton->setDisabled(true);

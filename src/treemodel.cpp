@@ -132,6 +132,7 @@ void TreeModel::setColumnsNames(const QVariantList &columnsNames) {
 void TreeModel::initModel() {
 		beginResetModel();
 
+		// Usuwamy wszystkie dzieci elementu głównego
 		if (p_rootItem != nullptr) {
 				p_rootItem->clearChildren();
 		}
