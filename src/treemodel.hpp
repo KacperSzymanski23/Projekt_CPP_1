@@ -31,7 +31,7 @@ class TreeModel : public QAbstractItemModel {
 		void setColumnsNames(const QVariantList &columnsNames); // Ustawia nazwy kolumn
 
 	  protected:
-		void initModel();
+		void initModel();                                  // Inicjalizuje model
 		virtual void setupModelData(TreeItem *parent) = 0; // Wypełnia model danymi z listy metadanych piosenek
 
 		std::unique_ptr<TreeItem> p_rootItem; // Wskaźnik do głównego TreeItem'u przechowującego wszystekie inne TreeItem

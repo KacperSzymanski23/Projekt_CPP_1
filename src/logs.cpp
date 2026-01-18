@@ -7,6 +7,7 @@
 // Tracy
 #include <tracy/Tracy.hpp>
 
+// Pobieranie obecną data i godzine
 std::tm timestamp() { // date and time mark
 		auto now = std::chrono::system_clock::now();
 		std::time_t nowTime = std::chrono::system_clock::to_time_t(now);
@@ -23,9 +24,13 @@ std::tm timestamp() { // date and time mark
 void logCreate(const std::string &message, const std::source_location LOCATION) {
 		ZoneScoped;
 
+		// Pobieranie obecnego czasu i daty
 		static const std::tm LOCAL_TIME = timestamp();
+
 		std::ostringstream oss;
 		std::string filename;
+
+		// Tworzenie pliku z logami
 		oss << std::put_time(&LOCAL_TIME, "%d-%m-%Y_%H-%M");
 		filename = oss.str() + ".log";
 
@@ -33,6 +38,7 @@ void logCreate(const std::string &message, const std::source_location LOCATION) 
 		if (!file) {
 				throw std::runtime_error("File can't be created");
 		}
+		// Zapisuje do pliku message i informacje o lokalizacji w której funkcja została wywołana
 		file << "file: " << LOCATION.file_name() << '(' << LOCATION.line() << ':' << LOCATION.column() << ") `" << LOCATION.function_name() << "`: " << message
 			 << '\n';
 		file.close();

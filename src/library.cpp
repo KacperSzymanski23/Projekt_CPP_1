@@ -65,12 +65,13 @@ QList<QString> Library::Album::getTracksPathsList() const {
 void Library::Album::findCoverArt(const QString &path) {
 		ZoneScoped;
 
-		const QStringList COVER_FILES = {"cover.jpg", "cover.jpeg", "cover.png", "cover.webp"}; // Wspierane typy plików dla grafiki okładki
+		const QStringList COVER_FILES = {"cover.jpg", "cover.jpeg", "cover.png", "cover.webp"}; // Lista plików okładek albumu
 
 		const QDir DIRECTORY{path};
 		for (const QString &fileName : COVER_FILES) {
 				const QFileInfo FILE_INFO{DIRECTORY, fileName};
 
+				// Jeśli plik istnieje i jest plikiem
 				if (FILE_INFO.exists() && FILE_INFO.isFile()) {
 						m_coverArtPath = FILE_INFO.absoluteFilePath();
 
@@ -88,6 +89,7 @@ Library::Artist::Artist(const QString &name, const QList<Album> &albums)
 Library::Album Library::Artist::findAlbum(const QString &title) const {
 		ZoneScoped;
 
+		// Szuka albumu o podanej nazwie
 		for (const auto &album : p_items) {
 				if (album.getName() == title) {
 						return album;
@@ -114,38 +116,49 @@ void Library::setLibraryPath(const QString &path) {
 QPair<Library::TrackMetadata, QString> Library::extractMetadata(const QString &path) {
 		ZoneScoped;
 
+		// Sprawdza czy ścieżka jest pusta
 		if (path.isEmpty()) {
 				logCreate("Path is empty");
 				return {};
 		}
 
+		// Enkodowanie ścieżki do QByteArray
 		const QByteArray ENCODED_PATH = QFile::encodeName(path);
+
+		// Otwiera plik audio i pobiera metadane
 		const TagLib::FileRef FILE_REF(ENCODED_PATH.constData(), true, TagLib::AudioProperties::Fast);
 
+		// Sprawdza czy plik jest pusty lub nie ma metadanych
 		if (FILE_REF.isNull() || FILE_REF.tag() == nullptr) {
 				logCreate("FileRef is null");
 				return {};
 		}
 
-		const TagLib::Tag *TAG{FILE_REF.tag()};
-		const TagLib::AudioProperties *AUDIO_PROPERTIES{FILE_REF.audioProperties()};
+		// Pobiera metadane i inne informacje z pliku audio
+		const TagLib::Tag *tag{FILE_REF.tag()};
+		const TagLib::AudioProperties *audioProperties{FILE_REF.audioProperties()};
 		const TagLib::PropertyMap PROPERTIES = FILE_REF.file()->properties();
 
-		const uint32_t NUMBER{TAG->track()};
-		const QString TITLE{QString::fromStdWString(TAG->title().toWString())};
-		const QString ALBUM{QString::fromStdWString(TAG->album().toWString())};
-		QString artist{QString::fromStdWString(TAG->artist().toWString())};
-		const uint32_t YEAR{TAG->year()};
+		// Konwertuje metadane do odpowiednich typów
+		const uint32_t NUMBER{tag->track()};
+		const QString TITLE{QString::fromStdWString(tag->title().toWString())};
+		const QString ALBUM{QString::fromStdWString(tag->album().toWString())};
+		QString artist{QString::fromStdWString(tag->artist().toWString())};
+		const uint32_t YEAR{tag->year()};
 
-		const int32_t DURATION_IN_SECONDS{AUDIO_PROPERTIES->lengthInSeconds()};
-		const int32_t BITRATE{AUDIO_PROPERTIES->bitrate()};
+		const int32_t DURATION_IN_SECONDS{audioProperties->lengthInSeconds()};
+		const int32_t BITRATE{audioProperties->bitrate()};
 
+		// Tworzy obiekt QTime z czasem trwania piosenki
 		const QTime DURATION{0, DURATION_IN_SECONDS / 60, DURATION_IN_SECONDS % 60};
 
 		constexpr double MIB = 1024.0 * 8.0;
+		// Oblicza rozmiar pliku
 		const double FILE_SIZE = (DURATION_IN_SECONDS * BITRATE) / MIB;
 
+		// Sprawdza czy istnieje własność "ALBUMARTIST"
 		if (PROPERTIES.contains("ALBUMARTIST")) {
+				// Ustawia artystę na "ALBUMARTIST"
 				artist = QString::fromStdWString(PROPERTIES["ALBUMARTIST"].front().toWString());
 		}
 
@@ -163,7 +176,9 @@ QPair<Library::TrackMetadata, QString> Library::extractMetadata(const QString &p
 			.path = path,
 		};
 
+		// Sprawdza czy nazwa utworu jest pusta
 		if (metadata.title.isEmpty()) {
+				// Ustawia nazwę utworu na nazwę pliku
 				metadata.title = path.split("/").last();
 		}
 
@@ -190,6 +205,7 @@ void Library::scanLibraryPath() {
 				logCreate("Library path is empty, using default path");
 				m_libraryPath = QDir::homePath() + "/Music";
 		}
+
 		const QDir LIBRARY{m_libraryPath};
 
 		if (!LIBRARY.exists()) {
@@ -197,16 +213,18 @@ void Library::scanLibraryPath() {
 				return;
 		}
 
-		constexpr auto FLAGS = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::FilesOnly;
+		constexpr auto FLAGS = QDirListing::IteratorFlag::Recursive | QDirListing::IteratorFlag::FilesOnly;      // Flagi QDirListing
 		const QStringList AUDIO_FILE_FILTER = {"*.mp3", "*.flac", "*.wav", "*.ogg", "*.opus", "*.m4a", "*.mka"}; // Wspierane typy plików
 
 		QList<QString> tracksPaths{};
 		tracksPaths.reserve(100);
 
+		// Przeszukuję katalog biblioteki w poszukiwaniu plików audio
 		for (const auto &file : QDirListing(LIBRARY.path(), AUDIO_FILE_FILTER, FLAGS)) {
 				tracksPaths.append(file.absoluteFilePath());
 		}
 
+		// Wykonuje operację pobierania metadanych z plików na wielu wątkach
 		QFuture<std::pair<TrackMetadata, QString>> future = QtConcurrent::mapped(tracksPaths, extractMetadata);
 		future.waitForFinished();
 
@@ -229,6 +247,7 @@ QList<Library::Album> Library::getAlbumsList() const {
 Library::Album Library::getAlbum(qsizetype index) const {
 		ZoneScoped;
 
+		// Sprawdza czy indeks jest w zakresie
 		if (index < m_albums.size()) {
 				return m_albums.at(index);
 		}
@@ -241,6 +260,7 @@ Library::Album Library::getAlbum(qsizetype index) const {
 Library::Artist Library::getArtist(const QString &name) const {
 		ZoneScoped;
 
+		// Szuka artysty o podanej nazwie
 		for (const auto &artist : m_artists) {
 				if (artist.getName() == name) {
 						return artist;
@@ -255,6 +275,7 @@ Library::Artist Library::getArtist(const QString &name) const {
 Library::Artist Library::getArtist(qsizetype index) const {
 		ZoneScoped;
 
+		// Sprawdza czy indeks jest w zakresie
 		if (index < m_artists.size()) {
 				return m_artists.at(index);
 		}

@@ -37,15 +37,18 @@ qsizetype PlaybackQueue::nextIndex(int32_t index) {
 		qsizetype nextIndex = m_currentIndex + index;
 
 		switch (m_playbackMode) {
+				// Piosenka ma się odtworzyć raz i zatrzymać się
 				case PlaybackMode::CurrentItemOnce:
 						if (index != 0) {
 								return -1;
 						}
 						return m_currentIndex;
 
+				// Piosenka ma się odtworzyć w pętli czyli m_currentIndex nie zmienia się
 				case PlaybackMode::CurrentItemInLoop:
 						return m_currentIndex;
 
+				// Odtwarzanie kolejnych piosenek w kolejce, m_currentIndex zwiększa się o index
 				case PlaybackMode::Sequential:
 						if (m_queue.size() <= nextIndex) {
 								nextIndex = 0;
@@ -53,10 +56,14 @@ qsizetype PlaybackQueue::nextIndex(int32_t index) {
 
 						break;
 
+				// Odtwarzanie kolejnych piosenek w kolejce w pętli, m_currentIndex zwiększa sie o index
+				// i wraca do początku kolejki gdy dojdzie do końca
 				case PlaybackMode::Loop:
 						nextIndex %= m_queue.count();
 						break;
 
+				// Odtwarzanie kolejnych piosenek w kolejce w trybie losowym
+				// m_currentIndex przybiera kolejne wartości z m_orderOfPlayback
 				case PlaybackMode::Shuffled:
 						nextIndex = m_orderOfPlayback.at(m_orderOfPlaybackIndex);
 
@@ -83,12 +90,14 @@ qsizetype PlaybackQueue::previousIndex(int32_t index) {
 
 		qsizetype previousIndex = m_currentIndex;
 
+		// Jeżeli index jest mniejszy od 0 to ustawiamy previousIndex na koniec kolejki
 		if (previousIndex < 0) {
 				previousIndex = m_queue.size();
 		}
 
 		previousIndex = previousIndex - index;
 
+		// Wszystko działa taksamo jako w nextIndex ale odwrotnie
 		switch (m_playbackMode) {
 				case PlaybackMode::CurrentItemOnce:
 						if (index != 0) {
@@ -192,6 +201,7 @@ void PlaybackQueue::shuffle() {
 				m_orderOfPlayback.append(i);
 		}
 
+		// Mieszanie m_orderOfPlayback przez generator liczb pseudolosowych
 		std::mt19937 rng(QRandomGenerator::global()->generate());
 		std::ranges::shuffle(m_orderOfPlayback, rng);
 }
@@ -217,6 +227,7 @@ void PlaybackQueue::previous() {
 void PlaybackQueue::setCurrentIndex(qsizetype index) {
 		ZoneScoped;
 
+		// Sprawdza czy indeks jest w zakresie
 		if (index < 0 || index >= m_queue.size()) {
 				logCreate("Index out of range: " + std::to_string(index));
 				index = -1;

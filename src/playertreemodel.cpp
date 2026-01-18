@@ -28,6 +28,7 @@ void PlayerTreeModel::setupModelData(TreeItem *parent) {
 		for (const auto &line : m_tracks) {
 				QVariantList columnData;
 
+				// Wypełnianie kolumn danymi
 				columnData << line.number;
 				columnData << line.title;
 				columnData << line.album;
@@ -38,6 +39,7 @@ void PlayerTreeModel::setupModelData(TreeItem *parent) {
 				columnData << line.fileSize;
 				columnData << line.path;
 
+				// Dodawanie nowego elementu do modelu
 				parent->appendChild(std::make_unique<TreeItem>(columnData, parent));
 		}
 }

@@ -26,6 +26,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 
 		constexpr QSize ICON_SIZE = QSize(24, 24);
 
+		// Tworzenie przycisku do zapętlania
 		m_loopButton->setIcon(Icons::LOOP);
 		m_loopButton->setIconSize(ICON_SIZE);
 		m_loopButton->setToolTip(tr("Loop Playback"));
@@ -33,6 +34,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_playbackControlsLayout->addWidget(m_loopButton);
 		connect(m_loopButton, &QToolButton::clicked, this, &PlayerControls::loopClicked);
 
+		// Tworzenie przycisku do mieszania kolejki odtwarzania
 		m_shuffleButton->setIcon(Icons::SHUFFLE);
 		m_shuffleButton->setIconSize(ICON_SIZE);
 		m_shuffleButton->setToolTip(tr("Shuffle"));
@@ -40,38 +42,45 @@ PlayerControls::PlayerControls(QWidget *parent)
 		m_playbackControlsLayout->addWidget(m_shuffleButton);
 		connect(m_shuffleButton, &QToolButton::clicked, this, &PlayerControls::shuffleClicked);
 
+		// Tworzenie przycisków do odtwarzania poprzedniego utworu
 		m_previousButton->setIcon(Icons::PREVIOUS);
 		m_previousButton->setIconSize(ICON_SIZE);
 		m_previousButton->setToolTip(tr("Previous Song"));
 		m_playbackControlsLayout->addWidget(m_previousButton);
 		connect(m_previousButton, &QToolButton::clicked, this, &PlayerControls::previous);
 
+		// Tworzenie przycisków do odtwarzania i pauzowania utworu
 		m_playPauseButton->setIcon(Icons::PLAY);
 		m_playPauseButton->setIconSize(ICON_SIZE);
 		m_playPauseButton->setToolTip(tr("Start"));
 		m_playbackControlsLayout->addWidget(m_playPauseButton);
 		connect(m_playPauseButton, &QToolButton::clicked, this, &PlayerControls::playPauseClicked);
 
+		// Tworzenie przycisków do odtwarzania następnego utworu
 		m_nextButton->setIcon(Icons::NEXT);
 		m_nextButton->setIconSize(ICON_SIZE);
 		m_nextButton->setToolTip(tr("Next Song"));
 		m_playbackControlsLayout->addWidget(m_nextButton);
 		connect(m_nextButton, &QToolButton::clicked, this, &PlayerControls::next);
 
+		// Tworzenie slidera do sterowania postępem odtwarzania
 		m_progressSlider->setOrientation(Qt::Horizontal);
 		m_playbackControlsLayout->addWidget(m_progressSlider);
 		connect(m_progressSlider, &QSlider::sliderMoved, this, &PlayerControls::progressSliderMoved);
 		connect(m_progressSlider, &QSlider::sliderPressed, this, &PlayerControls::progressSliderMoved);
 
+		// Tworzenie etykiety do wyswietlania postepu odtwarzania
 		m_progressLabel = new QLabel(tr(" 00:00 / 00:00 "), this);
 		m_playbackControlsLayout->addWidget(m_progressLabel);
 
+		// Tworzenie przycisku do wyciszania
 		m_audioButton->setIcon(Icons::HIGH_VOLUME);
 		m_audioButton->setIconSize(ICON_SIZE);
 		m_audioButton->setToolTip(tr("Volume"));
 		m_playbackControlsLayout->addWidget(m_audioButton);
 		connect(m_audioButton, &QToolButton::clicked, this, &PlayerControls::muteClicked);
 
+		// Tworzenie slidera do sterowania głosnością
 		m_volumeSlider->setOrientation(Qt::Horizontal);
 		m_volumeSlider->setMaximumWidth(175);
 		m_volumeSlider->setValue(100);
@@ -79,6 +88,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 
 		connect(m_volumeSlider, &QSlider::valueChanged, this, &PlayerControls::volumeSliderValueChanged);
 
+		// Tworzenie przycisku do dodawania utworów do ulubionych
 		m_favoriteButton->setIcon(Icons::FAVORITE);
 		m_favoriteButton->setIconSize(ICON_SIZE);
 		m_favoriteButton->setToolTip(tr("Add Favorite"));
@@ -87,7 +97,7 @@ PlayerControls::PlayerControls(QWidget *parent)
 
 		connect(m_favoriteButton, &QToolButton::clicked, this, &PlayerControls::favoriteClicked);
 
-		this->setLayout(m_playbackControlsLayout);
+		setLayout(m_playbackControlsLayout);
 }
 
 float PlayerControls::getVolume() const {
@@ -101,9 +111,11 @@ bool PlayerControls::isMuted() const {
 void PlayerControls::setPlayerState(QMediaPlayer::PlaybackState state) {
 		ZoneScoped;
 
+		// Aktualizacja stanu odtwarzania
 		if (state != m_playerState) {
 				m_playerState = state;
 
+				// Aktualizacja ikonki przycisku odtwarzania
 				switch (state) {
 						case QMediaPlayer::StoppedState:
 								m_playPauseButton->setIcon(Icons::PLAY);
@@ -137,6 +149,7 @@ void PlayerControls::updateProgressLabel(int32_t progress) const {
 void PlayerControls::updateVolumeIcon(int32_t volume) const {
 		ZoneScoped;
 
+		// Zmiana ikony w zależności od poziomu głosności
 		if (volume > 75) {
 				m_audioButton->setIcon(Icons::HIGH_VOLUME);
 		} else if (volume > 25) {
@@ -151,12 +164,15 @@ void PlayerControls::updateVolumeIcon(int32_t volume) const {
 void PlayerControls::playPauseClicked() {
 		ZoneScoped;
 
+		// Zmiana stanu odtwarzania
+		// na przeciwny
 		if (m_playerState == QMediaPlayer::PlayingState) {
 				m_playerState = QMediaPlayer::PausedState;
 		} else {
 				m_playerState = QMediaPlayer::PlayingState;
 		}
 
+		// Ten slot zmienia swoje działanie w zalażności od stanu odtwarzenia
 		switch (m_playerState) {
 				case QMediaPlayer::PlayingState:
 						emit play();
@@ -187,7 +203,7 @@ void PlayerControls::volumeSliderValueChanged() {
 		const float VOLUME = static_cast<float>(m_volumeSlider->value());
 
 		emit changeVolume(VOLUME / 100.0F);
-		logCreate("Changed volume");
+		logCreate("Changed volume to " + std::to_string(VOLUME));
 }
 
 void PlayerControls::shuffleClicked() {

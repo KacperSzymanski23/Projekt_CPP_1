@@ -24,8 +24,8 @@ std::string Settings::trim(const std::string &str) {
 
 		std::string trimmed = str;
 
-		trimmed.erase(0, trimmed.find_first_not_of(" \n\r\t"));
-		trimmed.erase(trimmed.find_last_not_of(" \n\r\t") + 1);
+		trimmed.erase(0, trimmed.find_first_not_of(" \n\r\t")); // Usuwanie białych znaków z początku
+		trimmed.erase(trimmed.find_last_not_of(" \n\r\t") + 1); // Usuwanie białych znaków z końca
 
 		return trimmed;
 }
@@ -43,14 +43,17 @@ bool Settings::parseLine(const std::string &line, std::string &entryKey, std::st
 				return false;
 		}
 
+		// Pozycja znaku '=' oddzielającego klucz i wartość
 		size_t const POSITION = TRIMMED_LINE.find_first_of('=');
 
+		// Sprawdzenie poprawności linii
 		if (POSITION == std::string::npos) {
 				logCreate("Invalid settings line " + line);
 
 				return false;
 		}
 
+		// Zapisanie klucza i wartości
 		entryKey = TRIMMED_LINE.substr(0, POSITION);
 		entryValue = TRIMMED_LINE.substr(POSITION + 1);
 
@@ -69,13 +72,16 @@ bool Settings::loadSettings() {
 				return false;
 		}
 
+		// Wyczyszczenie poprzednich ustawien
 		m_settings.clear();
 
 		std::string line{};
 		std::string key{};
 		std::string value{};
 
+		// Odczytywanie kolejnych linii z pliku
 		while (std::getline(settingsFile, line)) {
+				// Sprawdzanie poprawności linii
 				if (parseLine(line, key, value)) {
 						m_settings[key] = value;
 				}
@@ -99,7 +105,10 @@ bool Settings::saveSettings() {
 				return false;
 		}
 
+		// Zapisanie ustawienia do pliku
 		for (const auto &[key, value] : m_settings) {
+				// ustawienia sa zapisywane w taki sposób
+				// key=value
 				settingsFile << key << "=" << value << "\n";
 		}
 
@@ -115,6 +124,7 @@ std::string Settings::getSettingsEntry(const std::string &entryKey) {
 		const auto ENTRY_VALUE = m_settings.find(entryKey);
 		const auto LAST_ENTRY = m_settings.end();
 
+		// Sprawdzenie czy ustawienie o podanym kluczu zostało znalezione
 		if (ENTRY_VALUE == LAST_ENTRY) {
 				return {};
 		}

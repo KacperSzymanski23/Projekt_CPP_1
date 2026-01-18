@@ -33,16 +33,19 @@ MainWindow::MainWindow()
 	, m_middleModel(new QStandardItemModel(this)) {
 		ZoneScoped;
 
+		// Wczytywanie ustawien programu i inicjalizacja biblioteki
 		QString libraryPath = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
 		m_library = Library{libraryPath};
 
 		m_library.scanLibraryPath();
 
+		// Inicjalizacja odtwarzacza
 		m_audioPlayer->setAudioOutput(m_audioOutput);
 
 		m_playbackControlsWidget->setVolume(m_audioOutput->volume());
 		m_playbackControlsWidget->setMuted(m_playbackControlsWidget->isMuted());
 
+		// Inicjalizacja menu kontekstowego
 		m_middleTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
 		m_playerMainTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -124,7 +127,7 @@ void MainWindow::setupConnections() {
 				m_playbackQueue->setPlaybackMode(PlaybackQueue::CurrentItemInLoop);
 		});
 
-		// Połączenia odpowiadające za aktualizowanie ścierzki obecnie odtwarzanego utworu w QMediaPlayer
+		// Połączenia odpowiadające za aktualizowanie ścieżki obecnie odtwarzanego utworu w QMediaPlayer
 		connect(m_playbackQueue, &PlaybackQueue::currentMediaChanged, m_audioPlayer, &QMediaPlayer::setSource);
 		connect(m_playbackQueue, &PlaybackQueue::currentIndexChanged, this, &MainWindow::selectRow);
 
@@ -285,14 +288,17 @@ void MainWindow::readWindowGeometrySettings() {
 void MainWindow::showLibrary() {
 		ZoneScoped;
 
+		m_currentViewMode = ViewMode::Library;
+
+		// Jeżeli model jest pusty to tworzymy nowy model
+		// w innych przypadkach aktualizujemy jego dane
 		if (m_libraryModel == nullptr) {
 				m_libraryModel = new MiddleTreeModel(m_library.getArtistList(), "Library", this);
 		} else {
 				m_libraryModel->updateModelData(m_library.getArtistList());
 		}
 
-		m_currentViewMode = ViewMode::Library;
-
+		// Ustawia model dla m_middleTreeView jeżeli jest inny od m_libraryModel
 		if (m_middleTreeView->model() != m_libraryModel) {
 				m_middleTreeView->setModel(m_libraryModel);
 		}
@@ -304,6 +310,7 @@ void MainWindow::showPlaylists() {
 		ZoneScoped;
 
 		m_currentViewMode = ViewMode::Playlists;
+
 		if (m_middleModel != nullptr) {
 				m_middleModel->clear();
 		}
@@ -315,6 +322,7 @@ void MainWindow::showPlaylists() {
 
 		m_middleModel->setHorizontalHeaderLabels({"Playlists"});
 
+		// Wczytywanie playlist do modelu
 		QDir dir = getPlaylistsDir();
 		QStringList files = dir.entryList({"*.txt"}, QDir::Files);
 
@@ -348,6 +356,7 @@ void MainWindow::showAlbums() {
 
 		m_middleModel->setHorizontalHeaderLabels({"Albums"});
 
+		// Wczytywanie albumów do modelu
 		for (const auto &artist : m_library.getArtistList()) {
 				for (const auto &album : artist.getItems()) {
 						QStandardItem *item = new QStandardItem(Icons::ALBUMS, album.getName());
@@ -368,6 +377,7 @@ void MainWindow::selectRow(int32_t currentRow) const {
 
 		const QModelIndex CURRENT_MODEL_INDEX = m_playerModel->index(currentRow, 0, QModelIndex());
 
+		// Zaznzacza wybrany wiersz i scrolluje do niego
 		m_playerMainTreeView->setCurrentIndex(CURRENT_MODEL_INDEX);
 		m_playerMainTreeView->selectionModel()->select(CURRENT_MODEL_INDEX, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
 		m_playerMainTreeView->scrollTo(CURRENT_MODEL_INDEX);
@@ -384,9 +394,9 @@ void MainWindow::rowClicked(const QModelIndex &current) {
 QString MainWindow::getPlaylistsDir() {
 		ZoneScoped;
 
-		m_settings.loadSettings();
 		std::string libPathStd = m_settings.getSettingsEntry("libraryDirectory");
 		QString libPath = QString::fromStdString(libPathStd);
+
 		if (libPath.isEmpty()) {
 				libPath = QCoreApplication::applicationDirPath();
 		}
@@ -447,6 +457,7 @@ void MainWindow::createNewPlaylistDialog() {
 void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 		ZoneScoped;
 
+		// Pobieranie informacji o wierszu
 		const qsizetype ROW = index.row();
 		const qsizetype PARENT_ROW = index.parent().row();
 
@@ -455,6 +466,7 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 				loadPlaylistContent(filename);
 
 		} else if (m_currentViewMode == ViewMode::Library) {
+				// Jeżeli rodzic jest -1 to jest to nadrzędny wiersz
 				if (PARENT_ROW == -1) {
 						return;
 				}
@@ -464,6 +476,7 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 				const QList<QString> &paths{album.getTracksPathsList()};
 				const QList<Library::TrackMetadata> &tracks{album.getItems()};
 
+				// Ustawienie okładki albumu
 				m_coverImage = album.getCoverArtPath();
 				m_coverLabel->setPixmap(m_coverImage);
 
@@ -475,6 +488,7 @@ void MainWindow::onMiddleViewClicked(const QModelIndex &index) {
 				const QList<QString> &paths{album.getTracksPathsList()};
 				const QList<Library::TrackMetadata> &tracks{album.getItems()};
 
+				// Ustawienie okładki albumu
 				m_coverImage = album.getCoverArtPath();
 				m_coverLabel->setPixmap(m_coverImage);
 
@@ -489,16 +503,22 @@ void MainWindow::loadPlaylistContent(const QString &playlistName) {
 		QList<Library::TrackMetadata> trackList{};
 		QList<QString> pathList{};
 
-		QFile file(getPlaylistsDir() + "/" + playlistName);
+		// Wczytywanie playlisty
+		QFile file(getPlaylistsDir() + "/" + playlistName); // Konstruowanie scieżki do playlisty
 		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 				QTextStream in(&file);
+
+				// Wczytywanie kolejnych linii z playlisty
 				while (!in.atEnd()) {
 						QString line = in.readLine();
+
+						// Sprawdzenie czy linia jest pusta i czy plik istnieje
 						if (!line.isEmpty() && QFile::exists(line)) {
-								auto [metadata, path] = Library::extractMetadata(line);
+								// Pobieranie informacji o utworze
+								const auto &[metadata, path] = Library::extractMetadata(line);
 
 								trackList.append(metadata);
-								pathList.append(line);
+								pathList.append(path);
 						}
 				}
 				file.close();
@@ -519,15 +539,20 @@ void MainWindow::onSongContextMenu(const QPoint &pos) {
 
 		QString filePath = m_playbackQueue->currentMedia();
 
+		// Tworzenie menu kontekstowego i dodawanie do niego opcji
 		QMenu menu(this);
 		QMenu *subMenu = menu.addMenu("Dodaj do playlisty");
 
 		QDir dir = getPlaylistsDir();
+
+		// Wczytywanie listy playlist
 		QStringList playlists = dir.entryList({"*.txt"}, QDir::Files);
 
 		if (playlists.isEmpty()) {
 				subMenu->addAction("Brak playlist")->setEnabled(false);
 		} else {
+				// Dodawanie akcji do menu kontekstowego
+				// pozwalającej na dodawanie utworów do jednej z playlist
 				for (const QString &pl : playlists) {
 						QAction *act = subMenu->addAction(QFileInfo(pl).baseName());
 
@@ -577,8 +602,11 @@ void MainWindow::removeSongFromPlaylist(const QString &playlistName, const QStri
 		QList<QString> paths{};
 		loadPlaylistToList(playlistName, paths);
 
+		// Usuwanie utworów z playlisty
 		if (paths.removeOne(filePath)) {
 				QFile file(getPlaylistsDir() + "/" + playlistName);
+
+				// Zapisywanie nowej zawartości playlisty
 				if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
 						QTextStream out(&file);
 						for (const QString &path : paths) {

@@ -17,6 +17,7 @@ void TreeItem::appendChild(std::unique_ptr<TreeItem> &&child) {
 TreeItem *TreeItem::child(size_t row) const {
 		ZoneScoped;
 
+		// Sprawdza czy podany wiersz jest w zakresie
 		if (row >= 0 && row < childCount()) {
 				return m_childItems.at(row).get();
 		}

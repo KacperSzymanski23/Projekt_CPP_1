@@ -17,24 +17,26 @@ class SettingsDialog : public QDialog {
 		explicit SettingsDialog(QWidget *parent = nullptr);
 
 	  private:
-		QGridLayout *m_dialogGrigLayout;
+		QGridLayout *m_dialogGrigLayout; // Układ elementów GUI dla okna dialogowego
 
-		Settings &m_settings;
+		Settings &m_settings; // Referencja do obiektu Settings
 
+		// Inne elementy GUI zwiazane z zmianą ścieżki do biblioteki
 		QLabel *m_libraryDirectoryLabel;
 		QLineEdit *m_libraryDirectoryLineEdit;
 		QPushButton *m_browserFilesButton;
 		QDir m_libraryDirectory;
 
+		// Przyciski do zapisu, anulowania i zastosowania ustawienia
 		QPushButton *m_saveButton;
 		QPushButton *m_cancelButton;
 		QPushButton *m_applyButton;
 
 	  private slots:
-		void applySettings();
+		void applySettings(); // Zapisywanie ustawienia
 
 	  signals:
-		void settingsChanged();
+		void settingsChanged(); // Sygnał emitowany przy zapisaniu ustawienia
 };
 
 #endif /* SETTINGSDIALOG_HPP */

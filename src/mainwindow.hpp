@@ -53,7 +53,7 @@ class MainWindow : public QMainWindow {
 
 		QTreeView *m_middleTreeView;     // QTreeView zawierający wybrane przez użytkownika elementy np. albumy, autorów itd.
 		QTreeView *m_playerMainTreeView; // QTreeView zawierające wszystkie ścieżki dźwiękowe w albumnie lub wszystkie albumy autorstwa
-										 // danego autora
+		                                 // danego autora
 
 		QVBoxLayout *m_centralLayout;         // Układ wertykalny zawierający m_lowerHorizontalLayout i m_playbackControlsWidget
 		QHBoxLayout *m_lowerHorizontalLayout; // Układ poziomy zawierający m_sideBarWidget, m_middleVerticalLayout i m_playerMainTreeView
@@ -86,7 +86,7 @@ class MainWindow : public QMainWindow {
 		void readWindowGeometrySettings();            // Funkcja slot zapisująca stan okna
 
 		void selectRow(int32_t currentRow) const;    // Zaznacza wiersz w m_playerMainTreeView o podanym indeksie
-		void rowClicked(const QModelIndex &current); // Pobiera dane z piosenki z kliniętego przez użytkownika wiersza
+		void rowClicked(const QModelIndex &current); // Ustawie m_currentIndex w m_playbackQueue na indeks klikniętego wiersza
 
 		void onMiddleViewClicked(const QModelIndex &index); // Kliknięcie w playlistę
 		void onPlaylistContextMenu(const QPoint &pos);      // Menu: Nowa playlista

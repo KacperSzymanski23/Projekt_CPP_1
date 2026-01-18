@@ -11,6 +11,7 @@ namespace Icons {
 		using oclero::qlementine::icons::iconPath;
 		using oclero::qlementine::icons::Icons16;
 
+		// Ikony używane przez program
 		const QIcon CANCEL = QIcon::fromTheme(iconPath(Icons16::Action_Close));
 		const QIcon SAVE = QIcon::fromTheme(iconPath(Icons16::Action_Save));
 		const QIcon FOLDER = QIcon::fromTheme(iconPath(Icons16::File_Folder));

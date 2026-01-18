@@ -34,10 +34,12 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 		m_applyButton->setText("Apply");
 
 		connect(m_browserFilesButton, &QPushButton::clicked, this, [this]() {
+				// Wybieranie lokalizacji biblioteki
 				m_libraryDirectory = QFileDialog::getExistingDirectory(this, "Wybierz lokalizację biblioteki muzycznej", QDir::homePath());
 				m_libraryDirectoryLineEdit->setText(m_libraryDirectory.absolutePath());
 		});
 
+		// Gdy zmieni się tekst w QLineEdit odblokuj przycisk Apply
 		connect(m_libraryDirectoryLineEdit, &QLineEdit::textChanged, this, [this]() { m_applyButton->setDisabled(false); });
 
 		connect(m_saveButton, &QPushButton::clicked, this, [this]() {
@@ -47,6 +49,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 		connect(m_cancelButton, &QPushButton::clicked, this, &SettingsDialog::close);
 		connect(m_applyButton, &QPushButton::clicked, this, &SettingsDialog::applySettings);
 
+		// Dodawanie elementów do m_dialogGrigLayout
 		m_dialogGrigLayout->addWidget(m_libraryDirectoryLabel, 0, 0, 1, 1);
 		m_dialogGrigLayout->addWidget(m_libraryDirectoryLineEdit, 0, 1, 1, 1);
 		m_dialogGrigLayout->addWidget(m_browserFilesButton, 0, 2, 1, 1);

@@ -15,6 +15,7 @@ class SideBar : public QWidget {
 		explicit SideBar(QWidget *parent = nullptr);
 
 	  signals:
+		// Sygnały emitowane przez przyciski paska bocznego
 		void showLibraryClicked();
 		void showAlbumsClicked();
 		void showPlaylistsClicked();
@@ -27,6 +28,7 @@ class SideBar : public QWidget {
 
 		SettingsDialog *m_settingsDialog; // Okno zawierające ustawiania programu
 
+		// Przyciski paska bocznego
 		QToolButton *m_showLibraryButton;
 		QToolButton *m_showAlbumsButton;
 		QToolButton *m_showPlaylistsButton;
