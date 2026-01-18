@@ -79,6 +79,8 @@ void Library::Album::findCoverArt(const QString &path) {
 				}
 		}
 
+		m_coverArtPath = ":/Placeholder";
+
 		logCreate("Cover art not found");
 }
 

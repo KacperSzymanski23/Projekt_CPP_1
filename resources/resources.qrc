@@ -1,6 +1,8 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource>
     <file>themes/dark.json</file>
     <file>themes/light.json</file>
-</qresource>
+    <file alias="Placeholder">icons/placeholder.svg</file>
+  </qresource>
 </RCC>

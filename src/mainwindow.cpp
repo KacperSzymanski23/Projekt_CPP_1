@@ -35,6 +35,8 @@ MainWindow::MainWindow(oclero::qlementine::ThemeManager *themeManager)
 	, m_middleModel(new QStandardItemModel(this)) {
 		ZoneScoped;
 
+		m_coverImage = QPixmap{":/Placeholder"};
+
 		// Wczytywanie ustawien programu i inicjalizacja biblioteki
 		QString libraryPath = QString::fromStdString(m_settings.getSettingsEntry("libraryDirectory"));
 		m_library = Library{libraryPath};
