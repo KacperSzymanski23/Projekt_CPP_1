@@ -120,7 +120,6 @@ QPair<Library::TrackMetadata, QString> Library::extractMetadata(const QString &p
 
 		// Sprawdza czy ścieżka jest pusta
 		if (path.isEmpty()) {
-				logCreate("Path is empty");
 				return {};
 		}
 
@@ -132,7 +131,6 @@ QPair<Library::TrackMetadata, QString> Library::extractMetadata(const QString &p
 
 		// Sprawdza czy plik jest pusty lub nie ma metadanych
 		if (FILE_REF.isNull() || FILE_REF.tag() == nullptr) {
-				logCreate("FileRef is null");
 				return {};
 		}
 
@@ -185,12 +183,10 @@ QPair<Library::TrackMetadata, QString> Library::extractMetadata(const QString &p
 		}
 
 		if (metadata.artist.isEmpty()) {
-				logCreate("Artist name is empty");
 				metadata.artist = "Unknown";
 		}
 
 		if (metadata.album.isEmpty()) {
-				logCreate("Album name is empty");
 				metadata.album = "Unknown";
 		}
 
